@@ -6,13 +6,10 @@ part 'validate_event.dart';
 part 'validate_state.dart';
 
 class ValidateBloc extends Bloc<ValidateEvent, ValidateState> {
-  @override
-  ValidateState get initialState => InitialValidateState();
+  ValidateBloc() : super(InitialValidateState());
 
   @override
-  Stream<ValidateState> mapEventToState(
-    ValidateEvent event,
-  ) async* {
+  Stream<ValidateState> mapEventToState(ValidateEvent event) async* {
     if (event is FirstnameField) {
       yield InitialValidateState();
       if (event.value.isEmpty) {
