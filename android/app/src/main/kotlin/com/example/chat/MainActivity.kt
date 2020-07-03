@@ -1,0 +1,6 @@
+package com.secret.chat
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}
