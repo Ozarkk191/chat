@@ -8,6 +8,8 @@ part 'validate_state.dart';
 class ValidateBloc extends Bloc<ValidateEvent, ValidateState> {
   ValidateBloc() : super(InitialValidateState());
 
+  final validCharacters = RegExp(r'^[a-zA-Z\s]+$');
+
   @override
   Stream<ValidateState> mapEventToState(ValidateEvent event) async* {
     if (event is FirstnameField) {
@@ -30,6 +32,8 @@ class ValidateBloc extends Bloc<ValidateEvent, ValidateState> {
         yield PhoneErrorField(errorText: 'Phone number can not empty.');
       } else if (event.value.length != 10) {
         yield PhoneErrorField(errorText: 'Phone number must be 10 chars.');
+      } else if (validCharacters.hasMatch(event.value)) {
+        yield PhoneErrorField(errorText: 'Phone number is valid');
       }
     }
 

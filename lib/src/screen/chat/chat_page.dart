@@ -43,7 +43,6 @@ class ChatPage extends StatelessWidget {
                         uidsList.sort();
                         String test = "${uidsList[0]}_${uidsList[1]}";
                         AppString.uidRoomChat = test;
-                        print('$test');
 
                         Navigator.push(
                             context,

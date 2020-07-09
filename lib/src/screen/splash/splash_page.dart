@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/services/authservice.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    AuthService().signOut();
     _ioggedIn();
   }
 
@@ -67,7 +70,6 @@ class _SplashPageState extends State<SplashPage> {
       });
     } else {
       Timer(Duration(seconds: 3), () {
-        print("print after every 3 seconds");
         Navigator.of(context).pushReplacementNamed('/');
       });
     }

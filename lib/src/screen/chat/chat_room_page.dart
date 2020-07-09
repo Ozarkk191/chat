@@ -43,26 +43,25 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   void systemMessage() {
-    Timer(Duration(milliseconds: 300), () {
+    Timer(Duration(milliseconds: 0), () {
       if (i < 6) {
         setState(() {
           messages = [...messages, m[i]];
         });
         i++;
       }
-      Timer(Duration(milliseconds: 300), () {
+      Timer(Duration(milliseconds: 0), () {
         _chatViewKey.currentState.scrollController
           ..animateTo(
             _chatViewKey.currentState.scrollController.position.maxScrollExtent,
             curve: Curves.easeOut,
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 0),
           );
       });
     });
   }
 
   void onSend(ChatMessage message) {
-    print(message.toJson());
     var documentReference = Firestore.instance
         .collection('Rooms')
         .document(AppString.uidRoomChat)
@@ -178,18 +177,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     messages = [...messages];
                   });
 
-                  Timer(Duration(milliseconds: 300), () {
+                  Timer(Duration(milliseconds: 0), () {
                     _chatViewKey.currentState.scrollController
                       ..animateTo(
                         _chatViewKey.currentState.scrollController.position
                             .maxScrollExtent,
                         curve: Curves.easeOut,
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 0),
                       );
 
                     if (i == 0) {
                       systemMessage();
-                      Timer(Duration(milliseconds: 600), () {
+                      Timer(Duration(milliseconds: 0), () {
                         systemMessage();
                       });
                     } else {
@@ -214,8 +213,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       );
 
                       if (result != null) {
+                        var now = new DateTime.now();
+                        var now2 = now.toString().replaceAll(" ", "_");
+
                         final StorageReference storageRef =
-                            FirebaseStorage.instance.ref().child("chat_images");
+                            FirebaseStorage.instance.ref().child(now2);
 
                         StorageUploadTask uploadTask = storageRef.putFile(
                           File(result.path),

@@ -7,6 +7,7 @@ import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/settingpage/edit_profile_page.dart';
+import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,9 @@ class _UserHomePageState extends State<UserHomePage> {
         actions: <Widget>[
           InkWell(
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/setting');
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingPage()));
+              // Navigator.of(context).pushReplacementNamed('/setting');
             },
             child: Image.asset('assets/images/ic_setting.png'),
           )

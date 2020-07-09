@@ -10,7 +10,7 @@ class CustomTextField extends StatelessWidget {
 
   const CustomTextField({
     Key key,
-    @required this.hint,
+    this.hint,
     @required this.onChanged,
     this.color = Colors.white,
     this.errorText = '',
