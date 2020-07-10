@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
@@ -66,6 +67,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void onSend(ChatMessage message) {
     var documentReference = Firestore.instance
         .collection('Rooms')
+        .document('chats')
+        .collection('Group')
         .document(AppString.uidRoomChat)
         .collection('messages')
         .document(DateTime.now().millisecondsSinceEpoch.toString());
@@ -126,6 +129,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       body: StreamBuilder(
           stream: Firestore.instance
               .collection('Rooms')
+              .document('chats')
+              .collection('Group')
               .document(AppString.uidRoomChat)
               .collection('messages')
               .snapshots(),
@@ -155,6 +160,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 showUserAvatar: false,
                 showAvatarForEveryMessage: false,
                 scrollToBottom: false,
+                readOnly:
+                    AppString.roles == '${TypeStatus.USER}' ? true : false,
                 onPressAvatar: (ChatUser user) {
                   print("OnPressAvatar: ${user.name}");
                 },

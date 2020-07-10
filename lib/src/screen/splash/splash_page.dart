@@ -23,7 +23,7 @@ class _SplashPageState extends State<SplashPage> {
     _messaging.getToken().then((token) {
       tokenCheck = token;
     });
-    _ioggedIn();
+    _loggedIn();
   }
 
   @override
@@ -39,7 +39,7 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  _ioggedIn() async {
+  _loggedIn() async {
     FirebaseAuth _auth = FirebaseAuth.instance;
     Firestore _databaseReference = Firestore.instance;
     FirebaseUser user = await _auth.currentUser();

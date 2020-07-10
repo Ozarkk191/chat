@@ -14,6 +14,7 @@ class UserModel {
   String createdAt;
   String updatedAt;
   String avatarUrl;
+  List<dynamic> groupKey;
 
   UserModel(
       {@required this.firstName,
@@ -28,7 +29,8 @@ class UserModel {
       @required this.roles,
       @required this.createdAt,
       @required this.updatedAt,
-      @required this.avatarUrl});
+      @required this.avatarUrl,
+      @required this.groupKey});
 
   UserModel.fromJson(Map<String, dynamic> json)
       : firstName = json['firstName'],
@@ -43,7 +45,8 @@ class UserModel {
         roles = json['roles'],
         createdAt = json['createdAt'],
         updatedAt = json['updatedAt'],
-        avatarUrl = json['avatarUrl'];
+        avatarUrl = json['avatarUrl'],
+        groupKey = json['groupKey'];
 
   toJson() {
     return {
@@ -60,6 +63,7 @@ class UserModel {
       "createdAt": createdAt,
       "updatedAt": updatedAt,
       "avatarUrl": avatarUrl,
+      "groupKey": groupKey,
     };
   }
 }

@@ -1,7 +1,7 @@
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/group/create_group/create_group_page.dart';
+import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:flutter/material.dart';
 
 import 'chat_room_page.dart';
@@ -85,8 +85,10 @@ class ChatPage extends StatelessWidget {
 
   void _selecteMenu(String menu, BuildContext context) {
     if (menu == MenuSettings.createGroup) {
+      // Navigator.push(
+      //     context, MaterialPageRoute(builder: (context) => CreateGroup()));
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CreateGroup()));
+          context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
     }
   }
 }
