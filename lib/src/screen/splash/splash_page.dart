@@ -6,6 +6,7 @@ import 'package:chat/models/user_model.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class SplashPage extends StatefulWidget {
@@ -14,10 +15,14 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  final FirebaseMessaging _messaging = FirebaseMessaging();
+  String tokenCheck = "";
   @override
   void initState() {
     super.initState();
-    // AuthService().signOut();
+    _messaging.getToken().then((token) {
+      tokenCheck = token;
+    });
     _ioggedIn();
   }
 
@@ -46,8 +51,14 @@ class _SplashPageState extends State<SplashPage> {
           .document(user.uid)
           .get()
           .then((value) {
-        print('aaaaaaa ::${value.data}');
         var userModel = UserModel.fromJson(value.data);
+        if (userModel.notiToken != tokenCheck) {
+          userModel.notiToken = tokenCheck;
+          _databaseReference
+              .collection('Users')
+              .document(user.uid)
+              .setData(userModel.toJson());
+        }
         AppString.displayName = userModel.displayName;
         AppString.firstname = userModel.firstName;
         AppString.lastname = userModel.lastName;
