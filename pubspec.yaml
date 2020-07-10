@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^4.0.1
-  pin_code_fields: ^2.4.0
+  
   bubbled_navigation_bar: ^0.0.3
   badges: ^1.1.1
   firebase_database: ^3.1.3

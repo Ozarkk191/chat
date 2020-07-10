@@ -26,11 +26,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     avatar: AppString.photoUrl,
   );
 
-  final ChatUser otherUser = ChatUser(
-    name: "Mrfatty",
-    uid: "25649654",
-    avatar: "https://wallpapercave.com/wp/w1fkwPh.jpg",
-  );
+  // final ChatUser otherUser = ChatUser(
+  //   name: "Mrfatty",
+  //   uid: "25649654",
+  //   avatar: "https://wallpapercave.com/wp/w1fkwPh.jpg",
+  // );
 
   List<ChatMessage> messages = List<ChatMessage>();
   var m = List<ChatMessage>();
@@ -43,10 +43,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   void systemMessage() {
+    print('-----------------+++');
     Timer(Duration(milliseconds: 0), () {
       if (i < 6) {
         setState(() {
           messages = [...messages, m[i]];
+          print('-----------------+++$messages');
         });
         i++;
       }

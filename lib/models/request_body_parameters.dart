@@ -12,3 +12,19 @@ class SendOTPParameters extends RequestBodyParameters {
         'phoneNumber': phoneNumber,
       };
 }
+
+class SendNotiParameters extends RequestBodyParameters {
+  String title;
+  String body;
+  String data;
+  String token;
+
+  SendNotiParameters({this.title, this.body, this.data, this.token});
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'body': body,
+        'data': data,
+        'token': token,
+      };
+}

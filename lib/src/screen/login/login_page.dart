@@ -4,7 +4,6 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/button/custom_icon_button.dart';
-import 'package:chat/src/base_compoments/button/gradient_button.dart';
 import 'package:chat/src/screen/register/data_collect_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -52,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
     assert(user.uid == currentUser.uid);
 
     saveDataUser(user);
-
     return 'signInWithGoogle succeeded: $user';
   }
 
@@ -74,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
         // Navigator.of(context).pushReplacementNamed('/navhome');
 
         saveDataUser(user);
-
         break;
       case FacebookLoginStatus.cancelledByUser:
         setState(() {
@@ -114,14 +111,14 @@ class _LoginPageState extends State<LoginPage> {
               alignment: Alignment.center,
               child: Image.asset('assets/images/logo.png'),
             ),
-            GradientButton(
-              title: 'Register',
-              callBack: () {
-                // Navigator.push(context,
-                //     MaterialPageRoute(builder: (context) => LoginNewPage()));
-                // Navigator.pushNamed(context, '/register');
-              },
-            ),
+            // GradientButton(
+            //   title: 'Register',
+            //   callBack: () {
+            //     // Navigator.push(context,
+            //     //     MaterialPageRoute(builder: (context) => LoginNewPage()));
+            //     // Navigator.pushNamed(context, '/register');
+            //   },
+            // ),
             SizedBox(
               height: 20,
             ),
@@ -196,10 +193,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _savePhoneNumber({@required FirebaseUser user}) {
-    var name = user.displayName.split(" ");
+    if (user.displayName.contains(" ")) {
+      var name = user.displayName.split(" ");
+      AppString.firstname = name[0];
+      AppString.lastname = name[1];
+    } else {
+      AppString.firstname = user.displayName;
+      AppString.lastname = "";
+    }
     AppString.uid = user.uid;
-    AppString.firstname = name[0];
-    AppString.lastname = name[1];
     AppString.email = user.email;
     AppString.dateTime = dateTime;
     AppString.displayName = user.displayName;

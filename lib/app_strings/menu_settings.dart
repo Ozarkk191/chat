@@ -1,6 +1,9 @@
 import 'package:chat/models/user_model.dart';
 
 class MenuSettings {
+  static const String createGroup = 'สร้างกลุ่ม';
+  static const List<String> groupList = [createGroup];
+
   static const String invite = 'เชิญ';
   static const String member = 'สมาชิกทั้งหมด';
   static const String settingGroup = 'ตั้งค่ากลุ่ม';

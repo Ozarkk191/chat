@@ -1,6 +1,7 @@
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/group/create_group/create_group_page.dart';
 import 'package:flutter/material.dart';
 
 import 'chat_room_page.dart';
@@ -12,7 +13,22 @@ class ChatPage extends StatelessWidget {
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
         actions: <Widget>[
-          Container(width: 40, height: 40, child: Icon(Icons.more_vert)),
+          PopupMenuButton<String>(
+              color: Color(0xff292929),
+              onSelected: (value) {
+                _selecteMenu(value, context);
+              },
+              itemBuilder: (BuildContext context) {
+                return MenuSettings.groupList.map((String menu) {
+                  return PopupMenuItem<String>(
+                    value: menu,
+                    child: Text(
+                      menu,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                }).toList();
+              }),
         ],
         leading: Container(),
         backgroundColor: Color(0xff202020),
@@ -65,5 +81,12 @@ class ChatPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _selecteMenu(String menu, BuildContext context) {
+    if (menu == MenuSettings.createGroup) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => CreateGroup()));
+    }
   }
 }
