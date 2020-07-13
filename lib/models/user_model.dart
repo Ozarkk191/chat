@@ -15,22 +15,25 @@ class UserModel {
   String updatedAt;
   String avatarUrl;
   List<dynamic> groupKey;
+  String uid;
 
-  UserModel(
-      {@required this.firstName,
-      @required this.lastName,
-      @required this.notiToken,
-      @required this.phoneNumber,
-      @required this.email,
-      @required this.displayName,
-      @required this.gender,
-      @required this.birthDate,
-      @required this.isActive,
-      @required this.roles,
-      @required this.createdAt,
-      @required this.updatedAt,
-      @required this.avatarUrl,
-      @required this.groupKey});
+  UserModel({
+    @required this.firstName,
+    @required this.lastName,
+    @required this.notiToken,
+    @required this.phoneNumber,
+    @required this.email,
+    @required this.displayName,
+    @required this.gender,
+    @required this.birthDate,
+    @required this.isActive,
+    @required this.roles,
+    @required this.createdAt,
+    @required this.updatedAt,
+    @required this.avatarUrl,
+    @required this.groupKey,
+    this.uid,
+  });
 
   UserModel.fromJson(Map<String, dynamic> json)
       : firstName = json['firstName'],

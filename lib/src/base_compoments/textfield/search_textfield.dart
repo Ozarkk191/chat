@@ -6,24 +6,24 @@ class SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width / 1.2,
+      decoration: BoxDecoration(
+          color: Color(0xff707070),
+          borderRadius: BorderRadius.all(Radius.circular(5))),
       height: 40,
       child: Stack(
         children: <Widget>[
           TextField(
+            textAlign: TextAlign.justify,
+            cursorColor: Colors.black,
             decoration: InputDecoration(
-              hintText: 'ค้นหา',
-              prefixIcon: Icon(
-                Icons.search,
-              ),
-              filled: true,
-              fillColor: Color(0xff707070),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5.0),
+                hintText: 'ค้นหา',
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.black,
                 ),
-                borderSide: BorderSide(style: BorderStyle.none, width: 0),
-              ),
-            ),
+                filled: false,
+                border: InputBorder.none,
+                focusColor: Colors.black),
           ),
           Align(
             alignment: Alignment.centerRight,

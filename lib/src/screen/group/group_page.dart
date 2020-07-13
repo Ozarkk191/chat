@@ -1,3 +1,4 @@
+import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
@@ -35,20 +36,23 @@ class GroupPage extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
+                        AppString.uidRoomChat = AppList.groupKey[index];
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChatRoomPage()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatRoomPage(),
+                          ),
+                        );
                       },
                       child: ListChatItem(
-                        profileUrl: 'https://wallpapercave.com/wp/w1fkwPh.jpg',
+                        profileUrl: AppList.groupList[index].avatarGroup,
                         lastText: 'ข้อความสุดท้าย',
-                        name: 'Name Group',
+                        name: AppList.groupList[index].nameGroup,
                         time: '00.00 น.',
                       ),
                     );
                   },
-                  itemCount: 20,
+                  itemCount: AppList.groupList.length,
                 ),
               ),
             ],

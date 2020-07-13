@@ -1,9 +1,19 @@
+import 'dart:io';
+
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/models/group_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/icon_circle_card.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/add_user_group_button.dart';
 import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/invite/invite_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class SettingGroupPage extends StatefulWidget {
@@ -12,67 +22,171 @@ class SettingGroupPage extends StatefulWidget {
 }
 
 class _SettingGroupPageState extends State<SettingGroupPage> {
-  String _profileUrl = "https://wallpapercave.com/wp/w1fkwPh.jpg";
-  List<String> _memberUID = List<String>();
-  String _nameGroup = "";
+  String _profileUrl =
+      "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130";
+  List<UserModel> _memberList = List<UserModel>();
+  TextEditingController _nameGroup = new TextEditingController();
   String _statusGroup = "public";
+  File _image;
+  final picker = ImagePicker();
+  bool isLoading = false;
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  bool _check() {
+    if (_image == null) {
+      return false;
+    } else if (_nameGroup.text == null) {
+      return false;
+    } else if (_memberList.length == 0) {
+      return false;
+    }
+    return true;
+  }
+
+  void _createGroup() async {
+    setState(() {
+      isLoading = true;
+    });
+    var now = new DateTime.now();
+    var now2 = now.toString().replaceAll(" ", "_");
+    AppString.uidRoomChat = now2;
+    final StorageReference storageRef =
+        FirebaseStorage.instance.ref().child(now2);
+    StorageUploadTask uploadTask = storageRef.putFile(
+      File(_image.path),
+      StorageMetadata(
+        contentType: 'image/jpg',
+      ),
+    );
+    StorageTaskSnapshot download = await uploadTask.onComplete;
+
+    String url = await download.ref.getDownloadURL();
+    List<String> uidlist = List<String>();
+    for (int i = 0; i < _memberList.length; i++) {
+      uidlist.add(_memberList[i].uid);
+      print(_memberList[i].uid);
+    }
+
+    var group = GroupModel(
+      nameGroup: _nameGroup.text,
+      avatarGroup: url,
+      memberUIDList: uidlist,
+      statusGroup: _statusGroup,
+    );
+    var _documentReference = Firestore.instance;
+    _documentReference
+        .collection('Rooms')
+        .document("chats")
+        .collection('Group')
+        .document(now2)
+        .setData(group.toJson());
+
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => ChatGroupPage()));
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  _pushToInvite(BuildContext context) async {
+    _memberList = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InvitePage(
+          user: _memberList,
+        ),
+      ),
+    );
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameGroup.text = _profileUrl;
+  }
+
+  @override
+  void dispose() {
+    _nameGroup.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xff292929),
-      appBar: AppBar(
-        title: Text('ตั้งค่าโปรไฟล์กลุ่ม'),
-        backgroundColor: Color(0xff202020),
-        leading: InkWell(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back_ios)),
-        actions: <Widget>[
-          InkWell(
-            onTap: () {},
-            child: Container(
-              width: 70,
-              child: Center(
-                child: Text('สร้าง'),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            headerGroup(context),
-            Text(
-              'สมาชิก',
-              style: TextStyle(color: Colors.white),
-            ),
-            Expanded(
-              child: GridView.builder(
-                itemCount: 10,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 1.0,
-                  mainAxisSpacing: 1.0,
+    return LoadingOverlay(
+      isLoading: isLoading,
+      child: Scaffold(
+        backgroundColor: Color(0xff292929),
+        appBar: AppBar(
+          title: Text('ตั้งค่าโปรไฟล์กลุ่ม'),
+          backgroundColor: Color(0xff202020),
+          leading: InkWell(
+              onTap: () => Navigator.pop(context),
+              child: Icon(Icons.arrow_back_ios)),
+          actions: <Widget>[
+            InkWell(
+              onTap: !_check()
+                  ? null
+                  : () {
+                      _createGroup();
+                    },
+              child: Container(
+                width: 70,
+                child: Center(
+                  child: Text('สร้าง'),
                 ),
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return AddUserGroupButton(
-                      title: 'เชิญ',
-                    );
-                  } else {
-                    return ColumnProFileWithName(
-                      profileUrl: AppString.photoUrl,
-                      displayName: AppString.displayName,
-                    );
-                  }
-                },
               ),
-            )
+            ),
           ],
+        ),
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          margin: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              headerGroup(context),
+              Text(
+                'สมาชิก',
+                style: TextStyle(color: Colors.white),
+              ),
+              Expanded(
+                child: GridView.builder(
+                  itemCount: _memberList.length + 1,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 1.0,
+                    mainAxisSpacing: 1.0,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return AddUserGroupButton(
+                        onTop: () {
+                          _pushToInvite(context);
+                        },
+                        title: 'เชิญ',
+                      );
+                    } else {
+                      return ColumnProFileWithName(
+                        profileUrl: _memberList[index - 1].avatarUrl,
+                        displayName: _memberList[index - 1].firstName,
+                      );
+                    }
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -89,9 +203,23 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
             margin: EdgeInsets.only(right: 20),
             child: Stack(
               children: <Widget>[
-                ProfileCard(profileUrl: _profileUrl),
+                _image == null
+                    ? ProfileCard(profileUrl: _profileUrl)
+                    : Card(
+                        clipBehavior: Clip.hardEdge,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.white70, width: 1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Image.file(
+                          _image,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                 InkWell(
-                  onTap: () {},
+                  onTap: getImage,
                   child: Container(
                     width: 100,
                     height: 100,
@@ -116,7 +244,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                     initialLabelIndex: 0,
                     activeBgColor: Colors.redAccent,
                     activeTextColor: Colors.white,
-                    inactiveBgColor: Colors.grey,
+                    inactiveBgColor: Colors.white,
                     inactiveTextColor: Colors.black,
                     labels: ['', ''],
                     icons: [Icons.public, Icons.person],
@@ -137,6 +265,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                 TextField(
                   textAlign: TextAlign.center,
                   maxLength: 50,
+                  controller: _nameGroup,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'ชื่อกลุ่ม',

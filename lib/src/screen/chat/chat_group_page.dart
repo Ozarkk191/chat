@@ -12,12 +12,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ChatRoomPage extends StatefulWidget {
+class ChatGroupPage extends StatefulWidget {
   @override
-  _ChatRoomPageState createState() => _ChatRoomPageState();
+  _ChatGroupPageState createState() => _ChatGroupPageState();
 }
 
-class _ChatRoomPageState extends State<ChatRoomPage> {
+class _ChatGroupPageState extends State<ChatGroupPage> {
   final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
   final picker = ImagePicker();
 
@@ -71,19 +71,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         message.toJson(),
       );
     });
-    /* setState(() {
-      messages = [...messages, message];
-      print(messages.length);
-    });
-
-    if (i == 0) {
-      systemMessage();
-      Timer(Duration(milliseconds: 600), () {
-        systemMessage();
-      });
-    } else {
-      systemMessage();
-    } */
   }
 
   @override
@@ -144,8 +131,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 inverted: false,
                 onSend: onSend,
                 user: user,
-                inputDecoration: InputDecoration.collapsed(
-                    hintText: "Add message here something.."),
+                inputDecoration: InputDecoration.collapsed(hintText: "ข้อความ"),
                 dateFormat: DateFormat('yyyy-MMM-dd'),
                 timeFormat: DateFormat('HH:mm'),
                 messages: messages,

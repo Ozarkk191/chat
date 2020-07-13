@@ -1,5 +1,7 @@
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/card/promotion_card.dart';
@@ -30,7 +32,6 @@ class _UserHomePageState extends State<UserHomePage> {
           .document(user.uid)
           .get()
           .then((value) {
-        print('aaaaaaa ::${value.data}');
         var userModel = UserModel.fromJson(value.data);
         AppString.displayName = userModel.displayName;
         AppString.firstname = userModel.firstName;
@@ -56,47 +57,38 @@ class _UserHomePageState extends State<UserHomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
-        if (allUser.displayName != AppString.displayName) {
-          AppList.userList.add(allUser);
-          AppList.uidList.add(value.documentID);
-          // AppList.avatarList.add(value)
+        if (allUser.roles != "${TypeStatus.USER}") {
+          if (allUser.displayName != AppString.displayName) {
+            AppList.userList.add(allUser);
+            AppList.uidList.add(value.documentID);
+          }
         }
       });
     });
   }
 
-  // saveDataUser() async {
-  //   FirebaseUser user = await _auth.currentUser();
-  //   print("uid_uid ::  ${user.uid}");
-  //   final _databaseReference = Firestore.instance;
-  //   UserModel data = UserModel(
-  //     firstName: AppString.phoneNumber,
-  //     lastName: AppString.lastname,
-  //     notiToken: AppString.notiToken,
-  //     phoneNumber: AppString.phoneNumber,
-  //     email: AppString.email,
-  //     displayName: AppString.displayName,
-  //     gender: "ไม่ระบุ",
-  //     birthDate: "ไม่ระบุ",
-  //     isActive: false,
-  //     roles: "${TypeStatus.USER}",
-  //     createdAt: AppString.dateTime,
-  //     updatedAt: AppString.dateTime, avatarUrl: U,
-  //   );
-
-  //   _databaseReference
-  //       .collection("Users")
-  //       .document(user.uid)
-  //       .setData(data.toJson());
-  //   // Navigator.of(context).pushReplacementNamed('/navuserhome');
-  // }
+  _getGroup() async {
+    AppList.groupList.clear();
+    _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        AppList.groupKey.add(value.documentID);
+        var group = GroupModel.fromJson(value.data);
+        AppList.groupList.add(group);
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    // saveDataUser();
     user();
     getAllUser();
+    _getGroup();
   }
 
   @override

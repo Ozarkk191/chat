@@ -1,3 +1,4 @@
+import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 
 class MenuSettings {
@@ -40,4 +41,6 @@ class AppList {
   static List<UserModel> userList = [];
   static List<UserModel> avatarList = [];
   static List<String> uidList = [];
+  static List<GroupModel> groupList = [];
+  static List<String> groupKey = [];
 }

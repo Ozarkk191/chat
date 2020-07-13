@@ -1,18 +1,20 @@
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
+import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class UserNavBottom extends StatefulWidget {
-  final titles = ['Home', 'Chat'];
+  final titles = ['Home', 'Group', 'Chat'];
   final colors = [
     Colors.red,
     Colors.teal,
   ];
   final icons = [
     AssetImage('assets/images/ic_home_nav.png'),
+    AssetImage('assets/images/ic_group.png'),
     AssetImage('assets/images/ic_chat.png'),
   ];
 
@@ -64,6 +66,7 @@ class _UserNavBottomState extends State<UserNavBottom> {
             controller: _pageController,
             children: <Widget>[
               UserHomePage(),
+              GroupPage(),
               ChatPage(),
             ],
             onPageChanged: (page) {},

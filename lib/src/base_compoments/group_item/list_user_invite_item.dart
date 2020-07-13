@@ -1,16 +1,26 @@
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:flutter/material.dart';
 
-class ListUserInviteItem extends StatelessWidget {
+class ListUserInviteItem extends StatefulWidget {
   final String profileUrl, userName;
   final Function(bool) onChanged;
+  final bool value;
+  final int index;
 
   const ListUserInviteItem({
     Key key,
     @required this.profileUrl,
     @required this.userName,
-    @required this.onChanged,
+    this.onChanged,
+    this.value = false,
+    @required this.index,
   }) : super(key: key);
+
+  @override
+  _ListUserInviteItemState createState() => _ListUserInviteItemState();
+}
+
+class _ListUserInviteItemState extends State<ListUserInviteItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -18,17 +28,17 @@ class ListUserInviteItem extends StatelessWidget {
       height: 60,
       child: Row(
         children: <Widget>[
-          ProfileCard(width: 50, height: 50, profileUrl: profileUrl),
+          ProfileCard(width: 50, height: 50, profileUrl: widget.profileUrl),
           SizedBox(
             width: 10,
           ),
           Expanded(
             child: Text(
-              '$userName',
+              '${widget.userName}',
               style: TextStyle(color: Colors.grey),
             ),
           ),
-          Checkbox(value: true, onChanged: onChanged)
+          Checkbox(value: widget.value, onChanged: widget.onChanged)
         ],
       ),
     );

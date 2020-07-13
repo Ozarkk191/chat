@@ -2,6 +2,8 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/helpers/dialoghelper.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/helpers/user_dialog_helper.dart';
+import 'package:chat/models/group_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/list_admin_item.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
@@ -11,9 +13,57 @@ import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/settingpage/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  Firestore _databaseReference = Firestore.instance;
+
+  _getGroup() async {
+    AppList.groupList.clear();
+    _databaseReference
+        .collection("Room")
+        .document("chats")
+        .collection("Group")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        var group = GroupModel.fromJson(value.data);
+        AppList.groupList.add(group);
+      });
+    });
+  }
+
+  _getAllUser() async {
+    AppList.userList.clear();
+    AppList.uidList.clear();
+    _databaseReference
+        .collection("Users")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        var allUser = UserModel.fromJson(value.data);
+        if (allUser.displayName != AppString.displayName) {
+          AppList.userList.add(allUser);
+          AppList.uidList.add(value.documentID);
+          // AppList.avatarList.add(value)
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getGroup();
+    _getAllUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

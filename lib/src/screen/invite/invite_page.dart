@@ -1,9 +1,52 @@
+import 'dart:async';
+
+import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_invite_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class InvitePage extends StatelessWidget {
+class InvitePage extends StatefulWidget {
+  final List<UserModel> user;
+
+  const InvitePage({Key key, this.user}) : super(key: key);
+  @override
+  _InvitePageState createState() => _InvitePageState();
+}
+
+class _InvitePageState extends State<InvitePage> {
+  List<bool> _boolList = List<bool>();
+  List<UserModel> _addUserList = List<UserModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    for (int i = 0; i <= AppList.userList.length; i++) {
+      _boolList.add(false);
+    }
+    Timer(Duration(milliseconds: 500), () {
+      if (widget.user != null) {
+        for (int i = 0; i <= widget.user.length; i++) {
+          if (widget.user[i].displayName == AppList.userList[i].displayName) {
+            _boolList[i] = true;
+            setState(() {});
+          }
+        }
+      }
+    });
+  }
+
+  void _addUser() {
+    for (int i = 0; i <= AppList.userList.length; i++) {
+      if (_boolList[i]) {
+        _addUserList.add(AppList.userList[i]);
+        _addUserList[i].uid = AppList.uidList[i];
+      }
+    }
+    Navigator.pop(context, _addUserList);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,11 +55,18 @@ class InvitePage extends StatelessWidget {
         title: Text('เชิญ'),
         backgroundColor: Color(0xff202020),
         leading: InkWell(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back_ios)),
+          onTap: () {
+            if (widget.user != null) {
+              Navigator.pop(context, widget.user);
+            } else {
+              Navigator.pop(context);
+            }
+          },
+          child: Icon(Icons.arrow_back_ios),
+        ),
         actions: <Widget>[
           InkWell(
-            onTap: () {},
+            onTap: _addUser,
             child: Container(
               width: 70,
               child: Center(
@@ -58,12 +108,18 @@ class InvitePage extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
                   return ListUserInviteItem(
-                    profileUrl: 'https://wallpapercave.com/wp/w1fkwPh.jpg',
-                    onChanged: (bool) {},
-                    userName: 'User Name',
+                    index: index,
+                    profileUrl: AppList.userList[index].avatarUrl,
+                    value: _boolList[index],
+                    onChanged: (val) {
+                      setState(() {
+                        _boolList[index] = val;
+                      });
+                    },
+                    userName: AppList.userList[index].displayName,
                   );
                 },
-                itemCount: 20,
+                itemCount: AppList.userList.length,
               ),
             ),
           ],
