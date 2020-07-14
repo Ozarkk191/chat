@@ -1,10 +1,7 @@
 import 'dart:async';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
-import 'package:chat/services/authservice.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -47,54 +44,37 @@ class _SplashPageState extends State<SplashPage> {
 
     if (user != null) {
       AppString.uid = user.uid;
-      await _databaseReference
+      _databaseReference
           .collection('Users')
-          .getDocuments()
-          .then((QuerySnapshot snapshot) {
-        snapshot.documents.forEach((value) {
-          List<String> _uidKey = List<String>();
-          _uidKey.add(value.documentID);
-          var listUid = _uidKey.where((element) => element == user.uid);
-          if (listUid.length == 0) {
-            Timer(Duration(seconds: 3), () {
-              AuthService().signOut();
-              Navigator.of(context).pushReplacementNamed('/');
-            });
-          } else {
-            _databaseReference
-                .collection('Users')
-                .document(user.uid)
-                .get()
-                .then((value) {
-              var userModel = UserModel.fromJson(value.data);
-              if (userModel.notiToken != tokenCheck) {
-                userModel.notiToken = tokenCheck;
-                _databaseReference
-                    .collection('Users')
-                    .document(user.uid)
-                    .setData(userModel.toJson());
-              }
-              AppString.displayName = userModel.displayName;
-              AppString.firstname = userModel.firstName;
-              AppString.lastname = userModel.lastName;
-              AppString.birthDate = userModel.birthDate;
-              AppString.email = userModel.email;
-              AppString.notiToken = userModel.notiToken;
-              AppString.phoneNumber = userModel.phoneNumber;
-              AppString.roles = userModel.roles;
-              AppString.dateTime = userModel.updatedAt;
-              AppString.isActive = userModel.isActive;
-              AppString.gender = userModel.gender;
-              AppString.photoUrl = userModel.avatarUrl;
+          .document(user.uid)
+          .get()
+          .then((value) {
+        var userModel = UserModel.fromJson(value.data);
+        if (userModel.notiToken != tokenCheck) {
+          userModel.notiToken = tokenCheck;
+          _databaseReference
+              .collection('Users')
+              .document(user.uid)
+              .setData(userModel.toJson());
+        }
+        AppString.displayName = userModel.displayName;
+        AppString.firstname = userModel.firstName;
+        AppString.lastname = userModel.lastName;
+        AppString.birthDate = userModel.birthDate;
+        AppString.email = userModel.email;
+        AppString.notiToken = userModel.notiToken;
+        AppString.phoneNumber = userModel.phoneNumber;
+        AppString.roles = userModel.roles;
+        AppString.dateTime = userModel.updatedAt;
+        AppString.isActive = userModel.isActive;
+        AppString.gender = userModel.gender;
+        AppString.photoUrl = userModel.avatarUrl;
 
-              if (AppString.roles == TypeStatus.USER.toString()) {
-                Navigator.of(context).pushReplacementNamed('/navuserhome');
-              } else {
-                Navigator.of(context).pushReplacementNamed('/navhome');
-              }
-            });
-          }
-        });
+        if (AppString.roles == TypeStatus.USER.toString()) {
+          Navigator.of(context).pushReplacementNamed('/navuserhome');
+        } else {
+          Navigator.of(context).pushReplacementNamed('/navhome');
+        }
       });
     } else {
       Timer(Duration(seconds: 3), () {

@@ -90,6 +90,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    // AuthService().signOut();
     _messaging.getToken().then((token) {
       AppString.notiToken = token;
     });

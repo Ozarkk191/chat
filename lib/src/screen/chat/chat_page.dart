@@ -1,4 +1,5 @@
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
@@ -32,7 +33,9 @@ class ChatPage extends StatelessWidget {
         ],
         leading: Container(),
         backgroundColor: Color(0xff202020),
-        title: Text('แชทกับแอดมิน'),
+        title: AppString.roles == "${TypeStatus.USER}"
+            ? Text('แชทกับแอดมิน')
+            : Text('แชทกับลูกค้า'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

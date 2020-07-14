@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/request_body_parameters.dart';
@@ -36,6 +38,13 @@ class _DataCollectPageState extends State<DataCollectPage> {
   void dispose() {
     super.dispose();
     _phone.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    AuthService().signOut();
+    log('didChangeDependencies');
   }
 
   @override
