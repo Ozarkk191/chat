@@ -36,6 +36,7 @@ class _DataCollectPageState extends State<DataCollectPage> {
   void dispose() {
     super.dispose();
     _phone.dispose();
+    AuthService().signOut();
   }
 
   @override

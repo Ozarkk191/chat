@@ -14,6 +14,7 @@ import 'package:chat/src/screen/settingpage/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,6 +24,32 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Firestore _databaseReference = Firestore.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
+
+  user() async {
+    FirebaseUser user = await _auth.currentUser();
+    if (user != null) {
+      AppString.uid = user.uid;
+      await _databaseReference
+          .collection('Users')
+          .document(user.uid)
+          .get()
+          .then((value) {
+        var userModel = UserModel.fromJson(value.data);
+        AppString.displayName = userModel.displayName;
+        AppString.firstname = userModel.firstName;
+        AppString.lastname = userModel.lastName;
+        AppString.birthDate = userModel.birthDate;
+        AppString.email = userModel.email;
+        AppString.notiToken = userModel.notiToken;
+        AppString.phoneNumber = userModel.phoneNumber;
+        AppString.roles = userModel.roles.toString();
+        AppString.dateTime = userModel.updatedAt;
+        AppString.isActive = userModel.isActive;
+        AppString.gender = userModel.gender;
+      });
+    }
+  }
 
   _getGroup() async {
     AppList.groupList.clear();
@@ -47,7 +74,7 @@ class _HomePageState extends State<HomePage> {
   _getAllUser() async {
     AppList.userList.clear();
     AppList.uidList.clear();
-    _databaseReference
+    await _databaseReference
         .collection("Users")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
@@ -65,6 +92,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    user();
     _getGroup();
     _getAllUser();
   }

@@ -8,10 +8,7 @@ import 'package:flutter/rendering.dart';
 
 class UserNavBottom extends StatefulWidget {
   final titles = ['Home', 'Group', 'Chat'];
-  final colors = [
-    Colors.red,
-    Colors.teal,
-  ];
+
   final icons = [
     AssetImage('assets/images/ic_home_nav.png'),
     AssetImage('assets/images/ic_group.png'),

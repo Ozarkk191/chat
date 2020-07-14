@@ -34,7 +34,9 @@ class AppString {
   static bool isActive;
 
   static String uidRoomChat;
+  static String uidAdmin;
   static String keyChatRooms;
+  static String nameGroup;
 }
 
 class AppList {

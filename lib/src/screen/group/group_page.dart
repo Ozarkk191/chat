@@ -25,7 +25,7 @@ class GroupPage extends StatelessWidget {
                 ),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text('Group'),
+        title: Text('แชทกลุ่ม'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -45,6 +45,8 @@ class GroupPage extends StatelessWidget {
                     return InkWell(
                       onTap: () {
                         AppString.uidRoomChat = AppList.groupKey[index];
+                        AppString.nameGroup =
+                            AppList.groupList[index].nameGroup;
                         Navigator.push(
                           context,
                           MaterialPageRoute(

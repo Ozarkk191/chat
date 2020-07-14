@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +21,10 @@ class ChatRoomPage extends StatefulWidget {
 
 class _ChatRoomPageState extends State<ChatRoomPage> {
   final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
+  Firestore _databaseReference = Firestore.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
   final picker = ImagePicker();
+  UserModel userModel;
 
   final ChatUser user = ChatUser(
     name: AppString.firstname,
@@ -34,6 +40,22 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
     super.initState();
+    _admin();
+  }
+
+  _admin() async {
+    FirebaseUser user = await _auth.currentUser();
+    if (user != null) {
+      AppString.uid = user.uid;
+      await _databaseReference
+          .collection('Users')
+          .document(AppString.uidAdmin)
+          .get()
+          .then((value) {
+        userModel = UserModel.fromJson(value.data);
+        setState(() {});
+      });
+    }
   }
 
   void systemMessage() {
@@ -96,7 +118,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text('Name Chat'),
+        title: AppString.roles == "${TypeStatus.USER}"
+            ? Text(userModel != null ? 'แอดมิน ${userModel.firstName}' : "")
+            : Text(userModel != null ? "${userModel.firstName}" : ""),
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -130,8 +154,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 inverted: false,
                 onSend: onSend,
                 user: user,
-                inputDecoration: InputDecoration.collapsed(
-                    hintText: "Add message here something.."),
+                inputDecoration: InputDecoration.collapsed(hintText: "ข้อความ"),
                 dateFormat: DateFormat('yyyy-MMM-dd'),
                 timeFormat: DateFormat('HH:mm'),
                 messages: messages,

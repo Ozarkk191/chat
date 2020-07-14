@@ -97,7 +97,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text('Name Chat'),
+        title: Text(AppString.nameGroup),
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);

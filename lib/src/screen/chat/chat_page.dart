@@ -32,7 +32,7 @@ class ChatPage extends StatelessWidget {
         ],
         leading: Container(),
         backgroundColor: Color(0xff202020),
-        title: Text('Chat'),
+        title: Text('แชทกับแอดมิน'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -51,9 +51,10 @@ class ChatPage extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
-                        AppString.uidRoomChat = AppList.uidList[index];
+                        // AppString.uidRoomChat = AppList.uidList[index];
+                        AppString.uidAdmin = AppList.uidList[index];
                         List<String> uidsList = [
-                          AppString.uidRoomChat,
+                          AppString.uidAdmin,
                           AppString.uid
                         ];
                         uidsList.sort();
