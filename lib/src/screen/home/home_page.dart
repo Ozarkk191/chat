@@ -26,15 +26,20 @@ class _HomePageState extends State<HomePage> {
 
   _getGroup() async {
     AppList.groupList.clear();
-    _databaseReference
-        .collection("Room")
+    await _databaseReference
+        .collection("Rooms")
         .document("chats")
         .collection("Group")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var group = GroupModel.fromJson(value.data);
-        AppList.groupList.add(group);
+        var uid =
+            group.memberUIDList.where((element) => element == AppString.uid);
+        if (uid.length != 0) {
+          AppList.groupKey.add(value.documentID);
+          AppList.groupList.add(group);
+        }
       });
     });
   }

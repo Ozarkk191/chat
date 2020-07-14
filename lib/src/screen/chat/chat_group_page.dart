@@ -222,6 +222,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
 
                         var documentReference = Firestore.instance
                             .collection('Rooms')
+                            .document('chats')
+                            .collection('Group')
                             .document(AppString.uidRoomChat)
                             .collection('messages')
                             .document(DateTime.now()

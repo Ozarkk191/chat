@@ -1,7 +1,8 @@
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/chat/chat_room_page.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:flutter/material.dart';
 
 class GroupPage extends StatelessWidget {
@@ -10,15 +11,22 @@ class GroupPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
+        leading: Container(),
         actions: <Widget>[
-          Container(
-            width: 40,
-            height: 40,
-            child: Image.asset('assets/images/ic_add_group.png'),
-          ),
+          AppString.roles == '${TypeStatus.USER}'
+              ? Container()
+              : InkWell(
+                  onTap: () {},
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    child: Image.asset('assets/images/ic_add_group.png'),
+                  ),
+                ),
         ],
         backgroundColor: Color(0xff202020),
         title: Text('Group'),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -40,7 +48,7 @@ class GroupPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChatRoomPage(),
+                            builder: (context) => ChatGroupPage(),
                           ),
                         );
                       },

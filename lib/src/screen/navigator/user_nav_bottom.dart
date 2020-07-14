@@ -75,7 +75,7 @@ class _UserNavBottomState extends State<UserNavBottom> {
         bottomNavigationBar: BubbledNavigationBar(
           controller: _menuPositionController,
           initialIndex: 0,
-          itemMargin: EdgeInsets.symmetric(horizontal: 8),
+          itemMargin: EdgeInsets.symmetric(horizontal: 10),
           backgroundColor: Color(0xff242424),
           defaultBubbleColor: Colors.blue,
           onTap: (index) {

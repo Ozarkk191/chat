@@ -27,7 +27,7 @@ class _UserHomePageState extends State<UserHomePage> {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
       AppString.uid = user.uid;
-      _databaseReference
+      await _databaseReference
           .collection('Users')
           .document(user.uid)
           .get()
@@ -51,7 +51,7 @@ class _UserHomePageState extends State<UserHomePage> {
   getAllUser() async {
     AppList.userList.clear();
     AppList.uidList.clear();
-    _databaseReference
+    await _databaseReference
         .collection("Users")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
@@ -69,16 +69,20 @@ class _UserHomePageState extends State<UserHomePage> {
 
   _getGroup() async {
     AppList.groupList.clear();
-    _databaseReference
+    await _databaseReference
         .collection("Rooms")
         .document("chats")
         .collection("Group")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
-        AppList.groupKey.add(value.documentID);
         var group = GroupModel.fromJson(value.data);
-        AppList.groupList.add(group);
+        var uid =
+            group.memberUIDList.where((element) => element == AppString.uid);
+        if (uid.length != 0) {
+          AppList.groupKey.add(value.documentID);
+          AppList.groupList.add(group);
+        }
       });
     });
   }
