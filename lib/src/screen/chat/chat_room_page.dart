@@ -175,35 +175,35 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   border: Border.all(width: 0.0),
                   color: Colors.white,
                 ),
-                onQuickReply: (Reply reply) {
-                  setState(() {
-                    messages.add(ChatMessage(
-                        text: reply.value,
-                        createdAt: DateTime.now(),
-                        user: user));
+                // onQuickReply: (Reply reply) {
+                //   setState(() {
+                //     messages.add(ChatMessage(
+                //         text: reply.value,
+                //         createdAt: DateTime.now(),
+                //         user: user));
 
-                    messages = [...messages];
-                  });
+                //     messages = [...messages];
+                //   });
 
-                  Timer(Duration(milliseconds: 0), () {
-                    _chatViewKey.currentState.scrollController
-                      ..animateTo(
-                        _chatViewKey.currentState.scrollController.position
-                            .maxScrollExtent,
-                        curve: Curves.easeOut,
-                        duration: const Duration(milliseconds: 0),
-                      );
+                //   Timer(Duration(milliseconds: 0), () {
+                //     _chatViewKey.currentState.scrollController
+                //       ..animateTo(
+                //         _chatViewKey.currentState.scrollController.position
+                //             .maxScrollExtent,
+                //         curve: Curves.easeOut,
+                //         duration: const Duration(milliseconds: 0),
+                //       );
 
-                    if (i == 0) {
-                      systemMessage();
-                      Timer(Duration(milliseconds: 0), () {
-                        systemMessage();
-                      });
-                    } else {
-                      systemMessage();
-                    }
-                  });
-                },
+                //     if (i == 0) {
+                //       systemMessage();
+                //       Timer(Duration(milliseconds: 0), () {
+                //         systemMessage();
+                //       });
+                //     } else {
+                //       systemMessage();
+                //     }
+                //   });
+                // },
                 onLoadEarlier: () {
                   print("laoding...");
                 },

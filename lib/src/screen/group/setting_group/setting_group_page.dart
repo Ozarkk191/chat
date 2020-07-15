@@ -41,7 +41,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
   }
 
   bool _check() {
-    if (_image == null) {
+    if (_profileUrl == null) {
       return false;
     } else if (_nameGroup.text == null) {
       return false;
@@ -55,32 +55,36 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
     setState(() {
       isLoading = true;
     });
-    var now = new DateTime.now();
-    var now2 = now.toString().replaceAll(" ", "_");
+    var now2 = DateTime.now().millisecondsSinceEpoch.toString();
     AppString.uidRoomChat = now2;
     final StorageReference storageRef =
         FirebaseStorage.instance.ref().child(now2);
-    StorageUploadTask uploadTask = storageRef.putFile(
-      File(_image.path),
-      StorageMetadata(
-        contentType: 'image/jpg',
-      ),
-    );
-    StorageTaskSnapshot download = await uploadTask.onComplete;
+    if (_image != null) {
+      StorageUploadTask uploadTask = storageRef.putFile(
+        File(_image.path),
+        StorageMetadata(
+          contentType: 'image/jpg',
+        ),
+      );
+      StorageTaskSnapshot download = await uploadTask.onComplete;
 
-    String url = await download.ref.getDownloadURL();
+      _profileUrl = await download.ref.getDownloadURL();
+    }
+
     List<String> uidlist = List<String>();
     for (int i = 0; i < _memberList.length; i++) {
       uidlist.add(_memberList[i].uid);
       print(_memberList[i].uid);
     }
+    uidlist.add(AppString.uid);
 
     var group = GroupModel(
-      nameGroup: _nameGroup.text,
-      avatarGroup: url,
-      memberUIDList: uidlist,
-      statusGroup: _statusGroup,
-    );
+        nameGroup: _nameGroup.text,
+        avatarGroup: _profileUrl,
+        memberUIDList: uidlist,
+        statusGroup: _statusGroup,
+        coverUrl:
+            "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130");
     var _documentReference = Firestore.instance;
     _documentReference
         .collection('Rooms')
@@ -88,7 +92,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
         .collection('Group')
         .document(now2)
         .setData(group.toJson());
-
+    AppString.nameGroup = _nameGroup.text;
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => ChatGroupPage()));
 
@@ -112,7 +116,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
   @override
   void initState() {
     super.initState();
-    _nameGroup.text = _profileUrl;
+    // _nameGroup.text = _profileUrl;
   }
 
   @override
@@ -264,7 +268,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                 SizedBox(height: 10),
                 TextField(
                   textAlign: TextAlign.center,
-                  maxLength: 50,
+                  maxLength: 20,
                   controller: _nameGroup,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(

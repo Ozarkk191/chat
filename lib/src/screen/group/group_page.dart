@@ -3,6 +3,7 @@ import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:flutter/material.dart';
 
 class GroupPage extends StatelessWidget {
@@ -15,14 +16,23 @@ class GroupPage extends StatelessWidget {
         actions: <Widget>[
           AppString.roles == '${TypeStatus.USER}'
               ? Container()
-              : InkWell(
-                  onTap: () {},
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    child: Image.asset('assets/images/ic_add_group.png'),
-                  ),
-                ),
+              : PopupMenuButton<String>(
+                  child: Image.asset('assets/images/ic_add_group.png'),
+                  color: Color(0xff292929),
+                  onSelected: (value) {
+                    _selecteMenu(value, context);
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return MenuSettings.groupList.map((String menu) {
+                      return PopupMenuItem<String>(
+                        value: menu,
+                        child: Text(
+                          menu,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }).toList();
+                  }),
         ],
         backgroundColor: Color(0xff202020),
         title: Text('แชทกลุ่ม'),
@@ -70,5 +80,14 @@ class GroupPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _selecteMenu(String menu, BuildContext context) {
+    if (menu == MenuSettings.createGroup) {
+      // Navigator.push(
+      //     context, MaterialPageRoute(builder: (context) => CreateGroup()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
+    }
   }
 }

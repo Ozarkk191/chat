@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/helpers/user_dialog_helper.dart';
@@ -25,6 +28,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Firestore _databaseReference = Firestore.instance;
   FirebaseAuth _auth = FirebaseAuth.instance;
+  GroupModel _group;
 
   user() async {
     FirebaseUser user = await _auth.currentUser();
@@ -51,8 +55,29 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _getAllAdmin() async {
+    AppList.adminList.clear();
+    AppList.adminUidList.clear();
+    await _databaseReference
+        .collection("Users")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        var allUser = UserModel.fromJson(value.data);
+        if (allUser.roles != "${TypeStatus.USER}") {
+          if (allUser.displayName != AppString.displayName) {
+            AppList.adminList.add(allUser);
+            AppList.adminUidList.add(value.documentID);
+          }
+        }
+        setState(() {});
+      });
+    });
+  }
+
   _getGroup() async {
     AppList.groupList.clear();
+    AppList.groupKey.clear();
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -60,12 +85,12 @@ class _HomePageState extends State<HomePage> {
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
-        var group = GroupModel.fromJson(value.data);
+        _group = GroupModel.fromJson(value.data);
         var uid =
-            group.memberUIDList.where((element) => element == AppString.uid);
+            _group.memberUIDList.where((element) => element == AppString.uid);
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
-          AppList.groupList.add(group);
+          AppList.groupList.add(_group);
         }
       });
     });
@@ -80,10 +105,12 @@ class _HomePageState extends State<HomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
-        if (allUser.displayName != AppString.displayName) {
-          AppList.userList.add(allUser);
-          AppList.uidList.add(value.documentID);
-          // AppList.avatarList.add(value)
+        if (allUser.roles == "${TypeStatus.USER}") {
+          if (allUser.displayName != AppString.displayName) {
+            AppList.userList.add(allUser);
+            AppList.uidList.add(value.documentID);
+            // AppList.avatarList.add(value)
+          }
         }
       });
     });
@@ -95,15 +122,16 @@ class _HomePageState extends State<HomePage> {
     user();
     _getGroup();
     _getAllUser();
+    _getAllAdmin();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff202020),
+      backgroundColor: Color(0xff292929),
       appBar: AppBar(
         title: Text('Home'),
-        backgroundColor: Color(0xff242424),
+        backgroundColor: Color(0xff202020),
         actions: <Widget>[
           InkWell(
             onTap: () {
@@ -128,10 +156,15 @@ class _HomePageState extends State<HomePage> {
                 profileUrl: AppString.photoUrl,
                 context: context,
                 displayName: AppString.displayName,
+                premission: AppString.roles == "${TypeStatus.ADMIN}"
+                    ? "Admin"
+                    : "Super Admin",
               ),
-              TextAndLine(
-                title: 'Admin',
-              ),
+              AppList.adminList.length != 0
+                  ? TextAndLine(
+                      title: 'แอดมิน',
+                    )
+                  : Container(),
               Container(
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -139,21 +172,25 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
-                        DialogHelper.adminDialog(context);
+                        DialogHelper.adminDialog(
+                          context,
+                          AppList.adminList[index].avatarUrl,
+                          AppList.adminList[index].displayName,
+                          AppList.adminList[index].coverUrl,
+                        );
                       },
                       child: ListAdminItem(
-                        profileUrl:
-                            'https://sites.google.com/site/prawatiswntawpay/_/rsrc/1455021870334/hma-phi-thbul/images.jpg?height=266&width=400',
-                        adminName: 'Admin Name',
+                        profileUrl: AppList.adminList[index].avatarUrl,
+                        adminName: AppList.adminList[index].displayName,
                         callback: () {},
-                        status: 'online',
+                        status: AppList.adminList[index].isActive,
                       ),
                     );
                   },
-                  itemCount: 3,
+                  itemCount: AppList.adminList.length,
                 ),
               ),
-              TextAndLine(title: '"Waitting list"'),
+              TextAndLine(title: 'คำร้องขอเข้ากลุ่ม'),
               SizedBox(
                 height: 5,
               ),
@@ -183,41 +220,55 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              TextAndLine(title: 'Group'),
+              AppList.groupList.length != 0
+                  ? TextAndLine(title: 'กลุ่ม')
+                  : Container(),
               SizedBox(
                 height: 5,
               ),
-              Container(
-                height: 160,
-                child: ListView.builder(
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          GroupDialogHelper.adminDialog(
-                            context,
-                            'Group',
-                            'Delete',
-                            'assets/images/ic_group.png',
-                            'assets/images/ic_trash.png',
-                          );
-                        },
-                        child: ListGroupItem(
-                          imgCoverUrl:
-                              'https://i.pinimg.com/originals/a8/b2/6a/a8b26abdd653ad71d19ca2b63db68dae.jpg',
-                          imgGroupUrl:
-                              'https://wallpapercave.com/wp/w1fkwPh.jpg',
-                          nameGroup: 'Group name',
-                          numberUser: '9,999',
-                        ),
-                      );
-                    },
-                    itemCount: 6,
-                    scrollDirection: Axis.horizontal),
-              ),
+              AppList.groupList.length != 0
+                  ? Container(
+                      height: 160,
+                      child: ListView.builder(
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () {
+                                GroupDialogHelper.adminDialog(
+                                  context: context,
+                                  titleLeft: 'Group',
+                                  titleRight: 'Delete',
+                                  pathIconLeft: 'assets/images/ic_group.png',
+                                  pathIconRight: 'assets/images/ic_trash.png',
+                                  groupName: AppList.groupList[index].nameGroup,
+                                  profileUrl:
+                                      AppList.groupList[index].avatarGroup,
+                                  coverUrl: AppList.groupList[index].coverUrl,
+                                  member:
+                                      _group.memberUIDList.length.toString(),
+                                  statusGroup: _group.statusGroup,
+                                );
+                              },
+                              child: ListGroupItem(
+                                imgCoverUrl: AppList.groupList[index].coverUrl,
+                                imgGroupUrl:
+                                    AppList.groupList[index].avatarGroup,
+                                nameGroup: AppList.groupList[index].nameGroup,
+                                numberUser:
+                                    _group.memberUIDList.length.toString(),
+                                status: AppList.groupList[index].statusGroup,
+                              ),
+                            );
+                          },
+                          itemCount: AppList.groupList.length,
+                          scrollDirection: Axis.horizontal),
+                    )
+                  : Container(),
               SizedBox(
                 height: 5,
               ),
-              TextAndLine(title: 'User'),
+              AppList.userList.length != 0
+                  ? TextAndLine(title: 'ลูกค้า')
+                  : Container(),
               SizedBox(
                 height: 5,
               ),
@@ -228,17 +279,20 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
-                        UserDialogHelper.adminDialog(context);
+                        UserDialogHelper.adminDialog(
+                          context: context,
+                          profileUrl: AppList.userList[index].avatarUrl,
+                          username: AppList.userList[index].displayName,
+                        );
                       },
                       child: ListUserItem(
-                        profileUrl:
-                            'https://i.pinimg.com/736x/0f/c3/e7/0fc3e7cea3075c7a5c231ca73e60a6e9.jpg',
-                        userName: 'User Name',
+                        profileUrl: AppList.userList[index].avatarUrl,
+                        userName: AppList.userList[index].displayName,
                         callback: () {},
                       ),
                     );
                   },
-                  itemCount: 5,
+                  itemCount: AppList.userList.length,
                 ),
               ),
             ],
@@ -248,8 +302,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container buildMyProfile(
-      {String profileUrl, BuildContext context, String displayName}) {
+  Container buildMyProfile({
+    String profileUrl,
+    BuildContext context,
+    String displayName,
+    String premission,
+  }) {
     return Container(
       height: 100,
       child: Row(
@@ -270,10 +328,10 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 Text(
                   '$displayName',
-                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 Text(
-                  'Full Premission',
+                  'Status : $premission',
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],

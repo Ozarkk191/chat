@@ -50,6 +50,7 @@ class _SplashPageState extends State<SplashPage> {
           .get()
           .then((value) {
         var userModel = UserModel.fromJson(value.data);
+        AppModel.user = UserModel.fromJson(value.data);
         if (userModel.notiToken != tokenCheck) {
           userModel.notiToken = tokenCheck;
           _databaseReference
@@ -69,6 +70,12 @@ class _SplashPageState extends State<SplashPage> {
         AppString.isActive = userModel.isActive;
         AppString.gender = userModel.gender;
         AppString.photoUrl = userModel.avatarUrl;
+        AppString.coverUrl = userModel.coverUrl;
+        userModel.isActive = true;
+        _databaseReference
+            .collection('Users')
+            .document(user.uid)
+            .setData(userModel.toJson());
 
         if (AppString.roles == TypeStatus.USER.toString()) {
           Navigator.of(context).pushReplacementNamed('/navuserhome');
@@ -78,7 +85,7 @@ class _SplashPageState extends State<SplashPage> {
       });
     } else {
       Timer(Duration(seconds: 3), () {
-        Navigator.of(context).pushReplacementNamed('/');
+        Navigator.of(context).pushReplacementNamed('/login');
       });
     }
   }

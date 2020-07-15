@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
@@ -157,7 +155,6 @@ class _LoginPageState extends State<LoginPage> {
                 if (value != null) {
                   _memberList.add(value.documentID);
                 } else {
-                  log("3");
                   _savePhoneNumber(user: user);
                 }
               })
@@ -182,6 +179,7 @@ class _LoginPageState extends State<LoginPage> {
         AppString.dateTime = userModel.updatedAt;
         AppString.isActive = userModel.isActive;
         AppString.gender = userModel.gender;
+        AppString.gender = userModel.coverUrl;
         if (AppString.roles == '${TypeStatus.USER}') {
           Navigator.of(context).pushReplacementNamed('/navuserhome');
         } else {

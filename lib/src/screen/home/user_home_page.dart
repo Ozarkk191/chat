@@ -69,6 +69,7 @@ class _UserHomePageState extends State<UserHomePage> {
 
   _getGroup() async {
     AppList.groupList.clear();
+    AppList.groupKey.clear();
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -143,11 +144,13 @@ class _UserHomePageState extends State<UserHomePage> {
                       return InkWell(
                         onTap: () {
                           GroupDialogHelper.adminDialog(
-                            context,
-                            'Chat',
-                            'Delete',
-                            'assets/images/ic_chat.png',
-                            'assets/images/ic_trash.png',
+                            context: context,
+                            titleLeft: 'Group',
+                            titleRight: 'Delete',
+                            pathIconLeft: 'assets/images/ic_group.png',
+                            pathIconRight: 'assets/images/ic_trash.png',
+                            groupName: AppList.groupList[index].nameGroup,
+                            profileUrl: AppList.groupList[index].avatarGroup,
                           );
                         },
                         child: ListGroupItem(
@@ -157,6 +160,7 @@ class _UserHomePageState extends State<UserHomePage> {
                               'https://wallpapercave.com/wp/w1fkwPh.jpg',
                           nameGroup: 'Group name',
                           numberUser: '9,999',
+                          status: '',
                         ),
                       );
                     },
@@ -181,11 +185,13 @@ class _UserHomePageState extends State<UserHomePage> {
                         'Lorem ipsum is some dummy text generator, some dummy text generator',
                     callback: () {
                       GroupDialogHelper.adminDialog(
-                        context,
-                        'Chat',
-                        'Delete',
-                        'assets/images/ic_chat.png',
-                        'assets/images/ic_trash.png',
+                        context: context,
+                        titleLeft: 'Group',
+                        titleRight: 'Delete',
+                        pathIconLeft: 'assets/images/ic_group.png',
+                        pathIconRight: 'assets/images/ic_trash.png',
+                        groupName: AppList.groupList[index].nameGroup,
+                        profileUrl: AppList.groupList[index].avatarGroup,
                       );
                     },
                   );
@@ -223,7 +229,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   style: TextStyle(color: Colors.grey, fontSize: 18),
                 ),
                 Text(
-                  'Full Premission',
+                  'Status : User',
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],

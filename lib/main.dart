@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/splash',
         routes: {
           '/splash': (context) => SplashPage(),
-          '/': (context) => LoginPage(),
+          '/login': (context) => LoginPage(),
           '/register': (context) => RegisterPage(),
           // '/otp': (context) => OTPRequest(),
           '/home': (context) => HomePage(),

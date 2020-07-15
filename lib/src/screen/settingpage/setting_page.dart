@@ -58,7 +58,7 @@ class SettingPage extends StatelessWidget {
               data: ">",
               onTap: () {
                 AuthService().signOut();
-                Navigator.of(context).pushReplacementNamed('/');
+                Navigator.of(context).pushReplacementNamed('/login');
               }),
           TwoTextAndLine(
               context: context,

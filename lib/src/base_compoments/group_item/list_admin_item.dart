@@ -2,8 +2,9 @@ import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:flutter/material.dart';
 
 class ListAdminItem extends StatelessWidget {
-  final String profileUrl, adminName, status;
+  final String profileUrl, adminName;
   final Function callback;
+  final bool status;
 
   const ListAdminItem({
     Key key,
@@ -35,12 +36,15 @@ class ListAdminItem extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Image.asset('assets/images/ic_status_online.png'),
+                    Image.asset(
+                      'assets/images/ic_status_online.png',
+                      color: !status ? Colors.grey : null,
+                    ),
                     SizedBox(
                       width: 5,
                     ),
                     Text(
-                      '$status',
+                      status ? 'online' : 'offline',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],

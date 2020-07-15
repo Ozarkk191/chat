@@ -29,8 +29,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
             children: <Widget>[
               buildProfile(
                 context: context,
-                coverUrl:
-                    'https://images.alphacoders.com/846/thumb-1920-84631.jpg',
+                coverUrl: AppString.coverUrl,
                 profileUrl: AppString.photoUrl,
               ),
               buildItemProfile(
@@ -49,7 +48,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                   data: AppString.phoneNumber),
               buildItemProfile(
                   context: context, title: 'E-mail', data: AppString.email),
-              buildItemProfile(context: context, title: 'รหัสผ่าน', data: '>'),
+              // buildItemProfile(context: context, title: 'รหัสผ่าน', data: '>'),
               SizedBox(height: 50),
               GradientButton(title: 'Submit', callBack: () {}),
             ],

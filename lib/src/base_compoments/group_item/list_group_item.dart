@@ -7,6 +7,7 @@ class ListGroupItem extends StatelessWidget {
   final String imgGroupUrl;
   final String nameGroup;
   final String numberUser;
+  final String status;
 
   const ListGroupItem({
     Key key,
@@ -14,6 +15,7 @@ class ListGroupItem extends StatelessWidget {
     @required this.imgGroupUrl,
     @required this.nameGroup,
     @required this.numberUser,
+    this.status = "pubilc",
   }) : super(key: key);
 
   @override
@@ -80,7 +82,19 @@ class ListGroupItem extends StatelessWidget {
                             style: TextStyle(color: Colors.white, fontSize: 10),
                           ),
                         ),
-                        Image.asset('assets/images/ic_globe.png'),
+                        status == "pubilc"
+                            ? Image.asset(
+                                'assets/images/ic_globe.png',
+                                width: 20,
+                                height: 20,
+                                color: Colors.white,
+                              )
+                            : Image.asset(
+                                'assets/images/ic_peple.png',
+                                color: Colors.white,
+                                width: 20,
+                                height: 20,
+                              ),
                       ],
                     ),
                   ],

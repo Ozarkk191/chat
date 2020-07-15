@@ -2,7 +2,6 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:flutter/material.dart';
 
 import 'chat_room_page.dart';
@@ -13,24 +12,6 @@ class ChatPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
-        actions: <Widget>[
-          PopupMenuButton<String>(
-              color: Color(0xff292929),
-              onSelected: (value) {
-                _selecteMenu(value, context);
-              },
-              itemBuilder: (BuildContext context) {
-                return MenuSettings.groupList.map((String menu) {
-                  return PopupMenuItem<String>(
-                    value: menu,
-                    child: Text(
-                      menu,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList();
-              }),
-        ],
         leading: Container(),
         backgroundColor: Color(0xff202020),
         title: AppString.roles == "${TypeStatus.USER}"
@@ -85,14 +66,5 @@ class ChatPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _selecteMenu(String menu, BuildContext context) {
-    if (menu == MenuSettings.createGroup) {
-      // Navigator.push(
-      //     context, MaterialPageRoute(builder: (context) => CreateGroup()));
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
-    }
   }
 }

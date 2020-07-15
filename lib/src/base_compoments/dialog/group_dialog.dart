@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat/src/base_compoments/cover/cover_dialog.dart';
 import 'package:flutter/material.dart';
 
 class GroupDialog extends StatelessWidget {
-  final String title1, title2;
+  final String title1, title2, statusGroup;
   final String pathIcon1, pathIcon2;
   final String coverUrl, profileUrl, groupName, numberUser;
   final Function callbackItem1, callbackItem2;
@@ -17,7 +19,8 @@ class GroupDialog extends StatelessWidget {
       @required this.coverUrl,
       @required this.profileUrl,
       @required this.groupName,
-      @required this.numberUser})
+      @required this.numberUser,
+      @required this.statusGroup})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,9 @@ class GroupDialog extends StatelessWidget {
         ),
         child: Stack(
           children: <Widget>[
-            imgCover(context, coverUrl),
+            CoverDialog(
+              coverUrl: coverUrl,
+            ),
             Container(
               width: MediaQuery.of(context).size.width,
               child: Column(
@@ -56,9 +61,20 @@ class GroupDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(100)),
                       ),
-                      child: Image.network(
-                        profileUrl,
-                        fit: BoxFit.cover,
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                        imageUrl: profileUrl,
+                        imageBuilder: (context, imageProvider) => Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -66,8 +82,11 @@ class GroupDialog extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text('$groupName'),
-                      Image.asset('assets/images/ic_globe.png',
-                          color: Colors.black)
+                      statusGroup == "public"
+                          ? Image.asset('assets/images/ic_globe.png',
+                              color: Colors.black)
+                          : Image.asset('assets/images/ic_peple.png',
+                              color: Colors.black)
                     ],
                   ),
                   SizedBox(height: 5),
@@ -78,7 +97,7 @@ class GroupDialog extends StatelessWidget {
                           color: Colors.black),
                       Text(
                         '$numberUser',
-                        style: TextStyle(fontSize: 8, color: Colors.grey),
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -130,27 +149,6 @@ class GroupDialog extends StatelessWidget {
               style: TextStyle(fontSize: 10),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Container imgCover(BuildContext context, String coverUrl) {
-    return Container(
-      height: 125,
-      width: MediaQuery.of(context).size.width,
-      child: Card(
-        margin: EdgeInsets.all(0),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Image.network(
-          coverUrl,
-          fit: BoxFit.cover,
         ),
       ),
     );

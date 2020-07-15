@@ -30,6 +30,7 @@ class AppString {
   static String dateTime = "";
   static String photoUrl = "";
   static String uid = "";
+  static String coverUrl = "";
   static String roles;
   static bool isActive;
 
@@ -39,10 +40,15 @@ class AppString {
   static String nameGroup;
 }
 
+class AppModel {
+  static UserModel user;
+}
+
 class AppList {
   static List<UserModel> userList = [];
-  static List<UserModel> avatarList = [];
+  static List<UserModel> adminList = [];
   static List<String> uidList = [];
+  static List<String> adminUidList = [];
   static List<GroupModel> groupList = [];
   static List<String> groupKey = [];
 }

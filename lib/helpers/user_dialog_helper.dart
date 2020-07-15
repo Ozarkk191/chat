@@ -3,7 +3,12 @@ import 'package:chat/src/base_compoments/dialog/user_dialog.dart';
 import 'package:flutter/material.dart';
 
 class UserDialogHelper {
-  static adminDialog(context) => showDialog(
+  static adminDialog({
+    BuildContext context,
+    String profileUrl,
+    String username,
+  }) =>
+      showDialog(
         context: context,
         builder: (context) => UserDialog(
           title1: 'Group',
@@ -13,15 +18,16 @@ class UserDialogHelper {
           callbackItem1: () {},
           callbackItem2: () {},
           coverUrl:
-              'https://img.kaidee.com/prd/20180718/340041334/b/505c55d5-a967-4188-addc-b234df442c00.jpg',
-          profileUrl:
-              'https://sites.google.com/site/prawatiswntawpay/_/rsrc/1455021870334/hma-phi-thbul/images.jpg?height=266&width=400',
-          username: 'User name',
+              'https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130',
+          profileUrl: profileUrl,
+          username: username,
         ),
       );
 }
 
 class DeleteAccountDialogHelpers {
-  static delete(context) =>
-      showDialog(context: context, builder: (context) => DeleteAccountDialog());
+  static delete(context) => showDialog(
+        context: context,
+        builder: (context) => DeleteAccountDialog(),
+      );
 }

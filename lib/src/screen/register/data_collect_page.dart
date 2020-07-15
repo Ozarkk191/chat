@@ -258,20 +258,24 @@ class _DataCollectPageState extends State<DataCollectPage> {
       List<String> _phoneList = List<String>();
       List<String> _group = [];
       UserModel data = UserModel(
-          firstName: AppString.firstname,
-          lastName: AppString.lastname,
-          notiToken: AppString.notiToken,
-          phoneNumber: _phone.text,
-          email: AppString.email,
-          displayName: AppString.displayName,
-          gender: "ไม่ระบุ",
-          birthDate: "ไม่ระบุ",
-          isActive: false,
-          roles: TypeStatus.USER.toString(),
-          createdAt: AppString.dateTime,
-          updatedAt: AppString.dateTime,
-          avatarUrl: AppString.photoUrl,
-          groupKey: _group);
+        firstName: AppString.firstname,
+        lastName: AppString.lastname,
+        notiToken: AppString.notiToken,
+        phoneNumber: _phone.text,
+        email: AppString.email,
+        displayName: AppString.displayName,
+        gender: "ไม่ระบุ",
+        birthDate: "ไม่ระบุ",
+        isActive: true,
+        roles: TypeStatus.USER.toString(),
+        createdAt: AppString.dateTime,
+        updatedAt: AppString.dateTime,
+        avatarUrl: AppString.photoUrl,
+        groupKey: _group,
+        coverUrl:
+            "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130",
+        uid: AppString.uid,
+      );
 
       await _databaseReference
           .collection("Users")
