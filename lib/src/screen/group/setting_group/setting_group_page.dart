@@ -83,8 +83,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
         avatarGroup: _profileUrl,
         memberUIDList: uidlist,
         statusGroup: _statusGroup,
-        coverUrl:
-            "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130");
+        coverUrl: _profileUrl);
     var _documentReference = Firestore.instance;
     _documentReference
         .collection('Rooms')
@@ -113,11 +112,11 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
     setState(() {});
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // _nameGroup.text = _profileUrl;
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // _nameGroup.text = _profileUrl;
+  // }
 
   @override
   void dispose() {

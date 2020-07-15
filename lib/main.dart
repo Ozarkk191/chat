@@ -9,7 +9,7 @@ import 'src/screen/navigator/user_nav_bottom.dart';
 
 import 'src/screen/register/data_collect_page.dart';
 import 'src/screen/register/register_page.dart';
-import 'src/screen/settingpage/edit_profile_page.dart';
+import 'src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'src/screen/settingpage/setting_page.dart';
 import 'src/screen/splash/splash_page.dart';
 

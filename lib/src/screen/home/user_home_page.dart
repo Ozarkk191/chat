@@ -8,7 +8,7 @@ import 'package:chat/src/base_compoments/card/promotion_card.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/settingpage/edit_profile_page.dart';
+import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -58,7 +58,7 @@ class _UserHomePageState extends State<UserHomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.roles != "${TypeStatus.USER}") {
-          if (allUser.displayName != AppString.displayName) {
+          if (allUser.displayName != AppModel.user.displayName) {
             AppList.userList.add(allUser);
             AppList.uidList.add(value.documentID);
           }
@@ -127,9 +127,9 @@ class _UserHomePageState extends State<UserHomePage> {
               ),
               SearchField(),
               buildMyProfile(
-                profileUrl: AppString.photoUrl,
+                profileUrl: AppModel.user.avatarUrl,
                 context: context,
-                displayName: AppString.displayName,
+                displayName: AppModel.user.displayName,
               ),
               TextAndLine(
                 title: 'Group',

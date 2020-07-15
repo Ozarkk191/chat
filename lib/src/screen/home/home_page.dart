@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -13,7 +11,7 @@ import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/settingpage/edit_profile_page.dart';
+import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -65,7 +63,7 @@ class _HomePageState extends State<HomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.roles != "${TypeStatus.USER}") {
-          if (allUser.displayName != AppString.displayName) {
+          if (allUser.displayName != AppModel.user.displayName) {
             AppList.adminList.add(allUser);
             AppList.adminUidList.add(value.documentID);
           }
@@ -106,10 +104,9 @@ class _HomePageState extends State<HomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.roles == "${TypeStatus.USER}") {
-          if (allUser.displayName != AppString.displayName) {
+          if (allUser.displayName != AppModel.user.displayName) {
             AppList.userList.add(allUser);
             AppList.uidList.add(value.documentID);
-            // AppList.avatarList.add(value)
           }
         }
       });
@@ -132,6 +129,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('Home'),
         backgroundColor: Color(0xff202020),
+        leading: Container(),
+        centerTitle: true,
         actions: <Widget>[
           InkWell(
             onTap: () {
@@ -153,9 +152,9 @@ class _HomePageState extends State<HomePage> {
               ),
               SearchField(),
               buildMyProfile(
-                profileUrl: AppString.photoUrl,
+                profileUrl: AppModel.user.avatarUrl,
                 context: context,
-                displayName: AppString.displayName,
+                displayName: AppModel.user.displayName,
                 premission: AppString.roles == "${TypeStatus.ADMIN}"
                     ? "Admin"
                     : "Super Admin",
@@ -283,6 +282,7 @@ class _HomePageState extends State<HomePage> {
                           context: context,
                           profileUrl: AppList.userList[index].avatarUrl,
                           username: AppList.userList[index].displayName,
+                          coverUrl: AppList.userList[index].coverUrl,
                         );
                       },
                       child: ListUserItem(

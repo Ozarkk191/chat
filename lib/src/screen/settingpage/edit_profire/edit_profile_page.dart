@@ -1,6 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/button/gradient_button.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
+import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
+import 'package:chat/src/screen/settingpage/edit_profire/edit_page.dart';
 import 'package:flutter/material.dart';
 
 class EditProfilPage extends StatefulWidget {
@@ -14,11 +18,17 @@ class _EditProfilPageState extends State<EditProfilPage> {
     return Scaffold(
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
-        title: Text('Setting'),
+        title: Text('ข้อมูลส่วนตัว'),
         backgroundColor: Color(0xff242424),
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context);
+            if (AppString.roles == "${TypeStatus.USER}") {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => UserNavBottom()));
+            } else {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => TestNav()));
+            }
           },
           child: Icon(Icons.arrow_back_ios),
         ),
@@ -50,7 +60,12 @@ class _EditProfilPageState extends State<EditProfilPage> {
                   context: context, title: 'E-mail', data: AppString.email),
               // buildItemProfile(context: context, title: 'รหัสผ่าน', data: '>'),
               SizedBox(height: 50),
-              GradientButton(title: 'Submit', callBack: () {}),
+              GradientButton(
+                  title: 'แก้ไขข้อมูลส่วนตัว',
+                  callBack: () {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => EditPage()));
+                  }),
             ],
           ),
         ),
@@ -170,50 +185,50 @@ class _EditProfilPageState extends State<EditProfilPage> {
                             const Icon(Icons.error),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 30,
-                        width: 100,
-                        color: Colors.black.withOpacity(0.7),
-                        child: Center(
-                          child: Text(
-                            'Edit image',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
+                    // Align(
+                    //   alignment: Alignment.bottomCenter,
+                    //   child: Container(
+                    //     height: 30,
+                    //     width: 100,
+                    //     color: Colors.black.withOpacity(0.7),
+                    //     child: Center(
+                    //       child: Text(
+                    //         'Edit image',
+                    //         style: TextStyle(
+                    //           color: Colors.white,
+                    //           fontSize: 10,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // )
                   ],
                 ),
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Container(
-                  child: Text(
-                    'Edit image',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  child: Image.asset('assets/images/ic_edit.png'),
-                ),
-              ],
-            ),
-          )
+          // Align(
+          //   alignment: Alignment.bottomRight,
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.end,
+          //     children: <Widget>[
+          //       Container(
+          //         child: Text(
+          //           'Edit image',
+          //           style: TextStyle(
+          //             color: Colors.white,
+          //             fontSize: 10,
+          //           ),
+          //         ),
+          //       ),
+          //       Container(
+          //         width: 40,
+          //         height: 40,
+          //         child: Image.asset('assets/images/ic_edit.png'),
+          //       ),
+          //     ],
+          //   ),
+          // )
         ],
       ),
     );

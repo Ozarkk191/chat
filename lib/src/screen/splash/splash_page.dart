@@ -71,7 +71,9 @@ class _SplashPageState extends State<SplashPage> {
         AppString.gender = userModel.gender;
         AppString.photoUrl = userModel.avatarUrl;
         AppString.coverUrl = userModel.coverUrl;
+        AppString.coverUrl = DateTime.now().millisecondsSinceEpoch.toString();
         userModel.isActive = true;
+        userModel.lastTimeUpdate = AppString.coverUrl;
         _databaseReference
             .collection('Users')
             .document(user.uid)

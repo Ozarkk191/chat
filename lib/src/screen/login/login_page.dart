@@ -89,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     // AuthService().signOut();
+    AppModel.user = null;
     _messaging.getToken().then((token) {
       AppString.notiToken = token;
     });
@@ -161,25 +162,38 @@ class _LoginPageState extends State<LoginPage> {
             });
     var member = _memberList.where((element) => element == user.uid);
     if (member.length != 0) {
-      _databaseReference
+      await _databaseReference
           .collection('Users')
           .document(user.uid)
           .get()
           .then((value) {
-        var userModel = UserModel.fromJson(value.data);
-        AppString.displayName = userModel.displayName;
-        AppString.firstname = userModel.firstName;
-        AppString.lastname = userModel.lastName;
-        AppString.birthDate = userModel.birthDate;
-        AppString.email = userModel.email;
-        AppString.notiToken = userModel.notiToken;
-        AppString.phoneNumber = userModel.phoneNumber;
-        AppString.roles = userModel.roles;
-        AppString.photoUrl = userModel.avatarUrl;
-        AppString.dateTime = userModel.updatedAt;
-        AppString.isActive = userModel.isActive;
-        AppString.gender = userModel.gender;
-        AppString.gender = userModel.coverUrl;
+        // var userModel = UserModel.fromJson(value.data);
+        AppModel.user = UserModel.fromJson(value.data);
+        AppString.displayName = AppModel.user.displayName;
+        AppString.firstname = AppModel.user.firstName;
+        AppString.lastname = AppModel.user.lastName;
+        AppString.birthDate = AppModel.user.birthDate;
+        AppString.email = AppModel.user.email;
+        // AppString.notiToken = userModel.notiToken;
+        AppString.phoneNumber = AppModel.user.phoneNumber;
+        AppString.roles = AppModel.user.roles;
+        AppString.photoUrl = AppModel.user.avatarUrl;
+        AppString.dateTime = AppModel.user.updatedAt;
+        // AppString.isActive = userModel.isActive;
+        AppString.gender = AppModel.user.gender;
+        AppString.coverUrl = AppModel.user.coverUrl;
+
+        AppModel.user.lastTimeUpdate =
+            DateTime.now().millisecondsSinceEpoch.toString();
+        _databaseReference
+            .collection('Users')
+            .document(AppModel.user.uid)
+            .updateData({
+          "lastTimeUpdate": DateTime.now().millisecondsSinceEpoch.toString(),
+          "notiToken": AppString.notiToken,
+          "isActive": true
+        });
+
         if (AppString.roles == '${TypeStatus.USER}') {
           Navigator.of(context).pushReplacementNamed('/navuserhome');
         } else {

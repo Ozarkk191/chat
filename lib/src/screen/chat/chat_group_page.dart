@@ -22,9 +22,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   final picker = ImagePicker();
 
   final ChatUser user = ChatUser(
-    name: AppString.firstname,
-    uid: AppString.uid,
-    avatar: AppString.photoUrl,
+    name: AppModel.user.firstName,
+    uid: AppModel.user.uid,
+    avatar: AppModel.user.avatarUrl,
   );
 
   List<ChatMessage> messages = List<ChatMessage>();

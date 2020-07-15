@@ -1,6 +1,8 @@
+import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/helpers/user_dialog_helper.dart';
 import 'package:chat/services/authservice.dart';
 import 'package:chat/src/base_compoments/text/two_text_and_line.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'account_page/setting_account_page.dart';
 import 'chat_page/setting_chat_page.dart';
@@ -57,8 +59,7 @@ class SettingPage extends StatelessWidget {
               title: 'ออกจากระบบ',
               data: ">",
               onTap: () {
-                AuthService().signOut();
-                Navigator.of(context).pushReplacementNamed('/login');
+                _login(context);
               }),
           TwoTextAndLine(
               context: context,
@@ -69,5 +70,16 @@ class SettingPage extends StatelessWidget {
         ],
       )),
     );
+  }
+
+  void _login(BuildContext context) async {
+    Firestore _databaseReference = Firestore.instance;
+    await _databaseReference
+        .collection('Users')
+        .document(AppModel.user.uid)
+        .updateData({"isActive": false}).then((_) {
+      AuthService().signOut();
+      Navigator.of(context).pushReplacementNamed('/login');
+    });
   }
 }

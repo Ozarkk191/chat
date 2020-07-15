@@ -7,6 +7,7 @@ class UserDialogHelper {
     BuildContext context,
     String profileUrl,
     String username,
+    String coverUrl,
   }) =>
       showDialog(
         context: context,
@@ -17,8 +18,7 @@ class UserDialogHelper {
           pathIcon2: 'assets/images/ic_trash.png',
           callbackItem1: () {},
           callbackItem2: () {},
-          coverUrl:
-              'https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130',
+          coverUrl: coverUrl,
           profileUrl: profileUrl,
           username: username,
         ),

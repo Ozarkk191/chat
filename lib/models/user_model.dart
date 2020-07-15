@@ -17,6 +17,7 @@ class UserModel {
   List<dynamic> groupKey;
   String uid;
   String coverUrl;
+  String lastTimeUpdate;
 
   UserModel({
     @required this.firstName,
@@ -35,6 +36,7 @@ class UserModel {
     @required this.groupKey,
     @required this.coverUrl,
     @required this.uid,
+    @required this.lastTimeUpdate,
   });
 
   UserModel.fromJson(Map<String, dynamic> json)
@@ -53,6 +55,7 @@ class UserModel {
         avatarUrl = json['avatarUrl'],
         groupKey = json['groupKey'],
         coverUrl = json['coverUrl'],
+        lastTimeUpdate = json['lastTimeUpdate'],
         uid = json['uid'];
 
   toJson() {
@@ -72,6 +75,7 @@ class UserModel {
       "avatarUrl": avatarUrl,
       "groupKey": groupKey,
       "coverUrl": coverUrl,
+      "lastTimeUpdate": lastTimeUpdate,
       "uid": uid,
     };
   }
