@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -109,8 +107,8 @@ class _HomePageState extends State<HomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
-        if (allUser.roles == "${TypeStatus.USER}") {
-          if (allUser.displayName != AppModel.user.displayName) {
+        if (allUser.displayName != AppModel.user.displayName) {
+          if (allUser.roles == "${TypeStatus.USER}") {
             AppList.userList.add(allUser);
             AppList.uidList.add(value.documentID);
           }

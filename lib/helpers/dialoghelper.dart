@@ -23,7 +23,7 @@ class DialogHelper {
           coverUrl: coverUrl,
           profileUrl: profileUrl,
           username: username,
-          status: 'เข้าใช้งานเมื่อ 3 นาทีที่แล้ว',
+          status: '',
         ),
       );
 }

@@ -3,7 +3,7 @@ import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
-import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
+import 'package:chat/src/screen/group/create_group/create_group_page.dart';
 import 'package:flutter/material.dart';
 
 class GroupPage extends StatelessWidget {
@@ -87,7 +87,7 @@ class GroupPage extends StatelessWidget {
       // Navigator.push(
       //     context, MaterialPageRoute(builder: (context) => CreateGroup()));
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
+          context, MaterialPageRoute(builder: (context) => CreateGroup()));
     }
   }
 }

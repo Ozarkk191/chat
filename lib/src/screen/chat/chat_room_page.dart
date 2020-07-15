@@ -4,9 +4,6 @@ import 'dart:io';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
-import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
-import 'package:chat/src/screen/invite/invite_page.dart';
-import 'package:chat/src/screen/member/all_member_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -99,24 +96,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return Scaffold(
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
-        actions: <Widget>[
-          PopupMenuButton<String>(
-              color: Color(0xff202020),
-              onSelected: (value) {
-                _selecteMenu(value, context);
-              },
-              itemBuilder: (BuildContext context) {
-                return MenuSettings.menuList.map((String menu) {
-                  return PopupMenuItem<String>(
-                    value: menu,
-                    child: Text(
-                      menu,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList();
-              }),
-        ],
+        // actions: <Widget>[
+        //   PopupMenuButton<String>(
+        //       color: Color(0xff202020),
+        //       onSelected: (value) {
+        //         _selecteMenu(value, context);
+        //       },
+        //       itemBuilder: (BuildContext context) {
+        //         return MenuSettings.menuList.map((String menu) {
+        //           return PopupMenuItem<String>(
+        //             value: menu,
+        //             child: Text(
+        //               menu,
+        //               style: TextStyle(color: Colors.white),
+        //             ),
+        //           );
+        //         }).toList();
+        //       }),
+        // ],
         backgroundColor: Color(0xff202020),
         title: AppString.roles == "${TypeStatus.USER}"
             ? Text(userModel != null ? 'แอดมิน ${userModel.firstName}' : "")
@@ -268,15 +265,15 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 }
 
-void _selecteMenu(String menu, BuildContext context) {
-  if (menu == MenuSettings.invite) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => InvitePage()));
-  } else if (menu == MenuSettings.member) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AllMemberPage()));
-  } else if (menu == MenuSettings.settingGroup) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
-  }
-}
+// void _selecteMenu(String menu, BuildContext context) {
+//   if (menu == MenuSettings.invite) {
+//     Navigator.push(
+//         context, MaterialPageRoute(builder: (context) => InvitePage()));
+//   } else if (menu == MenuSettings.member) {
+//     Navigator.push(
+//         context, MaterialPageRoute(builder: (context) => AllMemberPage()));
+//   } else if (menu == MenuSettings.settingGroup) {
+//     Navigator.push(
+//         context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
+//   }
+// }

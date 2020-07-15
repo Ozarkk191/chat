@@ -33,10 +33,20 @@ class _ListAdminItemState extends State<ListAdminItem> {
       if (min == "0") {
         _lastTime = "ไม่กี่วินาทีที่แล้ว";
       } else {
-        _lastTime = "$min นาทีที่แล้ว";
+        if (min.substring(0, 1) == "0") {
+          min = min.replaceAll("0", "");
+          _lastTime = "$min นาทีที่แล้ว";
+        } else {
+          _lastTime = "$min นาทีที่แล้ว";
+        }
       }
     } else {
-      _lastTime = "$hour ชั่วโมงที่แล้ว";
+      if (hour.substring(0, 1) == "0") {
+        hour = hour.replaceAll("0", "");
+        _lastTime = "$hour ชั่วโมงที่แล้ว";
+      } else {
+        _lastTime = "$hour ชั่วโมงที่แล้ว";
+      }
     }
   }
 
