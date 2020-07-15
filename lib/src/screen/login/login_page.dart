@@ -189,7 +189,7 @@ class _LoginPageState extends State<LoginPage> {
             .collection('Users')
             .document(AppModel.user.uid)
             .updateData({
-          "lastTimeUpdate": DateTime.now().millisecondsSinceEpoch.toString(),
+          "lastTimeUpdate": DateTime.now().toString(),
           "notiToken": AppString.notiToken,
           "isActive": true
         });

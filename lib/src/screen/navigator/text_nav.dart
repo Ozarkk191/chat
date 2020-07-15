@@ -45,6 +45,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         AppModel.user.isActive = false;
+        AppModel.user.lastTimeUpdate = DateTime.now().toString();
         updateIsActive();
         break;
       case AppLifecycleState.resumed:

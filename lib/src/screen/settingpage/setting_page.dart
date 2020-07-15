@@ -77,7 +77,10 @@ class SettingPage extends StatelessWidget {
     await _databaseReference
         .collection('Users')
         .document(AppModel.user.uid)
-        .updateData({"isActive": false}).then((_) {
+        .updateData({
+      "isActive": false,
+      "lastTimeUpdate": DateTime.now().toString()
+    }).then((_) {
       AuthService().signOut();
       Navigator.of(context).pushReplacementNamed('/login');
     });

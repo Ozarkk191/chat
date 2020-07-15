@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -64,6 +66,10 @@ class _HomePageState extends State<HomePage> {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.roles != "${TypeStatus.USER}") {
           if (allUser.displayName != AppModel.user.displayName) {
+            var oldTime = DateTime.parse(allUser.lastTimeUpdate);
+            var time = DateTime.now().difference(oldTime);
+            var strSpit = time.toString().split(".");
+            allUser.lastTimeUpdate = strSpit[0];
             AppList.adminList.add(allUser);
             AppList.adminUidList.add(value.documentID);
           }
@@ -183,6 +189,7 @@ class _HomePageState extends State<HomePage> {
                         adminName: AppList.adminList[index].displayName,
                         callback: () {},
                         status: AppList.adminList[index].isActive,
+                        lastTime: AppList.adminList[index].lastTimeUpdate,
                       ),
                     );
                   },
