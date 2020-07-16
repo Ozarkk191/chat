@@ -55,6 +55,7 @@ class GroupPage extends StatelessWidget {
                     return InkWell(
                       onTap: () {
                         AppString.uidRoomChat = AppList.groupKey[index];
+                        AppModel.group = AppList.groupList[index];
                         AppString.nameGroup =
                             AppList.groupList[index].nameGroup;
                         Navigator.push(

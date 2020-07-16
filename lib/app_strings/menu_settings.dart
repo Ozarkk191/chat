@@ -42,6 +42,7 @@ class AppString {
 
 class AppModel {
   static UserModel user;
+  static GroupModel group;
 }
 
 class AppList {

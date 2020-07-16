@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
+import 'package:chat/models/group_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
@@ -20,6 +22,8 @@ class ChatGroupPage extends StatefulWidget {
 class _ChatGroupPageState extends State<ChatGroupPage> {
   final GlobalKey<DashChatState> _chatViewKey = GlobalKey<DashChatState>();
   final picker = ImagePicker();
+  Firestore _databaseReference = Firestore.instance;
+  List<UserModel> _memberList = List<UserModel>();
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -32,9 +36,39 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
 
   var i = 0;
 
+  void _getMemberUID() async {
+    await _databaseReference
+        .collection('Rooms')
+        .document('chats')
+        .collection('Group')
+        .document(AppString.uidRoomChat)
+        .get()
+        .then((value) {
+      var member = GroupModel.fromJson(value.data);
+      _getMember(member.memberUIDList);
+    });
+  }
+
+  void _getMember(List<dynamic> list) {
+    if (list.length != 0) {
+      for (int i = 0; i < list.length; i++) {
+        _databaseReference
+            .collection('Users')
+            .document(list[i].toString())
+            .get()
+            .then((value) {
+          var member = UserModel.fromJson(value.data);
+          _memberList.add(member);
+          setState(() {});
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _getMemberUID();
   }
 
   void systemMessage() {
@@ -97,7 +131,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text(AppString.nameGroup),
+        title: Text(AppModel.group.nameGroup),
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -154,35 +188,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                   border: Border.all(width: 0.0),
                   color: Colors.white,
                 ),
-                // onQuickReply: (Reply reply) {
-                //   setState(() {
-                //     messages.add(ChatMessage(
-                //         text: reply.value,
-                //         createdAt: DateTime.now(),
-                //         user: user));
-
-                //     messages = [...messages];
-                //   });
-
-                //   Timer(Duration(milliseconds: 0), () {
-                //     _chatViewKey.currentState.scrollController
-                //       ..animateTo(
-                //         _chatViewKey.currentState.scrollController.position
-                //             .maxScrollExtent,
-                //         curve: Curves.easeOut,
-                //         duration: const Duration(milliseconds: 0),
-                //       );
-
-                //     if (i == 0) {
-                //       systemMessage();
-                //       Timer(Duration(milliseconds: 0), () {
-                //         systemMessage();
-                //       });
-                //     } else {
-                //       systemMessage();
-                //     }
-                //   });
-                // },
                 onLoadEarlier: () {
                   print("laoding...");
                 },
@@ -245,17 +250,29 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
           }),
     );
   }
-}
 
-void _selecteMenu(String menu, BuildContext context) {
-  if (menu == MenuSettings.invite) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => InvitePage()));
-  } else if (menu == MenuSettings.member) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AllMemberPage()));
-  } else if (menu == MenuSettings.settingGroup) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
+  void _selecteMenu(String menu, BuildContext context) {
+    if (menu == MenuSettings.invite) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => InvitePage()));
+    } else if (menu == MenuSettings.member) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AllMemberPage(
+            memberList: _memberList,
+          ),
+        ),
+      );
+    } else if (menu == MenuSettings.settingGroup) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SettingGroupPage(
+            memberList: _memberList,
+          ),
+        ),
+      );
+    }
   }
 }
