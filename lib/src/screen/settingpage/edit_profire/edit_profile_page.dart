@@ -39,25 +39,25 @@ class _EditProfilPageState extends State<EditProfilPage> {
             children: <Widget>[
               buildProfile(
                 context: context,
-                coverUrl: AppString.coverUrl,
-                profileUrl: AppString.photoUrl,
+                coverUrl: AppModel.user.coverUrl,
+                profileUrl: AppModel.user.avatarUrl,
               ),
               buildItemProfile(
                   context: context,
                   title: 'ชื่อผู้ใช้',
-                  data: AppString.displayName),
+                  data: AppModel.user.displayName),
               buildItemProfile(
-                  context: context, title: 'เพศ', data: AppString.gender),
+                  context: context, title: 'เพศ', data: AppModel.user.gender),
               buildItemProfile(
                   context: context,
                   title: 'วันเกิด',
-                  data: AppString.birthDate),
+                  data: AppModel.user.birthDate),
               buildItemProfile(
                   context: context,
                   title: 'เบอร์โทรศัพท์',
-                  data: AppString.phoneNumber),
+                  data: AppModel.user.phoneNumber),
               buildItemProfile(
-                  context: context, title: 'E-mail', data: AppString.email),
+                  context: context, title: 'E-mail', data: AppModel.user.email),
               // buildItemProfile(context: context, title: 'รหัสผ่าน', data: '>'),
               SizedBox(height: 50),
               GradientButton(

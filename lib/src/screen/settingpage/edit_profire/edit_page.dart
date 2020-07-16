@@ -1,8 +1,17 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/src/base_compoments/button/gradient_button.dart';
+import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class EditPage extends StatefulWidget {
   @override
@@ -10,88 +19,257 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  TextEditingController _firstName = new TextEditingController();
+  TextEditingController _lastName = new TextEditingController();
+  TextEditingController _birthday = new TextEditingController();
+  bool _male = false;
+  bool _female = false;
+  bool _other = false;
+  bool _loading = false;
+  String _gender = "";
+  File _avatar, _cover;
+  final picker = ImagePicker();
+  final pickerAvatar = ImagePicker();
+
+  Future getImageAvatar() async {
+    final pickedFile1 =
+        await pickerAvatar.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile1 != null) {
+        _avatar = File(pickedFile1.path);
+        log(_avatar.toString());
+      }
+    });
+  }
+
+  Future getImageCover() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _cover = File(pickedFile.path);
+        log(_cover.toString());
+      }
+    });
+  }
+
+  bool _check() {
+    if (_firstName.text == "" || _lastName.text == "") {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  void _updateProfile() async {
+    setState(() {
+      _loading = true;
+    });
+    final _databaseReference = Firestore.instance;
+    if (_avatar != null) {
+      var now = DateTime.now().millisecondsSinceEpoch.toString();
+      final StorageReference storageRef =
+          FirebaseStorage.instance.ref().child(now);
+      StorageUploadTask uploadTask = storageRef.putFile(
+        File(_avatar.path),
+        StorageMetadata(
+          contentType: 'image/jpg',
+        ),
+      );
+      StorageTaskSnapshot download = await uploadTask.onComplete;
+
+      AppModel.user.avatarUrl = await download.ref.getDownloadURL();
+    }
+    if (_cover != null) {
+      var now = DateTime.now().millisecondsSinceEpoch.toString();
+      final StorageReference storageRef =
+          FirebaseStorage.instance.ref().child(now);
+      StorageUploadTask uploadTask = storageRef.putFile(
+        File(_cover.path),
+        StorageMetadata(
+          contentType: 'image/jpg',
+        ),
+      );
+      StorageTaskSnapshot download = await uploadTask.onComplete;
+      AppModel.user.coverUrl = await download.ref.getDownloadURL();
+    }
+
+    _databaseReference
+        .collection('Users')
+        .document(AppModel.user.uid)
+        .updateData({
+      "firstName": _firstName.text,
+      "lastName": _lastName.text,
+      "gender": _gender,
+      "birthDate": _birthday.text,
+      "displayName": "${_firstName.text} ${_lastName.text}",
+      "avatarUrl": AppModel.user.avatarUrl,
+      "coverUrl": AppModel.user.coverUrl
+    }).then((_) {
+      AppModel.user.firstName = _firstName.text;
+      AppModel.user.lastName = _lastName.text;
+      AppModel.user.displayName = "${_firstName.text} ${_lastName.text}";
+      AppModel.user.birthDate = _birthday.text;
+      AppModel.user.gender = _gender;
+      setState(() {
+        _loading = false;
+      });
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => EditProfilPage()));
+    });
+  }
+
+  @override
+  void initState() {
+    _firstName.text = AppModel.user.firstName;
+    _lastName.text = AppModel.user.lastName;
+    _birthday.text = AppModel.user.birthDate;
+    if (AppModel.user.gender == "ไม่ระบุ") {
+      _other = true;
+      _gender = "ไม่ระบุ";
+    } else if (AppModel.user.gender == "ชาย") {
+      _male = true;
+      _gender = "ชาย";
+    } else if (AppModel.user.gender == "หญิง") {
+      _female = true;
+      _gender = "หญิง";
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _firstName.dispose();
+    _lastName.dispose();
+    _birthday.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xff292929),
-      appBar: AppBar(
-        title: Text('แก้ไขข้อมูลส่วนตัว'),
-        backgroundColor: Color(0xff242424),
-        leading: InkWell(
-          onTap: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => EditProfilPage()));
-          },
-          child: Icon(Icons.arrow_back_ios),
+    return LoadingOverlay(
+      isLoading: _loading,
+      child: Scaffold(
+        backgroundColor: Color(0xff292929),
+        appBar: AppBar(
+          title: Text('แก้ไขข้อมูลส่วนตัว'),
+          backgroundColor: Color(0xff242424),
+          leading: InkWell(
+            onTap: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => EditProfilPage()));
+            },
+            child: Icon(Icons.arrow_back_ios),
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              buildProfile(
-                context: context,
-                coverUrl: AppString.coverUrl,
-                profileUrl: AppString.photoUrl,
-              ),
-              buildItemProfile(
+        body: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                buildProfile(
                   context: context,
-                  title: 'ชื่อผู้ใช้',
-                  data: AppString.displayName),
-              buildItemProfile(
-                  context: context, title: 'เพศ', data: AppString.gender),
-              buildItemProfile(
-                  context: context,
-                  title: 'วันเกิด',
-                  data: AppString.birthDate),
-              buildItemProfile(
-                  context: context,
-                  title: 'เบอร์โทรศัพท์',
-                  data: AppString.phoneNumber),
-              buildItemProfile(
-                  context: context, title: 'E-mail', data: AppString.email),
-              // buildItemProfile(context: context, title: 'รหัสผ่าน', data: '>'),
-              SizedBox(height: 50),
-              GradientButton(title: 'บันทึก', callBack: () {}),
-            ],
+                  coverUrl: AppModel.user.coverUrl,
+                  profileUrl: AppModel.user.avatarUrl,
+                ),
+                SizedBox(height: 20),
+                BigRoundTextField(controller: _firstName),
+                SizedBox(height: 10),
+                BigRoundTextField(controller: _lastName),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _genderCheckBox(
+                      gender: _male,
+                      onChanged: (val) {
+                        setState(() {
+                          _male = val;
+                          if (_male) {
+                            _gender = "ชาย";
+                            _female = false;
+                            _other = false;
+                          }
+                        });
+                      },
+                      title: "ชาย",
+                    ),
+                    _genderCheckBox(
+                      gender: _female,
+                      onChanged: (val) {
+                        setState(() {
+                          _female = val;
+                          if (_female) {
+                            _gender = "หญิง";
+                            _male = false;
+                            _other = false;
+                          }
+                        });
+                      },
+                      title: "หญิง",
+                    ),
+                    _genderCheckBox(
+                      gender: _other,
+                      onChanged: (val) {
+                        setState(() {
+                          _other = val;
+                          if (_other) {
+                            _gender = "ไม่ระบุ";
+                            _male = false;
+                            _female = false;
+                          }
+                        });
+                      },
+                      title: "ไม่ระบุ",
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () {
+                    DatePicker.showDatePicker(context, showTitleActions: true,
+                        onConfirm: (date) {
+                      var dateList = date.toString().split(" ");
+                      _birthday.text = dateList[0];
+                    }, currentTime: DateTime.now(), locale: LocaleType.th);
+                  },
+                  child: BigRoundTextField(
+                    controller: _birthday,
+                    enabled: false,
+                  ),
+                ),
+                SizedBox(height: 50),
+                GradientButton(
+                  title: 'บันทึก',
+                  callBack: !_check()
+                      ? null
+                      : () {
+                          _updateProfile();
+                        },
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Container buildItemProfile({
-    BuildContext context,
+  Container _genderCheckBox({
+    bool gender,
+    Function onChanged,
     String title,
-    String data,
   }) {
     return Container(
-      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: Column(
+      height: 50,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          SizedBox(
-            height: 20,
+          Checkbox(
+            activeColor: Colors.cyan,
+            checkColor: Colors.black,
+            value: gender,
+            onChanged: onChanged,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                '$title',
-                style: TextStyle(color: Colors.grey),
-              ),
-              Text(
-                '$data',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 1,
-            color: Colors.grey,
+          Text(
+            title,
+            style: TextStyle(color: Colors.white),
           ),
         ],
       ),
@@ -112,19 +290,20 @@ class _EditPageState extends State<EditPage> {
           Container(
             width: MediaQuery.of(context).size.width,
             height: 200,
-            child: CachedNetworkImage(
-              imageUrl: coverUrl,
-              imageBuilder: (context, imageProvider) => Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imageProvider,
+            child: _cover == null
+                ? CachedNetworkImage(
+                    imageUrl: coverUrl,
+                    fit: BoxFit.cover,
+                    width: 200,
+                    height: 200,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                  )
+                : Image.file(
+                    _cover,
                     fit: BoxFit.cover,
                   ),
-                ),
-              ),
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -139,83 +318,91 @@ class _EditPageState extends State<EditPage> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: 100,
-              height: 100,
-              child: Card(
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(100),
-                  ),
-                ),
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      width: 100,
-                      height: 100,
-                      child: CachedNetworkImage(
-                        imageUrl: profileUrl,
-                        imageBuilder: (context, imageProvider) => Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        placeholder: (context, url) =>
-                            CircularProgressIndicator(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
+          InkWell(
+            onTap: () {
+              getImageCover();
+            },
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      'Edit image',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 30,
-                        width: 100,
-                        color: Colors.black.withOpacity(0.7),
-                        child: Center(
-                          child: Text(
-                            'Edit image',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    child: Image.asset('assets/images/ic_edit.png'),
+                  ),
+                ],
               ),
             ),
           ),
           Align(
-            alignment: Alignment.bottomRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Container(
-                  child: Text(
-                    'Edit image',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
+            alignment: Alignment.center,
+            child: InkWell(
+              onTap: () {
+                getImageAvatar();
+              },
+              child: Container(
+                width: 100,
+                height: 100,
+                child: Card(
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(100),
                     ),
                   ),
+                  child: Stack(
+                    children: <Widget>[
+                      _avatar == null
+                          ? CachedNetworkImage(
+                              imageUrl: profileUrl,
+                              fit: BoxFit.cover,
+                              width: 100,
+                              height: 100,
+                              placeholder: (context, url) =>
+                                  CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            )
+                          : Image.file(
+                              _avatar,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 30,
+                          width: 100,
+                          color: Colors.black.withOpacity(0.7),
+                          child: Center(
+                            child: Text(
+                              'Edit image',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  child: Image.asset('assets/images/ic_edit.png'),
-                ),
-              ],
+              ),
             ),
-          )
+          ),
         ],
       ),
     );

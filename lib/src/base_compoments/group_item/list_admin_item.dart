@@ -30,22 +30,22 @@ class _ListAdminItemState extends State<ListAdminItem> {
     var min = text[1];
 
     if (hour == "0") {
-      if (min == "0") {
+      if (min == "00") {
         _lastTime = "ไม่กี่วินาทีที่แล้ว";
       } else {
         if (min.substring(0, 1) == "0") {
           min = min.replaceAll("0", "");
-          _lastTime = "$min นาทีที่แล้ว";
+          _lastTime = " $min นาทีที่แล้ว";
         } else {
-          _lastTime = "$min นาทีที่แล้ว";
+          _lastTime = " $min นาทีที่แล้ว";
         }
       }
     } else {
       if (hour.substring(0, 1) == "0") {
         hour = hour.replaceAll("0", "");
-        _lastTime = "$hour ชั่วโมงที่แล้ว";
+        _lastTime = " $hour ชั่วโมงที่แล้ว";
       } else {
-        _lastTime = "$hour ชั่วโมงที่แล้ว";
+        _lastTime = " $hour ชั่วโมงที่แล้ว";
       }
     }
   }
@@ -84,7 +84,7 @@ class _ListAdminItemState extends State<ListAdminItem> {
                       width: 5,
                     ),
                     Text(
-                      widget.status ? 'online' : 'ใช้งานล่าสุดเมื่อ $_lastTime',
+                      widget.status ? 'online' : 'ใช้งานล่าสุดเมื่อ$_lastTime',
                       style: TextStyle(color: Colors.grey, fontSize: 8),
                     ),
                   ],
