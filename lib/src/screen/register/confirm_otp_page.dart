@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/request_body_parameters.dart';
@@ -51,9 +52,11 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
     final _databaseReference = Firestore.instance;
     _databaseReference
         .collection("Users")
-        .document(AppString.uid)
-        .setData(user.toJson());
-    Navigator.of(context).pushReplacementNamed('/navuserhome');
+        .document(AppModel.user.uid)
+        .setData(user.toJson())
+        .then((_) {
+      Navigator.of(context).pushReplacementNamed('/navuserhome');
+    });
   }
 
   bool _checkOTP() {
@@ -93,6 +96,7 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
   void initState() {
     startTimer();
     otpBackEnd = widget.otp;
+    log("${widget.user.displayName}");
     super.initState();
   }
 

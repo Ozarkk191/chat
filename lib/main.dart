@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/validate_bloc/validate_bloc.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
+        statusBarColor: Color(0xf202020),
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: Colors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
@@ -41,7 +42,6 @@ class MyApp extends StatelessWidget {
           '/splash': (context) => SplashPage(),
           '/login': (context) => LoginPage(),
           '/register': (context) => RegisterPage(),
-          // '/otp': (context) => OTPRequest(),
           '/home': (context) => HomePage(),
           '/editprofile': (context) => EditProfilPage(),
           '/navhome': (context) => TestNav(),
@@ -51,6 +51,8 @@ class MyApp extends StatelessWidget {
         },
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          accentColor: Colors.green,
+          // brightness: Brightness.dark,
           canvasColor: Colors.transparent,
         ),
       ),

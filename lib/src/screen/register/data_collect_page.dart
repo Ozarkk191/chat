@@ -254,27 +254,27 @@ class _DataCollectPageState extends State<DataCollectPage> {
         _loading = true;
       });
       final _databaseReference = Firestore.instance;
-      AppString.phoneNumber = _phone.text;
+      AppModel.user.phoneNumber = _phone.text;
       List<String> _phoneList = List<String>();
       List<String> _group = [];
       UserModel data = UserModel(
-        firstName: AppString.firstname,
-        lastName: AppString.lastname,
-        notiToken: AppString.notiToken,
+        firstName: AppModel.user.firstName,
+        lastName: AppModel.user.lastName,
+        notiToken: AppModel.user.notiToken,
         phoneNumber: _phone.text,
-        email: AppString.email,
-        displayName: AppString.displayName,
+        email: AppModel.user.email,
+        displayName: AppModel.user.displayName,
         gender: "ไม่ระบุ",
         birthDate: "ไม่ระบุ",
         isActive: true,
         roles: TypeStatus.USER.toString(),
-        createdAt: AppString.dateTime,
-        updatedAt: AppString.dateTime,
-        avatarUrl: AppString.photoUrl,
+        createdAt: AppModel.user.createdAt,
+        updatedAt: AppModel.user.updatedAt,
+        avatarUrl: AppModel.user.avatarUrl,
         groupKey: _group,
         coverUrl:
             "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130",
-        uid: AppString.uid,
+        uid: AppModel.user.uid,
         lastTimeUpdate: DateTime.now().millisecondsSinceEpoch.toString(),
       );
 

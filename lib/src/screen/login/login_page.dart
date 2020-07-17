@@ -206,21 +206,43 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _savePhoneNumber({@required FirebaseUser user}) {
+    List<dynamic> grouplist = [];
+    AppModel.user = UserModel(
+      firstName: "null",
+      lastName: "null",
+      notiToken: "null",
+      phoneNumber: "null",
+      email: "null",
+      displayName: "null",
+      gender: "null",
+      birthDate: "null",
+      isActive: true,
+      roles: "null",
+      createdAt: "null",
+      updatedAt: "null",
+      avatarUrl: "null",
+      groupKey: grouplist,
+      coverUrl: "null",
+      uid: "null",
+      lastTimeUpdate: "null",
+    );
     if (user.displayName.contains(" ")) {
       var name = user.displayName.split(" ");
-      AppString.firstname = name[0];
-      AppString.lastname = name[1];
+      AppModel.user.firstName = name[0];
+      AppModel.user.lastName = name[1];
     } else {
-      AppString.firstname = user.displayName;
-      AppString.lastname = "";
+      AppModel.user.firstName = user.displayName;
+      AppModel.user.lastName = "";
     }
-    AppString.uid = user.uid;
-    AppString.email = user.email;
-    AppString.dateTime = dateTime;
-    AppString.displayName = user.displayName;
-    AppString.phoneNumber = "null";
-    AppString.roles = TypeStatus.USER.toString();
-    AppString.photoUrl = user.photoUrl;
+    AppModel.user.uid = user.uid;
+    AppModel.user.email = user.email;
+    AppModel.user.createdAt = dateTime;
+    AppModel.user.updatedAt = dateTime;
+    AppModel.user.notiToken = AppString.notiToken;
+    AppModel.user.displayName = user.displayName;
+    AppModel.user.phoneNumber = "null";
+    AppModel.user.roles = TypeStatus.USER.toString();
+    AppModel.user.avatarUrl = user.photoUrl;
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => DataCollectPage()));
   }

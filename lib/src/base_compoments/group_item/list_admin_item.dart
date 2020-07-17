@@ -25,27 +25,41 @@ class _ListAdminItemState extends State<ListAdminItem> {
   @override
   void initState() {
     super.initState();
+
     var text = widget.lastTime.split(":");
     var hour = text[0];
     var min = text[1];
 
-    if (hour == "0") {
-      if (min == "00") {
-        _lastTime = "ไม่กี่วินาทีที่แล้ว";
-      } else {
-        if (min.substring(0, 1) == "0") {
-          min = min.replaceAll("0", "");
-          _lastTime = " $min นาทีที่แล้ว";
-        } else {
-          _lastTime = " $min นาทีที่แล้ว";
-        }
-      }
+    var day1 = int.parse(hour) / 24;
+    var day = day1.toInt();
+    var week1 = day / 7;
+    var week = week1.toInt();
+
+    if (week != 0) {
+      _lastTime = " $week สัปดาห์ที่แล้ว";
     } else {
-      if (hour.substring(0, 1) == "0") {
-        hour = hour.replaceAll("0", "");
-        _lastTime = " $hour ชั่วโมงที่แล้ว";
+      if (day != 0) {
+        _lastTime = " $day วันที่แล้ว";
       } else {
-        _lastTime = " $hour ชั่วโมงที่แล้ว";
+        if (hour == "0") {
+          if (min == "00") {
+            _lastTime = "ไม่กี่วินาทีที่แล้ว";
+          } else {
+            if (min.substring(0, 1) == "0") {
+              min = min.replaceAll("0", "");
+              _lastTime = " $min นาทีที่แล้ว";
+            } else {
+              _lastTime = " $min นาทีที่แล้ว";
+            }
+          }
+        } else {
+          if (hour.substring(0, 1) == "0") {
+            hour = hour.replaceAll("0", "");
+            _lastTime = " $hour ชั่วโมงที่แล้ว";
+          } else {
+            _lastTime = " $hour ชั่วโมงที่แล้ว";
+          }
+        }
       }
     }
   }

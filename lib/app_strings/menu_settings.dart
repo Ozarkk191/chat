@@ -8,7 +8,9 @@ class MenuSettings {
   static const String invite = 'เชิญ';
   static const String member = 'สมาชิกทั้งหมด';
   static const String settingGroup = 'ตั้งค่ากลุ่ม';
-  static const List<String> menuList = [invite, member, settingGroup];
+  static const String post = 'โพสต์ข่าว';
+  static const List<String> menuList = [invite, member];
+  static const List<String> menuList2 = [invite, member, settingGroup, post];
 
   static const String muted = 'ปิดการแจ้งเตือน';
   static const String medied = 'รูปภาพ/วีดิโอ';

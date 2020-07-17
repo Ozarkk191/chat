@@ -8,6 +8,7 @@ import 'package:chat/models/user_model.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
+import 'package:chat/src/screen/post/post_news_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -119,15 +120,25 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 _selecteMenu(value, context);
               },
               itemBuilder: (BuildContext context) {
-                return MenuSettings.menuList.map((String menu) {
-                  return PopupMenuItem<String>(
-                    value: menu,
-                    child: Text(
-                      menu,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList();
+                return AppModel.user.roles == "${TypeStatus.USER}"
+                    ? MenuSettings.menuList.map((String menu) {
+                        return PopupMenuItem<String>(
+                          value: menu,
+                          child: Text(
+                            menu,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }).toList()
+                    : MenuSettings.menuList2.map((String menu) {
+                        return PopupMenuItem<String>(
+                          value: menu,
+                          child: Text(
+                            menu,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }).toList();
               }),
         ],
         backgroundColor: Color(0xff202020),
@@ -271,6 +282,13 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
           builder: (context) => SettingGroupPage(
             memberList: _memberList,
           ),
+        ),
+      );
+    } else if (menu == MenuSettings.post) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PostNewsGroupPage(),
         ),
       );
     }

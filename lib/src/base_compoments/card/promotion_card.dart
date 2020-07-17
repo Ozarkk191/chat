@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'profile_card.dart';
 
-class PromotionCard extends StatelessWidget {
+class PromotionCard extends StatefulWidget {
   final String imageUrlGroup;
   final String imageUrlPromotion;
   final String nameGroup;
@@ -19,6 +19,54 @@ class PromotionCard extends StatelessWidget {
     @required this.description,
     @required this.callback,
   }) : super(key: key);
+
+  @override
+  _PromotionCardState createState() => _PromotionCardState();
+}
+
+class _PromotionCardState extends State<PromotionCard> {
+  String _lastTime = "";
+  @override
+  void initState() {
+    super.initState();
+
+    var text = widget.status.split(":");
+    var hour = text[0];
+    var min = text[1];
+
+    var day1 = int.parse(hour) / 24;
+    var day = day1.toInt();
+    var week1 = day / 7;
+    var week = week1.toInt();
+
+    if (week != 0) {
+      _lastTime = " $week สัปดาห์ที่แล้ว";
+    } else {
+      if (day != 0) {
+        _lastTime = " $day วันที่แล้ว";
+      } else {
+        if (hour == "0") {
+          if (min == "00") {
+            _lastTime = "ไม่กี่วินาทีที่แล้ว";
+          } else {
+            if (min.substring(0, 1) == "0") {
+              min = min.replaceAll("0", "");
+              _lastTime = " $min นาทีที่แล้ว";
+            } else {
+              _lastTime = " $min นาทีที่แล้ว";
+            }
+          }
+        } else {
+          if (hour.substring(0, 1) == "0") {
+            hour = hour.replaceAll("0", "");
+            _lastTime = " $hour ชั่วโมงที่แล้ว";
+          } else {
+            _lastTime = " $hour ชั่วโมงที่แล้ว";
+          }
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +92,7 @@ class PromotionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     ProfileCard(
-                      profileUrl: imageUrlGroup,
+                      profileUrl: widget.imageUrlGroup,
                       width: 50,
                       height: 50,
                     ),
@@ -57,11 +105,11 @@ class PromotionCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            nameGroup,
+                            widget.nameGroup,
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(
-                            status,
+                            "โพสต์เมื่อ$_lastTime",
                             style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ],
@@ -70,7 +118,7 @@ class PromotionCard extends StatelessWidget {
                     Container(
                       width: 80,
                       child: RaisedButton(
-                        onPressed: callback,
+                        onPressed: widget.callback,
                         color: Colors.black,
                         child: Row(
                           children: <Widget>[
@@ -87,7 +135,7 @@ class PromotionCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -101,19 +149,21 @@ class PromotionCard extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 10),
                 child: Text(
-                  description,
+                  widget.description,
                   style: TextStyle(fontSize: 12),
                 ),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 250,
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: Image.network(
-                  imageUrlPromotion,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              widget.imageUrlPromotion != null
+                  ? Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 250,
+                      margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      child: Image.network(
+                        widget.imageUrlPromotion,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(),
             ],
           ),
         ),

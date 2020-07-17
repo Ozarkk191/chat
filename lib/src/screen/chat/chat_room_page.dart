@@ -96,24 +96,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return Scaffold(
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
-        // actions: <Widget>[
-        //   PopupMenuButton<String>(
-        //       color: Color(0xff202020),
-        //       onSelected: (value) {
-        //         _selecteMenu(value, context);
-        //       },
-        //       itemBuilder: (BuildContext context) {
-        //         return MenuSettings.menuList.map((String menu) {
-        //           return PopupMenuItem<String>(
-        //             value: menu,
-        //             child: Text(
-        //               menu,
-        //               style: TextStyle(color: Colors.white),
-        //             ),
-        //           );
-        //         }).toList();
-        //       }),
-        // ],
         backgroundColor: Color(0xff202020),
         title: AppString.roles == "${TypeStatus.USER}"
             ? Text(userModel != null ? 'แอดมิน ${userModel.firstName}' : "")
@@ -172,35 +154,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   border: Border.all(width: 0.0),
                   color: Colors.white,
                 ),
-                // onQuickReply: (Reply reply) {
-                //   setState(() {
-                //     messages.add(ChatMessage(
-                //         text: reply.value,
-                //         createdAt: DateTime.now(),
-                //         user: user));
-
-                //     messages = [...messages];
-                //   });
-
-                //   Timer(Duration(milliseconds: 0), () {
-                //     _chatViewKey.currentState.scrollController
-                //       ..animateTo(
-                //         _chatViewKey.currentState.scrollController.position
-                //             .maxScrollExtent,
-                //         curve: Curves.easeOut,
-                //         duration: const Duration(milliseconds: 0),
-                //       );
-
-                //     if (i == 0) {
-                //       systemMessage();
-                //       Timer(Duration(milliseconds: 0), () {
-                //         systemMessage();
-                //       });
-                //     } else {
-                //       systemMessage();
-                //     }
-                //   });
-                // },
                 onLoadEarlier: () {
                   print("laoding...");
                 },
@@ -264,16 +217,3 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 }
-
-// void _selecteMenu(String menu, BuildContext context) {
-//   if (menu == MenuSettings.invite) {
-//     Navigator.push(
-//         context, MaterialPageRoute(builder: (context) => InvitePage()));
-//   } else if (menu == MenuSettings.member) {
-//     Navigator.push(
-//         context, MaterialPageRoute(builder: (context) => AllMemberPage()));
-//   } else if (menu == MenuSettings.settingGroup) {
-//     Navigator.push(
-//         context, MaterialPageRoute(builder: (context) => SettingGroupPage()));
-//   }
-// }

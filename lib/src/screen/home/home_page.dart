@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                 profileUrl: AppModel.user.avatarUrl,
                 context: context,
                 displayName: AppModel.user.displayName,
-                premission: AppString.roles == "${TypeStatus.ADMIN}"
+                premission: AppModel.user.roles == "${TypeStatus.ADMIN}"
                     ? "Admin"
                     : "Super Admin",
               ),

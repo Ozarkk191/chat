@@ -2,6 +2,7 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/models/group_model.dart';
+import 'package:chat/models/news_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/card/promotion_card.dart';
@@ -22,7 +23,8 @@ class UserHomePage extends StatefulWidget {
 class _UserHomePageState extends State<UserHomePage> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _databaseReference = Firestore.instance;
-
+  List<NewsModel> _newsList = List<NewsModel>();
+  var uid;
   user() async {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
@@ -58,10 +60,10 @@ class _UserHomePageState extends State<UserHomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.roles != "${TypeStatus.USER}") {
-          if (allUser.displayName != AppModel.user.displayName) {
-            AppList.userList.add(allUser);
-            AppList.uidList.add(value.documentID);
-          }
+          // if (allUser.displayName != AppModel.user.displayName) {
+          AppList.userList.add(allUser);
+          AppList.uidList.add(value.documentID);
+          // }
         }
       });
     });
@@ -84,6 +86,22 @@ class _UserHomePageState extends State<UserHomePage> {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
         }
+        _databaseReference
+            .collection("News")
+            .document(value.documentID)
+            .collection("NewsDate")
+            .getDocuments()
+            .then((QuerySnapshot snapshot) {
+          snapshot.documents.forEach((value) {
+            var news = NewsModel.fromJson(value.data);
+            var oldTime = DateTime.parse(news.timePost);
+            var time = DateTime.now().difference(oldTime);
+            var strSpit = time.toString().split(".");
+            news.timePost = strSpit[0];
+            _newsList.add(news);
+            setState(() {});
+          });
+        });
       });
     });
   }
@@ -131,72 +149,85 @@ class _UserHomePageState extends State<UserHomePage> {
                 context: context,
                 displayName: AppModel.user.displayName,
               ),
-              TextAndLine(
-                title: 'Group',
-              ),
+              AppList.groupList.length != 0
+                  ? TextAndLine(title: 'กลุ่ม')
+                  : Container(),
               SizedBox(
                 height: 5,
               ),
-              Container(
-                height: 160,
-                child: ListView.builder(
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          GroupDialogHelper.adminDialog(
-                            context: context,
-                            titleLeft: 'Group',
-                            titleRight: 'Delete',
-                            pathIconLeft: 'assets/images/ic_group.png',
-                            pathIconRight: 'assets/images/ic_trash.png',
-                            groupName: AppList.groupList[index].nameGroup,
-                            profileUrl: AppList.groupList[index].avatarGroup,
-                          );
-                        },
-                        child: ListGroupItem(
-                          imgCoverUrl:
-                              'https://i.pinimg.com/originals/a8/b2/6a/a8b26abdd653ad71d19ca2b63db68dae.jpg',
-                          imgGroupUrl:
-                              'https://wallpapercave.com/wp/w1fkwPh.jpg',
-                          nameGroup: 'Group name',
-                          numberUser: '9,999',
-                          status: '',
-                        ),
-                      );
-                    },
-                    itemCount: 6,
-                    scrollDirection: Axis.horizontal),
-              ),
+              AppList.groupList.length != 0
+                  ? Container(
+                      height: 160,
+                      child: ListView.builder(
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () {
+                                GroupDialogHelper.adminDialog(
+                                  context: context,
+                                  titleLeft: 'Group',
+                                  titleRight: 'Delete',
+                                  pathIconLeft: 'assets/images/ic_group.png',
+                                  pathIconRight: 'assets/images/ic_trash.png',
+                                  groupName: AppList.groupList[index].nameGroup,
+                                  profileUrl:
+                                      AppList.groupList[index].avatarGroup,
+                                  coverUrl: AppList.groupList[index].coverUrl,
+                                  member: AppList
+                                      .groupList[index].memberUIDList.length
+                                      .toString(),
+                                  statusGroup:
+                                      AppList.groupList[index].statusGroup,
+                                );
+                              },
+                              child: ListGroupItem(
+                                imgCoverUrl: AppList.groupList[index].coverUrl,
+                                imgGroupUrl:
+                                    AppList.groupList[index].avatarGroup,
+                                nameGroup: AppList.groupList[index].nameGroup,
+                                numberUser: AppList
+                                    .groupList[index].memberUIDList.length
+                                    .toString(),
+                                status: AppList.groupList[index].statusGroup,
+                              ),
+                            );
+                          },
+                          itemCount: AppList.groupList.length,
+                          scrollDirection: Axis.horizontal),
+                    )
+                  : Container(),
               SizedBox(
                 height: 5,
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 3,
-                itemBuilder: (BuildContext context, int index) {
-                  return PromotionCard(
-                    imageUrlGroup: 'https://wallpapercave.com/wp/w1fkwPh.jpg',
-                    imageUrlPromotion:
-                        'https://ichiangmaipr.com/wp-content/uploads/2018/06/653234c16ef6c02c6e4f1d82f10221f8.jpg',
-                    nameGroup: 'Group Name',
-                    status: 'Active 48 นาที ที่ผ่านมา',
-                    description:
-                        'Lorem ipsum is some dummy text generator, some dummy text generator',
-                    callback: () {
-                      GroupDialogHelper.adminDialog(
-                        context: context,
-                        titleLeft: 'Group',
-                        titleRight: 'Delete',
-                        pathIconLeft: 'assets/images/ic_group.png',
-                        pathIconRight: 'assets/images/ic_trash.png',
-                        groupName: AppList.groupList[index].nameGroup,
-                        profileUrl: AppList.groupList[index].avatarGroup,
-                      );
-                    },
-                  );
-                },
-              )
+              _newsList.length != 0
+                  ? TextAndLine(title: 'ข่าวสาร')
+                  : Container(),
+              SizedBox(
+                height: 5,
+              ),
+              _newsList.length != 0
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _newsList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return PromotionCard(
+                          imageUrlGroup: _newsList[index].imageGroup,
+                          imageUrlPromotion: _newsList[index].imageUrl,
+                          nameGroup: _newsList[index].nameGroup,
+                          status: _newsList[index].timePost,
+                          description: _newsList[index].title,
+                          callback: () {
+                            _databaseReference
+                                .collection("News")
+                                .document(_newsList[index].groupUID)
+                                .collection("Waitting")
+                                .document(AppModel.user.uid)
+                                .setData({"uid": AppModel.user.uid});
+                          },
+                        );
+                      },
+                    )
+                  : Container(),
             ],
           ),
         ),
