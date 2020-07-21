@@ -12,8 +12,10 @@ import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget {
   @override
@@ -24,6 +26,10 @@ class _UserHomePageState extends State<UserHomePage> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _databaseReference = Firestore.instance;
   List<NewsModel> _newsList = List<NewsModel>();
+  List<bool> _newsActiveList = List<bool>();
+  NewsModel news;
+  bool uidMember = false;
+
   var uid;
   user() async {
     FirebaseUser user = await _auth.currentUser();
@@ -85,7 +91,9 @@ class _UserHomePageState extends State<UserHomePage> {
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
+          _getLastText();
         }
+
         _databaseReference
             .collection("News")
             .document(value.documentID)
@@ -93,17 +101,96 @@ class _UserHomePageState extends State<UserHomePage> {
             .getDocuments()
             .then((QuerySnapshot snapshot) {
           snapshot.documents.forEach((value) {
-            var news = NewsModel.fromJson(value.data);
+            news = NewsModel.fromJson(value.data);
+            _getGroupProfile(news.groupUID);
             var oldTime = DateTime.parse(news.timePost);
             var time = DateTime.now().difference(oldTime);
             var strSpit = time.toString().split(".");
             news.timePost = strSpit[0];
+            news.isActive = uidMember;
             _newsList.add(news);
+            _newsList.sort((a, b) => a.timePost.compareTo(b.timePost));
             setState(() {});
           });
         });
       });
     });
+  }
+
+  _getGroupProfile(String key) async {
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(key)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      var uid =
+          group.memberUIDList.where((element) => element == AppString.uid);
+
+      if (uid.length != 0) {
+        uidMember = true;
+        _newsActiveList.add(uidMember);
+      } else {
+        uidMember = false;
+        _newsActiveList.add(uidMember);
+      }
+      setState(() {});
+    });
+  }
+
+  _getLastText() async {
+    String lastText = "";
+    String lastTime = "";
+    if (AppList.groupKey.length != 0) {
+      for (var i = 0; i < AppList.groupKey.length; i++) {
+        await _databaseReference
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(AppList.groupKey[i])
+            .collection("messages")
+            .getDocuments()
+            .then((QuerySnapshot snapshot) {
+          snapshot.documents.forEach((value) {
+            var message = ChatMessage.fromJson(value.data);
+            // log("1 :: ${message.text}");
+            if (message != null) {
+              if (message.text.isEmpty) {
+                if (message.user.uid == AppModel.user.uid) {
+                  lastText = "คุณได้ส่งรูปภาพ";
+                } else {
+                  lastText = "คุณได้รับรูปภาพ";
+                }
+              } else {
+                lastText = message.text;
+              }
+
+              lastTime = DateTime.fromMillisecondsSinceEpoch(
+                      message.createdAt.millisecondsSinceEpoch)
+                  .toString();
+              var str = lastTime.split(" ");
+              var str2 = str[1].split(".");
+              str = str2[0].split(":");
+              lastTime = "${str[0]}:${str[1]} น.";
+            } else {
+              lastText = "";
+              lastTime = "00:00 น.";
+            }
+          });
+        });
+        // String timeRead = _getRead(id).toString();
+        AppList.lastTextList.add(lastText);
+        AppList.lastTimeList.add(lastTime);
+      }
+    }
+  }
+
+  Future<String> _getRead(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String read = prefs.getString(key);
+    return read ?? "";
   }
 
   @override
@@ -216,6 +303,9 @@ class _UserHomePageState extends State<UserHomePage> {
                           nameGroup: _newsList[index].nameGroup,
                           status: _newsList[index].timePost,
                           description: _newsList[index].title,
+                          isActive: _newsActiveList.length != 0
+                              ? _newsActiveList[index]
+                              : false,
                           callback: () {
                             _databaseReference
                                 .collection("News")

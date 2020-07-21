@@ -43,7 +43,9 @@ class ListChatItem extends StatelessWidget {
             ),
           ),
           Container(
+            width: 70,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
                   '$time',

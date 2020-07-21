@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/user_model.dart';
@@ -17,6 +18,7 @@ class InvitePage extends StatefulWidget {
 
 class _InvitePageState extends State<InvitePage> {
   List<bool> _boolList = List<bool>();
+  List<int> _indexList = List<int>();
   List<UserModel> _addUserList = List<UserModel>();
 
   @override
@@ -25,23 +27,28 @@ class _InvitePageState extends State<InvitePage> {
     for (int i = 0; i <= AppList.userList.length; i++) {
       _boolList.add(false);
     }
-    Timer(Duration(milliseconds: 500), () {
-      if (widget.user != null) {
-        for (int i = 0; i <= widget.user.length; i++) {
-          if (widget.user[i].displayName == AppList.userList[i].displayName) {
-            _boolList[i] = true;
-            setState(() {});
-          }
-        }
+    // Timer(Duration(milliseconds: 500), () {
+    if (AppList.indexList.length != 0) {
+      for (int i = 0; i <= AppList.indexList.length; i++) {
+        // if (widget.user[i].displayName == AppList.userList[i].displayName) {
+        _boolList[AppList.indexList[i]] = true;
+        setState(() {});
+        // }
       }
-    });
+    }
+    // });
   }
 
   void _addUser() {
-    for (int i = 0; i <= AppList.userList.length; i++) {
+    AppList.indexList.clear();
+    for (int i = 0; i < _boolList.length; i++) {
+      log(_boolList[i].toString());
+      log(AppList.userList[1].displayName.toString());
       if (_boolList[i]) {
-        _addUserList.add(AppList.userList[i]);
-        _addUserList[i].uid = AppList.uidList[i];
+        UserModel data = AppList.userList[i];
+        data.uid = AppList.uidList[i];
+        AppList.indexList.add(i);
+        _addUserList.add(data);
       }
     }
     Navigator.pop(context, _addUserList);
@@ -113,7 +120,11 @@ class _InvitePageState extends State<InvitePage> {
                     value: _boolList[index],
                     onChanged: (val) {
                       setState(() {
+                        // log("$index");
                         _boolList[index] = val;
+                        // if(_boolList[index]){
+                        //     _intdexList[index] .add(index);
+                        // }
                       });
                     },
                     userName: AppList.userList[index].displayName,

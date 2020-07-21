@@ -9,6 +9,7 @@ class PromotionCard extends StatefulWidget {
   final String status;
   final String description;
   final Function callback;
+  final bool isActive;
 
   const PromotionCard({
     Key key,
@@ -18,6 +19,7 @@ class PromotionCard extends StatefulWidget {
     @required this.status,
     @required this.description,
     @required this.callback,
+    @required this.isActive,
   }) : super(key: key);
 
   @override
@@ -115,27 +117,33 @@ class _PromotionCardState extends State<PromotionCard> {
                         ],
                       ),
                     ),
-                    Container(
-                      width: 80,
-                      child: RaisedButton(
-                        onPressed: widget.callback,
-                        color: Colors.black,
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              Icons.add,
-                              size: 12,
-                              color: Colors.white,
+                    !widget.isActive
+                        ? Container(
+                            width: 80,
+                            child: RaisedButton(
+                              onPressed: widget.callback,
+                              color: Colors.black,
+                              child: Row(
+                                children: <Widget>[
+                                  !widget.isActive
+                                      ? Icon(
+                                          Icons.add,
+                                          size: 12,
+                                          color: Colors.white,
+                                        )
+                                      : Container(),
+                                  Text(
+                                    !widget.isActive
+                                        ? 'เข้ากลุ่ม'
+                                        : 'เข้าร่วมแล้ว',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 10),
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(
-                              'เข้ากลุ่ม',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 10),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
+                          )
+                        : Container()
                   ],
                 ),
               ),

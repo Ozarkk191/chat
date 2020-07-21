@@ -15,7 +15,7 @@ class ListGroupItem extends StatelessWidget {
     @required this.imgGroupUrl,
     @required this.nameGroup,
     @required this.numberUser,
-    this.status = "pubilc",
+    this.status = "public",
   }) : super(key: key);
 
   @override
@@ -82,7 +82,7 @@ class ListGroupItem extends StatelessWidget {
                             style: TextStyle(color: Colors.white, fontSize: 10),
                           ),
                         ),
-                        status == "pubilc"
+                        status == "public"
                             ? Image.asset(
                                 'assets/images/ic_globe.png',
                                 width: 20,

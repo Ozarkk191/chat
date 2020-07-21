@@ -5,15 +5,16 @@ class NewsModel {
   String groupUID;
   String imageGroup;
   String nameGroup;
+  bool isActive;
 
-  NewsModel({
-    this.title,
-    this.imageUrl,
-    this.timePost,
-    this.groupUID,
-    this.imageGroup,
-    this.nameGroup,
-  });
+  NewsModel(
+      {this.title,
+      this.imageUrl,
+      this.timePost,
+      this.groupUID,
+      this.imageGroup,
+      this.nameGroup,
+      this.isActive});
 
   NewsModel.fromJson(Map<String, dynamic> json)
       : title = json['title'],

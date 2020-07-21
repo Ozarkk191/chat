@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -10,13 +12,17 @@ import 'package:chat/src/base_compoments/group_item/list_admin_item.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
+import 'package:chat/src/base_compoments/text/text_and_line_edit.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/settingpage/add_admin_page/add_admin_page.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -91,16 +97,20 @@ class _HomePageState extends State<HomePage> {
         var uid =
             _group.memberUIDList.where((element) => element == AppString.uid);
         if (uid.length != 0) {
+          // _getLastText(value.documentID);
+
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(_group);
         }
       });
     });
+    _getLastText();
   }
 
   _getAllUser() async {
     AppList.userList.clear();
     AppList.uidList.clear();
+    AppList.allUserList.clear();
     await _databaseReference
         .collection("Users")
         .getDocuments()
@@ -108,6 +118,7 @@ class _HomePageState extends State<HomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.displayName != AppModel.user.displayName) {
+          AppList.allUserList.add(allUser);
           if (allUser.roles == "${TypeStatus.USER}") {
             AppList.userList.add(allUser);
             AppList.uidList.add(value.documentID);
@@ -115,6 +126,60 @@ class _HomePageState extends State<HomePage> {
         }
       });
     });
+  }
+
+  _getLastText() async {
+    String lastText = "";
+    String lastTime = "";
+    if (AppList.groupKey.length != 0) {
+      for (var i = 0; i < AppList.groupKey.length; i++) {
+        await _databaseReference
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(AppList.groupKey[i])
+            .collection("messages")
+            .getDocuments()
+            .then((QuerySnapshot snapshot) {
+          snapshot.documents.forEach((value) {
+            var message = ChatMessage.fromJson(value.data);
+            // log("1 :: ${message.text}");
+            if (message != null) {
+              if (message.text.isEmpty) {
+                if (message.user.uid == AppModel.user.uid) {
+                  lastText = "คุณได้ส่งรูปภาพ";
+                } else {
+                  lastText = "คุณได้รับรูปภาพ";
+                }
+              } else {
+                lastText = message.text;
+              }
+
+              lastTime = DateTime.fromMillisecondsSinceEpoch(
+                      message.createdAt.millisecondsSinceEpoch)
+                  .toString();
+              var str = lastTime.split(" ");
+              var str2 = str[1].split(".");
+              str = str2[0].split(":");
+              lastTime = "${str[0]}:${str[1]} น.";
+            } else {
+              lastText = "";
+              lastTime = "00:00 น.";
+            }
+          });
+        });
+        log("2 :: $lastText");
+        // String timeRead = _getRead(id).toString();
+        AppList.lastTextList.add(lastText);
+        AppList.lastTimeList.add(lastTime);
+      }
+    }
+  }
+
+  Future<String> _getRead(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String read = prefs.getString(key);
+    return read ?? "";
   }
 
   @override
@@ -164,9 +229,19 @@ class _HomePageState extends State<HomePage> {
                     : "Super Admin",
               ),
               AppList.adminList.length != 0
-                  ? TextAndLine(
-                      title: 'แอดมิน',
-                    )
+                  ? AppModel.user.roles != "${TypeStatus.SUPERADMIN}"
+                      ? TextAndLine(
+                          title: 'แอดมิน',
+                        )
+                      : TextAndLineEdit(
+                          title: "แอดมิน",
+                          callback: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AddAdminPage()));
+                          },
+                        )
                   : Container(),
               Container(
                 child: ListView.builder(
@@ -257,8 +332,9 @@ class _HomePageState extends State<HomePage> {
                                 imgGroupUrl:
                                     AppList.groupList[index].avatarGroup,
                                 nameGroup: AppList.groupList[index].nameGroup,
-                                numberUser:
-                                    _group.memberUIDList.length.toString(),
+                                numberUser: AppList
+                                    .groupList[index].memberUIDList.length
+                                    .toString(),
                                 status: AppList.groupList[index].statusGroup,
                               ),
                             );

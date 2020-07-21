@@ -61,15 +61,17 @@ class GroupPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChatGroupPage(),
+                            builder: (context) => ChatGroupPage(
+                              groupName: AppString.nameGroup,
+                            ),
                           ),
                         );
                       },
                       child: ListChatItem(
                         profileUrl: AppList.groupList[index].avatarGroup,
-                        lastText: 'ข้อความสุดท้าย',
+                        lastText: AppList.lastTextList[index],
                         name: AppList.groupList[index].nameGroup,
-                        time: '00.00 น.',
+                        time: AppList.lastTimeList[index],
                       ),
                     );
                   },

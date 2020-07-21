@@ -16,8 +16,10 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 class SettingGroupPage extends StatefulWidget {
   final List<UserModel> memberList;
+  final String groupName;
 
-  const SettingGroupPage({Key key, this.memberList}) : super(key: key);
+  const SettingGroupPage({Key key, this.memberList, this.groupName})
+      : super(key: key);
   @override
   _SettingGroupPageState createState() => _SettingGroupPageState();
 }
@@ -75,7 +77,9 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ChatGroupPage(),
+          builder: (context) => ChatGroupPage(
+            groupName: widget.groupName,
+          ),
         ),
       );
     });

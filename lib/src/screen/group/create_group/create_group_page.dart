@@ -10,6 +10,7 @@ import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dar
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -90,17 +91,51 @@ class _CreateGroupState extends State<CreateGroup> {
         .document("chats")
         .collection('Group')
         .document(now2)
-        .setData(group.toJson());
-    AppString.nameGroup = _nameGroup.text;
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => ChatGroupPage()));
+        .setData(group.toJson())
+        .then((_) {
+      final ChatUser user = ChatUser(
+        name: AppModel.user.firstName,
+        uid: AppModel.user.uid,
+        avatar: AppModel.user.avatarUrl,
+      );
+      ChatMessage message = ChatMessage(
+          text:
+              "${AppModel.user.firstName} ได้สร้างกลุ่ม ${_nameGroup.text} ขึ้น",
+          user: user,
+          image: null);
 
-    setState(() {
-      isLoading = false;
+      var documentReference = Firestore.instance
+          .collection('Rooms')
+          .document('chats')
+          .collection('Group')
+          .document(AppString.uidRoomChat)
+          .collection('messages')
+          .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+      Firestore.instance.runTransaction((transaction) async {
+        await transaction.set(
+          documentReference,
+          message.toJson(),
+        );
+      }).then((_) {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatGroupPage(
+                      groupName: _nameGroup.text,
+                    )));
+        AppList.indexList.clear();
+
+        setState(() {
+          isLoading = false;
+        });
+      });
     });
+    // AppModel.group.nameGroup = _nameGroup.text;
   }
 
   _pushToInvite(BuildContext context) async {
+    setState(() {});
     _memberList = await Navigator.push(
       context,
       MaterialPageRoute(

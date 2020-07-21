@@ -14,8 +14,12 @@ import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatGroupPage extends StatefulWidget {
+  final String groupName;
+
+  const ChatGroupPage({Key key, @required this.groupName}) : super(key: key);
   @override
   _ChatGroupPageState createState() => _ChatGroupPageState();
 }
@@ -108,6 +112,11 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     });
   }
 
+  void _saveRead(String value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(AppString.uidRoomChat, value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +151,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text(AppModel.group.nameGroup),
+        title: Text(widget.groupName),
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -171,6 +180,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               List<DocumentSnapshot> items = snapshot.data.documents;
               var messages =
                   items.map((i) => ChatMessage.fromJson(i.data)).toList();
+              _saveRead(messages[messages.length - 1].createdAt.toString());
               return DashChat(
                 key: _chatViewKey,
                 inverted: false,
@@ -281,6 +291,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         MaterialPageRoute(
           builder: (context) => SettingGroupPage(
             memberList: _memberList,
+            groupName: widget.groupName,
           ),
         ),
       );

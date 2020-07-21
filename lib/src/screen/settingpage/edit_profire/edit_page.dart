@@ -30,6 +30,12 @@ class _EditPageState extends State<EditPage> {
   File _avatar, _cover;
   final picker = ImagePicker();
   final pickerAvatar = ImagePicker();
+  final validNameTh = RegExp(r'^[ก-๏\s]+$');
+  final validNameEn = RegExp(r'^[a-zA-Z]+$');
+  final validName = RegExp(r'^[a-zA-Zก-๙]+$');
+
+  String _errorText = "";
+  String _errorText2 = "";
 
   Future getImageAvatar() async {
     final pickedFile1 =
@@ -54,6 +60,8 @@ class _EditPageState extends State<EditPage> {
 
   bool _check() {
     if (_firstName.text == "" || _lastName.text == "") {
+      return false;
+    } else if (_errorText != "" && _errorText2 != "") {
       return false;
     } else {
       return true;
@@ -171,9 +179,35 @@ class _EditPageState extends State<EditPage> {
                   profileUrl: AppModel.user.avatarUrl,
                 ),
                 SizedBox(height: 20),
-                BigRoundTextField(controller: _firstName),
+                BigRoundTextField(
+                  controller: _firstName,
+                  maxLength: 20,
+                  onChanged: (val) {
+                    _validate(val);
+                  },
+                ),
+                Text(
+                  _errorText,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 10,
+                  ),
+                ),
                 SizedBox(height: 10),
-                BigRoundTextField(controller: _lastName),
+                BigRoundTextField(
+                  controller: _lastName,
+                  maxLength: 20,
+                  onChanged: (val) {
+                    _validate2(val);
+                  },
+                ),
+                Text(
+                  _errorText2,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 10,
+                  ),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -249,6 +283,106 @@ class _EditPageState extends State<EditPage> {
         ),
       ),
     );
+  }
+
+  void _validate(String value) {
+    if (value.length == 0) {
+      setState(() {
+        _errorText = "*กรุณากรอกข้อมูล";
+      });
+    } else {
+      if (!validName.hasMatch(value)) {
+        setState(() {
+          _errorText = "*ไม่สามรถใช้อักษรพิเศษได้";
+        });
+      } else if (value.contains("฿")) {
+        setState(() {
+          _errorText = "*ไม่สามรถใช้อักษรพิเศษได้";
+        });
+      } else if (!validNameTh.hasMatch(value)) {
+        if (!validNameEn.hasMatch(value)) {
+          setState(() {
+            _errorText = "*ชื่อต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          setState(() {
+            _errorText = "";
+          });
+        }
+      } else if (!validNameEn.hasMatch(value)) {
+        if (!validNameTh.hasMatch(value)) {
+          setState(() {
+            _errorText = "*ชื่อต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          setState(() {
+            _errorText = "";
+          });
+        }
+      }
+      if (_lastName.text != "") {
+        var first = !validNameTh.hasMatch(_lastName.text);
+        var last = !validNameTh.hasMatch(value);
+        if (first != last) {
+          setState(() {
+            _errorText = "*ชื่อและนามสกุลต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          _errorText = "";
+          _errorText2 = "";
+        }
+      }
+    }
+  }
+
+  void _validate2(String value) {
+    if (value.length == 0) {
+      setState(() {
+        _errorText2 = "*กรุณากรอกข้อมูล";
+      });
+    } else {
+      if (!validName.hasMatch(value)) {
+        setState(() {
+          _errorText2 = "*ไม่สามรถใช้อักษรพิเศษได้";
+        });
+      } else if (value.contains("฿")) {
+        setState(() {
+          _errorText2 = "*ไม่สามรถใช้อักษรพิเศษได้";
+        });
+      } else if (!validNameTh.hasMatch(value)) {
+        if (!validNameEn.hasMatch(value)) {
+          setState(() {
+            _errorText2 = "*นามสกุลต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          setState(() {
+            _errorText2 = "";
+          });
+        }
+      } else if (!validNameEn.hasMatch(value)) {
+        if (!validNameTh.hasMatch(value)) {
+          setState(() {
+            _errorText2 = "*นามสกุลต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          setState(() {
+            _errorText2 = "";
+          });
+        }
+      }
+      if (_firstName.text != "") {
+        var first = !validNameTh.hasMatch(_firstName.text);
+        var last = !validNameTh.hasMatch(value);
+        if (first != last) {
+          setState(() {
+            _errorText2 = "*ชื่อและนามสกุลต้องเป็นภาษาเดียวกัน";
+          });
+        } else {
+          _errorText = "";
+          _errorText2 = "";
+        }
+      }
+    }
   }
 
   Container _genderCheckBox({

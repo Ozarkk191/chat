@@ -63,9 +63,11 @@ class _PostNewsGroupPageState extends State<PostNewsGroupPage> {
         nameGroup: AppModel.group.nameGroup);
     final _databaseReference = Firestore.instance;
     _databaseReference
-        .collection("News")
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
         .document(AppString.uidRoomChat)
-        .collection("NewsDate")
+        .collection("News")
         .document()
         .setData(post.toJson())
         .then((_) {
