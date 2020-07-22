@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:chat/app_strings/menu_settings.dart';
@@ -18,7 +17,7 @@ class InvitePage extends StatefulWidget {
 
 class _InvitePageState extends State<InvitePage> {
   List<bool> _boolList = List<bool>();
-  List<int> _indexList = List<int>();
+
   List<UserModel> _addUserList = List<UserModel>();
 
   @override

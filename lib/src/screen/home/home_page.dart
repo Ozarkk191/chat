@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -62,14 +60,17 @@ class _HomePageState extends State<HomePage> {
   _getAllAdmin() async {
     AppList.adminList.clear();
     AppList.adminUidList.clear();
+    AppList.user.clear();
+    AppList.admin.clear();
+    AppList.superAdmin.clear();
     await _databaseReference
         .collection("Users")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
-        if (allUser.roles != "${TypeStatus.USER}") {
-          if (allUser.displayName != AppModel.user.displayName) {
+        if (allUser.displayName != AppModel.user.displayName) {
+          if (allUser.roles != "${TypeStatus.USER}") {
             var oldTime = DateTime.parse(allUser.lastTimeUpdate);
             var time = DateTime.now().difference(oldTime);
             var strSpit = time.toString().split(".");
@@ -111,6 +112,8 @@ class _HomePageState extends State<HomePage> {
     AppList.userList.clear();
     AppList.uidList.clear();
     AppList.allUserList.clear();
+    AppList.lastTextList.clear();
+    AppList.lastTimeList.clear();
     await _databaseReference
         .collection("Users")
         .getDocuments()
@@ -168,7 +171,7 @@ class _HomePageState extends State<HomePage> {
             }
           });
         });
-        log("2 :: $lastText");
+
         // String timeRead = _getRead(id).toString();
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
@@ -214,170 +217,185 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
           width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
-              SearchField(),
-              buildMyProfile(
-                profileUrl: AppModel.user.avatarUrl,
-                context: context,
-                displayName: AppModel.user.displayName,
-                premission: AppModel.user.roles == "${TypeStatus.ADMIN}"
-                    ? "Admin"
-                    : "Super Admin",
-              ),
-              AppList.adminList.length != 0
-                  ? AppModel.user.roles != "${TypeStatus.SUPERADMIN}"
-                      ? TextAndLine(
-                          title: 'แอดมิน',
-                        )
-                      : TextAndLineEdit(
-                          title: "แอดมิน",
-                          callback: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddAdminPage()));
-                          },
-                        )
-                  : Container(),
-              Container(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return InkWell(
-                      onTap: () {
-                        DialogHelper.adminDialog(
-                          context,
-                          AppList.adminList[index].avatarUrl,
-                          AppList.adminList[index].displayName,
-                          AppList.adminList[index].coverUrl,
-                        );
-                      },
-                      child: ListAdminItem(
-                        profileUrl: AppList.adminList[index].avatarUrl,
-                        adminName: AppList.adminList[index].displayName,
-                        callback: () {},
-                        status: AppList.adminList[index].isActive,
-                        lastTime: AppList.adminList[index].lastTimeUpdate,
-                      ),
-                    );
-                  },
-                  itemCount: AppList.adminList.length,
-                ),
-              ),
-              TextAndLine(title: 'คำร้องขอเข้ากลุ่ม'),
-              SizedBox(
-                height: 5,
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => WaittingPage()));
-                },
-                child: Row(
+          height: MediaQuery.of(context).size.height,
+          child: AppList.groupList.length != 0
+              ? Column(
                   children: <Widget>[
-                    ProfileCard(
-                      profileUrl:
-                          'https://i.pinimg.com/736x/0f/c3/e7/0fc3e7cea3075c7a5c231ca73e60a6e9.jpg',
-                      width: 50,
-                      height: 50,
+                    SizedBox(
+                      height: 20,
                     ),
-                    Expanded(
-                      child: Text(
-                        'user1200,user1122,user2500...20+',
-                        style: TextStyle(color: Colors.grey),
+                    SearchField(),
+                    buildMyProfile(
+                      profileUrl: AppModel.user.avatarUrl,
+                      context: context,
+                      displayName: AppModel.user.displayName,
+                      premission: AppModel.user.roles == "${TypeStatus.ADMIN}"
+                          ? "Admin"
+                          : "Super Admin",
+                    ),
+                    AppList.adminList.length != 0
+                        ? AppModel.user.roles != "${TypeStatus.SUPERADMIN}"
+                            ? TextAndLine(
+                                title: 'แอดมิน',
+                              )
+                            : TextAndLineEdit(
+                                title: "แอดมิน",
+                                callback: () {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              AddAdminPage()));
+                                },
+                              )
+                        : Container(),
+                    Container(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          return InkWell(
+                            onTap: () {
+                              DialogHelper.adminDialog(
+                                context,
+                                AppList.adminList[index].avatarUrl,
+                                AppList.adminList[index].displayName,
+                                AppList.adminList[index].coverUrl,
+                              );
+                            },
+                            child: ListAdminItem(
+                              profileUrl: AppList.adminList[index].avatarUrl,
+                              adminName: AppList.adminList[index].displayName,
+                              callback: () {},
+                              status: AppList.adminList[index].isActive,
+                              lastTime: AppList.adminList[index].lastTimeUpdate,
+                            ),
+                          );
+                        },
+                        itemCount: AppList.adminList.length,
                       ),
                     ),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.grey,
+                    TextAndLine(title: 'คำร้องขอเข้ากลุ่ม'),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => WaittingPage()));
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          ProfileCard(
+                            profileUrl:
+                                'https://i.pinimg.com/736x/0f/c3/e7/0fc3e7cea3075c7a5c231ca73e60a6e9.jpg',
+                            width: 50,
+                            height: 50,
+                          ),
+                          Expanded(
+                            child: Text(
+                              'user1200,user1122,user2500...20+',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppList.groupList.length != 0
+                        ? TextAndLine(title: 'กลุ่ม')
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    AppList.groupList.length != 0
+                        ? Container(
+                            height: 160,
+                            child: ListView.builder(
+                                itemBuilder: (BuildContext context, int index) {
+                                  return InkWell(
+                                    onTap: () {
+                                      GroupDialogHelper.adminDialog(
+                                        context: context,
+                                        titleLeft: 'Group',
+                                        titleRight: 'Delete',
+                                        pathIconLeft:
+                                            'assets/images/ic_group.png',
+                                        pathIconRight:
+                                            'assets/images/ic_trash.png',
+                                        groupName:
+                                            AppList.groupList[index].nameGroup,
+                                        profileUrl: AppList
+                                            .groupList[index].avatarGroup,
+                                        coverUrl:
+                                            AppList.groupList[index].coverUrl,
+                                        member: _group.memberUIDList.length
+                                            .toString(),
+                                        statusGroup: _group.statusGroup,
+                                      );
+                                    },
+                                    child: ListGroupItem(
+                                      imgCoverUrl:
+                                          AppList.groupList[index].coverUrl,
+                                      imgGroupUrl:
+                                          AppList.groupList[index].avatarGroup,
+                                      nameGroup:
+                                          AppList.groupList[index].nameGroup,
+                                      numberUser: AppList
+                                          .groupList[index].memberUIDList.length
+                                          .toString(),
+                                      status:
+                                          AppList.groupList[index].statusGroup,
+                                    ),
+                                  );
+                                },
+                                itemCount: AppList.groupList.length,
+                                scrollDirection: Axis.horizontal),
+                          )
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    AppList.userList.length != 0
+                        ? TextAndLine(title: 'ลูกค้า')
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Container(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          return InkWell(
+                            onTap: () {
+                              UserDialogHelper.adminDialog(
+                                context: context,
+                                profileUrl: AppList.userList[index].avatarUrl,
+                                username: AppList.userList[index].displayName,
+                                coverUrl: AppList.userList[index].coverUrl,
+                              );
+                            },
+                            child: ListUserItem(
+                              profileUrl: AppList.userList[index].avatarUrl,
+                              userName: AppList.userList[index].displayName,
+                              callback: () {},
+                            ),
+                          );
+                        },
+                        itemCount: AppList.userList.length,
+                      ),
                     ),
                   ],
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-              AppList.groupList.length != 0
-                  ? TextAndLine(title: 'กลุ่ม')
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              AppList.groupList.length != 0
-                  ? Container(
-                      height: 160,
-                      child: ListView.builder(
-                          itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                              onTap: () {
-                                GroupDialogHelper.adminDialog(
-                                  context: context,
-                                  titleLeft: 'Group',
-                                  titleRight: 'Delete',
-                                  pathIconLeft: 'assets/images/ic_group.png',
-                                  pathIconRight: 'assets/images/ic_trash.png',
-                                  groupName: AppList.groupList[index].nameGroup,
-                                  profileUrl:
-                                      AppList.groupList[index].avatarGroup,
-                                  coverUrl: AppList.groupList[index].coverUrl,
-                                  member:
-                                      _group.memberUIDList.length.toString(),
-                                  statusGroup: _group.statusGroup,
-                                );
-                              },
-                              child: ListGroupItem(
-                                imgCoverUrl: AppList.groupList[index].coverUrl,
-                                imgGroupUrl:
-                                    AppList.groupList[index].avatarGroup,
-                                nameGroup: AppList.groupList[index].nameGroup,
-                                numberUser: AppList
-                                    .groupList[index].memberUIDList.length
-                                    .toString(),
-                                status: AppList.groupList[index].statusGroup,
-                              ),
-                            );
-                          },
-                          itemCount: AppList.groupList.length,
-                          scrollDirection: Axis.horizontal),
-                    )
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              AppList.userList.length != 0
-                  ? TextAndLine(title: 'ลูกค้า')
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              Container(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return InkWell(
-                      onTap: () {
-                        UserDialogHelper.adminDialog(
-                          context: context,
-                          profileUrl: AppList.userList[index].avatarUrl,
-                          username: AppList.userList[index].displayName,
-                          coverUrl: AppList.userList[index].coverUrl,
-                        );
-                      },
-                      child: ListUserItem(
-                        profileUrl: AppList.userList[index].avatarUrl,
-                        userName: AppList.userList[index].displayName,
-                        callback: () {},
-                      ),
-                    );
-                  },
-                  itemCount: AppList.userList.length,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
@@ -78,6 +80,8 @@ class _UserHomePageState extends State<UserHomePage> {
   _getGroup() async {
     AppList.groupList.clear();
     AppList.groupKey.clear();
+    AppList.lastTextList.clear();
+    AppList.lastTimeList.clear();
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -89,15 +93,19 @@ class _UserHomePageState extends State<UserHomePage> {
         var uid =
             group.memberUIDList.where((element) => element == AppString.uid);
         if (uid.length != 0) {
+          _getLastText();
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
-          _getLastText();
+          log(AppList.groupList.length.toString());
+          setState(() {});
         }
 
         _databaseReference
-            .collection("News")
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
             .document(value.documentID)
-            .collection("NewsDate")
+            .collection("News")
             .getDocuments()
             .then((QuerySnapshot snapshot) {
           snapshot.documents.forEach((value) {
@@ -155,14 +163,10 @@ class _UserHomePageState extends State<UserHomePage> {
             .then((QuerySnapshot snapshot) {
           snapshot.documents.forEach((value) {
             var message = ChatMessage.fromJson(value.data);
-            // log("1 :: ${message.text}");
+
             if (message != null) {
               if (message.text.isEmpty) {
-                if (message.user.uid == AppModel.user.uid) {
-                  lastText = "คุณได้ส่งรูปภาพ";
-                } else {
-                  lastText = "คุณได้รับรูปภาพ";
-                }
+                lastText = "คุณได้รับรูปภาพ";
               } else {
                 lastText = message.text;
               }
@@ -181,6 +185,7 @@ class _UserHomePageState extends State<UserHomePage> {
           });
         });
         // String timeRead = _getRead(id).toString();
+        log("2 :: $lastText");
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
       }

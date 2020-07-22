@@ -183,8 +183,7 @@ class _LoginPageState extends State<LoginPage> {
         AppString.gender = AppModel.user.gender;
         AppString.coverUrl = AppModel.user.coverUrl;
 
-        AppModel.user.lastTimeUpdate =
-            DateTime.now().millisecondsSinceEpoch.toString();
+        AppModel.user.lastTimeUpdate = DateTime.now().toString();
         _databaseReference
             .collection('Users')
             .document(AppModel.user.uid)

@@ -58,4 +58,8 @@ class AppList {
   static List<GroupModel> groupList = [];
   static List<String> groupKey = [];
   static List<int> indexList = List<int>();
+
+  static List<UserModel> user = [];
+  static List<UserModel> admin = [];
+  static List<UserModel> superAdmin = [];
 }
