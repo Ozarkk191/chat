@@ -52,6 +52,7 @@ class AppList {
   static List<String> lastTimeList = List<String>();
   static List<UserModel> userList = [];
   static List<UserModel> allUserList = [];
+  static List<String> allUidList = [];
   static List<UserModel> adminList = [];
   static List<String> uidList = [];
   static List<String> adminUidList = [];

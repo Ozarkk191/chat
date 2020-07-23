@@ -31,6 +31,7 @@ class _UserHomePageState extends State<UserHomePage> {
   List<bool> _newsActiveList = List<bool>();
   NewsModel news;
   bool uidMember = false;
+  List<String> waittingList = List<String>();
 
   var uid;
   user() async {
@@ -93,35 +94,64 @@ class _UserHomePageState extends State<UserHomePage> {
         var uid =
             group.memberUIDList.where((element) => element == AppString.uid);
         if (uid.length != 0) {
-          _getLastText();
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
-          log(AppList.groupList.length.toString());
+          _getLastText();
+          // log(AppList.groupList.length.toString());
           setState(() {});
         }
-
-        _databaseReference
-            .collection("Rooms")
-            .document("chats")
-            .collection("Group")
-            .document(value.documentID)
-            .collection("News")
-            .getDocuments()
-            .then((QuerySnapshot snapshot) {
-          snapshot.documents.forEach((value) {
-            news = NewsModel.fromJson(value.data);
-            _getGroupProfile(news.groupUID);
-            var oldTime = DateTime.parse(news.timePost);
-            var time = DateTime.now().difference(oldTime);
-            var strSpit = time.toString().split(".");
-            news.timePost = strSpit[0];
-            news.isActive = uidMember;
-            _newsList.add(news);
-            _newsList.sort((a, b) => a.timePost.compareTo(b.timePost));
-            setState(() {});
-          });
-        });
+        // _getWaitting(value.documentID);
+        _getNews(value.documentID);
       });
+    });
+  }
+
+  _getNews(String id) async {
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(id)
+        .collection("News")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        news = NewsModel.fromJson(value.data);
+
+        var oldTime = DateTime.parse(news.timePost);
+        var time = DateTime.now().difference(oldTime);
+        log(time.toString());
+        var strSpit = time.toString().split(".");
+        news.timePost = strSpit[0];
+        news.isActive = uidMember;
+        _newsList.add(news);
+        _newsList.sort((a, b) => a.timePost.compareTo(b.timePost));
+
+        _getWaitting(news.groupUID);
+        _getGroupProfile(news.groupUID);
+        setState(() {});
+      });
+    });
+  }
+
+  _getWaitting(String id) async {
+    String uid = "null";
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(id)
+        .collection("Waitting")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        if (value.documentID == AppModel.user.uid) {
+          uid = value.documentID;
+        }
+      });
+    }).then((value) {
+      waittingList.add(uid);
+      setState(() {});
     });
   }
 
@@ -144,6 +174,7 @@ class _UserHomePageState extends State<UserHomePage> {
         uidMember = false;
         _newsActiveList.add(uidMember);
       }
+      // log(uidMember.toString());
       setState(() {});
     });
   }
@@ -185,7 +216,7 @@ class _UserHomePageState extends State<UserHomePage> {
           });
         });
         // String timeRead = _getRead(id).toString();
-        log("2 :: $lastText");
+        // log("2 :: $lastText");
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
       }
@@ -296,7 +327,7 @@ class _UserHomePageState extends State<UserHomePage> {
               SizedBox(
                 height: 5,
               ),
-              _newsList.length != 0
+              _newsList.length != 0 || waittingList.length != 0
                   ? ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -308,16 +339,22 @@ class _UserHomePageState extends State<UserHomePage> {
                           nameGroup: _newsList[index].nameGroup,
                           status: _newsList[index].timePost,
                           description: _newsList[index].title,
+                          waitting: "null",
                           isActive: _newsActiveList.length != 0
                               ? _newsActiveList[index]
                               : false,
                           callback: () {
                             _databaseReference
-                                .collection("News")
+                                .collection("Rooms")
+                                .document("chats")
+                                .collection("Group")
                                 .document(_newsList[index].groupUID)
                                 .collection("Waitting")
                                 .document(AppModel.user.uid)
-                                .setData({"uid": AppModel.user.uid});
+                                .setData({"uid": AppModel.user.uid}).then((_) {
+                              waittingList[index] = "null";
+                              setState(() {});
+                            });
                           },
                         );
                       },

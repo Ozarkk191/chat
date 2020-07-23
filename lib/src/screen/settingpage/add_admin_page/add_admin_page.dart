@@ -17,6 +17,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
   List<UserModel> user = List<UserModel>();
   List<UserModel> admin = List<UserModel>();
   List<UserModel> superAdmin = List<UserModel>();
+  bool _loading = true;
 
   _getUser() async {
     Firestore _databaseReference = Firestore.instance;
@@ -35,7 +36,10 @@ class _AddAdminPageState extends State<AddAdminPage> {
             superAdmin.add(allUser);
           }
         }
-        setState(() {});
+      });
+    }).then((_) {
+      setState(() {
+        _loading = false;
       });
     });
   }
@@ -65,7 +69,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: user.length != 0
+          child: !_loading
               ? Column(
                   children: <Widget>[
                     SizedBox(height: 20),
@@ -101,70 +105,78 @@ class _AddAdminPageState extends State<AddAdminPage> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: TextAndLine(title: "Admin"),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: admin.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditStatusPage(
-                                    user: admin[index],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: ListUserWithStatus(
-                                callback: () {},
-                                profileUrl: admin[index].avatarUrl,
-                                userName: admin[index].displayName,
-                                status: "ADMIN"),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: TextAndLine(title: "User"),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: user.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditStatusPage(
-                                    user: user[index],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: ListUserWithStatus(
-                              callback: () {},
-                              profileUrl: user[index].avatarUrl,
-                              userName: user[index].displayName,
-                              status: "USER",
+                    admin.length != 0
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            child: TextAndLine(title: "Admin"),
+                          )
+                        : Container(),
+                    admin.length != 0
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: admin.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditStatusPage(
+                                          user: admin[index],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ListUserWithStatus(
+                                      callback: () {},
+                                      profileUrl: admin[index].avatarUrl,
+                                      userName: admin[index].displayName,
+                                      status: "ADMIN"),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          )
+                        : Container(),
+                    SizedBox(height: 20),
+                    user.length != 0
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            child: TextAndLine(title: "User"),
+                          )
+                        : Container(),
+                    user.length != 0
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: user.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditStatusPage(
+                                          user: user[index],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ListUserWithStatus(
+                                    callback: () {},
+                                    profileUrl: user[index].avatarUrl,
+                                    userName: user[index].displayName,
+                                    status: "USER",
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        : Container(),
                     SizedBox(height: 20),
                   ],
                 )

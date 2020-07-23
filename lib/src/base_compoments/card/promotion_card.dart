@@ -7,6 +7,7 @@ class PromotionCard extends StatefulWidget {
   final String imageUrlPromotion;
   final String nameGroup;
   final String status;
+  final String waitting;
   final String description;
   final Function callback;
   final bool isActive;
@@ -20,6 +21,7 @@ class PromotionCard extends StatefulWidget {
     @required this.description,
     @required this.callback,
     @required this.isActive,
+    @required this.waitting,
   }) : super(key: key);
 
   @override
@@ -120,12 +122,17 @@ class _PromotionCardState extends State<PromotionCard> {
                     !widget.isActive
                         ? Container(
                             width: 80,
+                            height: 30,
                             child: RaisedButton(
-                              onPressed: widget.callback,
-                              color: Colors.black,
+                              onPressed: widget.waitting != "null"
+                                  ? null
+                                  : widget.callback,
+                              color: widget.waitting == "null"
+                                  ? Colors.black
+                                  : Colors.grey,
                               child: Row(
                                 children: <Widget>[
-                                  !widget.isActive
+                                  widget.waitting == "null"
                                       ? Icon(
                                           Icons.add,
                                           size: 12,
@@ -133,7 +140,7 @@ class _PromotionCardState extends State<PromotionCard> {
                                         )
                                       : Container(),
                                   Text(
-                                    !widget.isActive
+                                    widget.waitting == "null"
                                         ? 'เข้ากลุ่ม'
                                         : 'เข้าร่วมแล้ว',
                                     style: TextStyle(

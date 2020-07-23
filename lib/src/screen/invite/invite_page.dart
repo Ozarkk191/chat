@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'dart:async';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_invite_item.dart';
@@ -23,29 +22,29 @@ class _InvitePageState extends State<InvitePage> {
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i <= AppList.userList.length; i++) {
+    for (int i = 0; i <= AppList.allUserList.length; i++) {
       _boolList.add(false);
     }
-    // Timer(Duration(milliseconds: 500), () {
-    if (AppList.indexList.length != 0) {
-      for (int i = 0; i <= AppList.indexList.length; i++) {
-        // if (widget.user[i].displayName == AppList.userList[i].displayName) {
-        _boolList[AppList.indexList[i]] = true;
-        setState(() {});
-        // }
+    Timer(Duration(milliseconds: 500), () {
+      if (AppList.indexList.length != 0) {
+        for (int i = 0; i <= AppList.indexList.length; i++) {
+          // if (widget.user[i].displayName == AppList.allUserList[i].displayName) {
+          _boolList[AppList.indexList[i]] = true;
+          setState(() {});
+          // }
+        }
       }
-    }
-    // });
+    });
   }
 
   void _addUser() {
     AppList.indexList.clear();
     for (int i = 0; i < _boolList.length; i++) {
-      log(_boolList[i].toString());
-      log(AppList.userList[1].displayName.toString());
+      // log(_boolList[i].toString());
+      // log(AppList.allUserList[1].displayName.toString());
       if (_boolList[i]) {
-        UserModel data = AppList.userList[i];
-        data.uid = AppList.uidList[i];
+        UserModel data = AppList.allUserList[i];
+        data.uid = AppList.allUidList[i];
         AppList.indexList.add(i);
         _addUserList.add(data);
       }
@@ -115,7 +114,7 @@ class _InvitePageState extends State<InvitePage> {
                 itemBuilder: (BuildContext context, int index) {
                   return ListUserInviteItem(
                     index: index,
-                    profileUrl: AppList.userList[index].avatarUrl,
+                    profileUrl: AppList.allUserList[index].avatarUrl,
                     value: _boolList[index],
                     onChanged: (val) {
                       setState(() {
@@ -126,10 +125,10 @@ class _InvitePageState extends State<InvitePage> {
                         // }
                       });
                     },
-                    userName: AppList.userList[index].displayName,
+                    userName: AppList.allUserList[index].displayName,
                   );
                 },
-                itemCount: AppList.userList.length,
+                itemCount: AppList.allUserList.length,
               ),
             ),
           ],

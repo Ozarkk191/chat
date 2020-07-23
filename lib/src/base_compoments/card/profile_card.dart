@@ -17,6 +17,7 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
+      elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(100),

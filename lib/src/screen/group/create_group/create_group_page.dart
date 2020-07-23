@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
@@ -7,6 +8,7 @@ import 'package:chat/src/base_compoments/card/icon_circle_card.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/add_user_group_button.dart';
 import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dart';
+import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,10 +27,13 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   String _profileUrl =
       "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130";
+  String _coverUrl =
+      "https://c4.wallpaperflare.com/wallpaper/160/664/862/bashar-essassani-symbols-triangle-wallpaper-preview.jpg";
   List<UserModel> _memberList = List<UserModel>();
   TextEditingController _nameGroup = new TextEditingController();
   String _statusGroup = "public";
   File _image;
+  File _imageCover;
   final picker = ImagePicker();
   bool isLoading = false;
 
@@ -37,6 +42,15 @@ class _CreateGroupState extends State<CreateGroup> {
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  Future getImageCover() async {
+    final pickedCover = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedCover != null) {
+        _imageCover = File(pickedCover.path);
       }
     });
   }
@@ -58,9 +72,10 @@ class _CreateGroupState extends State<CreateGroup> {
     });
     var now2 = DateTime.now().millisecondsSinceEpoch.toString();
     AppString.uidRoomChat = now2;
-    final StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(now2);
+
     if (_image != null) {
+      final StorageReference storageRef =
+          FirebaseStorage.instance.ref().child(now2);
       StorageUploadTask uploadTask = storageRef.putFile(
         File(_image.path),
         StorageMetadata(
@@ -70,6 +85,21 @@ class _CreateGroupState extends State<CreateGroup> {
       StorageTaskSnapshot download = await uploadTask.onComplete;
 
       _profileUrl = await download.ref.getDownloadURL();
+    }
+
+    if (_imageCover != null) {
+      var now = DateTime.now().millisecondsSinceEpoch.toString();
+      final StorageReference storageRef =
+          FirebaseStorage.instance.ref().child(now);
+      StorageUploadTask uploadTask = storageRef.putFile(
+        File(_imageCover.path),
+        StorageMetadata(
+          contentType: 'image/jpg',
+        ),
+      );
+      StorageTaskSnapshot download = await uploadTask.onComplete;
+
+      _coverUrl = await download.ref.getDownloadURL();
     }
 
     List<String> uidlist = List<String>();
@@ -84,7 +114,7 @@ class _CreateGroupState extends State<CreateGroup> {
         avatarGroup: _profileUrl,
         memberUIDList: uidlist,
         statusGroup: _statusGroup,
-        coverUrl: _profileUrl);
+        coverUrl: _coverUrl);
     var _documentReference = Firestore.instance;
     _documentReference
         .collection('Rooms')
@@ -169,7 +199,10 @@ class _CreateGroupState extends State<CreateGroup> {
           title: Text('ตั้งค่าโปรไฟล์กลุ่ม'),
           backgroundColor: Color(0xff202020),
           leading: InkWell(
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                AppList.indexList.clear();
+                Navigator.pop(context);
+              },
               child: Icon(Icons.arrow_back_ios)),
           actions: <Widget>[
             InkWell(
@@ -187,44 +220,68 @@ class _CreateGroupState extends State<CreateGroup> {
             ),
           ],
         ),
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          margin: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              headerGroup(context),
-              Text(
-                'สมาชิก',
-                style: TextStyle(color: Colors.white),
-              ),
-              Expanded(
-                child: GridView.builder(
-                  itemCount: _memberList.length + 1,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 1.0,
-                    mainAxisSpacing: 1.0,
+        body: Stack(
+          children: <Widget>[
+            _imageCover == null
+                ? CachedNetworkImage(
+                    imageUrl: _coverUrl,
+                    height: 200,
+                    width: MediaQuery.of(context).size.width,
+                    fit: BoxFit.cover,
+                  )
+                : Image.file(
+                    _imageCover,
+                    height: 200,
+                    width: MediaQuery.of(context).size.width,
+                    fit: BoxFit.cover,
                   ),
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == 0) {
-                      return AddUserGroupButton(
-                        onTop: () {
-                          _pushToInvite(context);
+            Container(
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  headerGroup(context),
+                  SizedBox(height: 10),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: Text(
+                      'สมาชิก',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      // margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: GridView.builder(
+                        itemCount: _memberList.length + 1,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 1.0,
+                          mainAxisSpacing: 1.0,
+                        ),
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index == 0) {
+                            return AddUserGroupButton(
+                              onTop: () {
+                                _pushToInvite(context);
+                              },
+                              title: 'เชิญ',
+                            );
+                          } else {
+                            return ColumnProFileWithName(
+                              profileUrl: _memberList[index - 1].avatarUrl,
+                              displayName: _memberList[index - 1].firstName,
+                            );
+                          }
                         },
-                        title: 'เชิญ',
-                      );
-                    } else {
-                      return ColumnProFileWithName(
-                        profileUrl: _memberList[index - 1].avatarUrl,
-                        displayName: _memberList[index - 1].firstName,
-                      );
-                    }
-                  },
-                ),
-              )
-            ],
-          ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -232,90 +289,151 @@ class _CreateGroupState extends State<CreateGroup> {
 
   Container headerGroup(BuildContext context) {
     return Container(
+      height: 180,
       width: MediaQuery.of(context).size.width,
-      child: Row(
+      child: Stack(
         children: <Widget>[
-          Container(
-            width: 100,
-            height: 100,
-            margin: EdgeInsets.only(right: 20),
-            child: Stack(
-              children: <Widget>[
-                _image == null
-                    ? ProfileCard(profileUrl: _profileUrl)
-                    : Card(
-                        clipBehavior: Clip.hardEdge,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.white70, width: 1),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Image.file(
-                          _image,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                InkWell(
-                  onTap: getImage,
-                  child: Container(
+          Column(
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
                     width: 100,
                     height: 100,
-                    margin: EdgeInsets.all(5),
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: IconCircleCard(
-                          iconPath: 'assets/images/ic_camera_circle.png'),
+                    margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    child: Stack(
+                      children: <Widget>[
+                        _image == null
+                            ? ProfileCard(profileUrl: _profileUrl)
+                            : Card(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Colors.white70, width: 1),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: Image.file(
+                                  _image,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                        InkWell(
+                          onTap: getImage,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            margin: EdgeInsets.all(5),
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: IconCircleCard(
+                                  iconPath:
+                                      'assets/images/ic_camera_circle.png'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            child: ToggleSwitch(
+                              minWidth: 50,
+                              initialLabelIndex: 0,
+                              activeBgColor: Colors.redAccent,
+                              activeTextColor: Colors.white,
+                              inactiveBgColor: Colors.white,
+                              inactiveTextColor: Colors.black,
+                              labels: ['', ''],
+                              icons: [Icons.public, Icons.person],
+                              onToggle: (index) {
+                                if (index == 0) {
+                                  setState(() {
+                                    _statusGroup = "public";
+                                  });
+                                } else {
+                                  setState(() {
+                                    _statusGroup = "private";
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          BigRoundTextField(
+                            controller: _nameGroup,
+                            hintText: "ชื่อกลุ่ม",
+                            hintStyle: TextStyle(
+                              color: Colors.white,
+                            ),
+                            maxLength: 20,
+                          ),
+                          // TextField(
+                          //   textAlign: TextAlign.center,
+                          //   maxLength: 20,
+                          //   controller: _nameGroup,
+                          //   style: TextStyle(color: Colors.grey),
+                          //   decoration: InputDecoration(
+                          //     hintText: '',
+                          //     hintStyle: TextStyle(
+                          //       color: Colors.grey,
+                          //     ),
+                          //     enabledBorder: UnderlineInputBorder(
+                          //       borderSide: BorderSide(color: Colors.cyan),
+                          //     ),
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Container(
-                  child: ToggleSwitch(
-                    minWidth: 50,
-                    initialLabelIndex: 0,
-                    activeBgColor: Colors.redAccent,
-                    activeTextColor: Colors.white,
-                    inactiveBgColor: Colors.white,
-                    inactiveTextColor: Colors.black,
-                    labels: ['', ''],
-                    icons: [Icons.public, Icons.person],
-                    onToggle: (index) {
-                      if (index == 0) {
-                        setState(() {
-                          _statusGroup = "public";
-                        });
-                      } else {
-                        setState(() {
-                          _statusGroup = "private";
-                        });
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  textAlign: TextAlign.center,
-                  maxLength: 20,
-                  controller: _nameGroup,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'ชื่อกลุ่ม',
-                    hintStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.cyan),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(1),
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withOpacity(0), Colors.black]),
+              ),
+              child: InkWell(
+                onTap: () {
+                  getImageCover();
+                },
+                child: Container(
+                  margin: EdgeInsets.all(10),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          "เพิ่มรูปปกกลุ่ม",
+                          style: TextStyle(color: Colors.white),
+                        )
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ],
