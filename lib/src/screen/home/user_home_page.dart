@@ -97,10 +97,8 @@ class _UserHomePageState extends State<UserHomePage> {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
           _getLastText();
-          // log(AppList.groupList.length.toString());
           setState(() {});
         }
-        // _getWaitting(value.documentID);
         _getNews(value.documentID);
       });
     });
@@ -123,37 +121,39 @@ class _UserHomePageState extends State<UserHomePage> {
         log(time.toString());
         var strSpit = time.toString().split(".");
         news.timePost = strSpit[0];
+        news.timeCheck = int.parse(strSpit[0].replaceAll(":", ""));
+        log(news.timeCheck.toString());
         news.isActive = uidMember;
         _newsList.add(news);
-        _newsList.sort((a, b) => a.timePost.compareTo(b.timePost));
+        _newsList.sort((a, b) => a.timeCheck.compareTo(b.timeCheck));
 
-        _getWaitting(news.groupUID);
+        // _getWaitting(news.groupUID);
         _getGroupProfile(news.groupUID);
         setState(() {});
       });
     });
   }
 
-  _getWaitting(String id) async {
-    String uid = "null";
-    await _databaseReference
-        .collection("Rooms")
-        .document("chats")
-        .collection("Group")
-        .document(id)
-        .collection("Waitting")
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((value) {
-        if (value.documentID == AppModel.user.uid) {
-          uid = value.documentID;
-        }
-      });
-    }).then((value) {
-      waittingList.add(uid);
-      setState(() {});
-    });
-  }
+  // _getWaitting(String id) async {
+  //   String uid = "null";
+  //   await _databaseReference
+  //       .collection("Rooms")
+  //       .document("chats")
+  //       .collection("Group")
+  //       .document(id)
+  //       .collection("Waitting")
+  //       .getDocuments()
+  //       .then((QuerySnapshot snapshot) {
+  //     snapshot.documents.forEach((value) {
+  //       if (value.documentID == AppModel.user.uid) {
+  //         uid = value.documentID;
+  //       }
+  //     });
+  //   }).then((value) {
+  //     waittingList.add(uid);
+  //     setState(() {});
+  //   });
+  // }
 
   _getGroupProfile(String key) async {
     await _databaseReference
@@ -339,10 +339,9 @@ class _UserHomePageState extends State<UserHomePage> {
                           nameGroup: _newsList[index].nameGroup,
                           status: _newsList[index].timePost,
                           description: _newsList[index].title,
+                          keyGroup: _newsList[index].groupUID,
                           waitting: "null",
-                          isActive: _newsActiveList.length != 0
-                              ? _newsActiveList[index]
-                              : false,
+                          isActive: false,
                           callback: () {
                             _databaseReference
                                 .collection("Rooms")
@@ -351,10 +350,12 @@ class _UserHomePageState extends State<UserHomePage> {
                                 .document(_newsList[index].groupUID)
                                 .collection("Waitting")
                                 .document(AppModel.user.uid)
-                                .setData({"uid": AppModel.user.uid}).then((_) {
-                              waittingList[index] = "null";
-                              setState(() {});
-                            });
+                                .setData({"uid": AppModel.user.uid});
+                            _dialogShowBack(
+                                title: "แจ้งเตือน",
+                                content:
+                                    "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
+                            setState(() {});
                           },
                         );
                       },
@@ -422,5 +423,28 @@ class _UserHomePageState extends State<UserHomePage> {
         ],
       ),
     );
+  }
+
+  Future<bool> _dialogShowBack({String title, String content}) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('$title'),
+            content: new Text('$content'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                  setState(() {});
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ตกลง"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

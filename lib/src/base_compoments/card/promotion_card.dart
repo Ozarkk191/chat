@@ -1,3 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/models/group_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'profile_card.dart';
@@ -11,6 +15,7 @@ class PromotionCard extends StatefulWidget {
   final String description;
   final Function callback;
   final bool isActive;
+  final String keyGroup;
 
   const PromotionCard({
     Key key,
@@ -22,6 +27,7 @@ class PromotionCard extends StatefulWidget {
     @required this.callback,
     @required this.isActive,
     @required this.waitting,
+    @required this.keyGroup,
   }) : super(key: key);
 
   @override
@@ -29,11 +35,13 @@ class PromotionCard extends StatefulWidget {
 }
 
 class _PromotionCardState extends State<PromotionCard> {
+  Firestore _databaseReference = Firestore.instance;
   String _lastTime = "";
-  @override
-  void initState() {
-    super.initState();
+  String _uidWaitting = "";
+  List<dynamic> _memberList = List<String>();
+  bool isActive = false;
 
+  _getTime() {
     var text = widget.status.split(":");
     var hour = text[0];
     var min = text[1];
@@ -72,6 +80,53 @@ class _PromotionCardState extends State<PromotionCard> {
     }
   }
 
+  _getGroup(String id) async {
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(id)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      _memberList = group.memberUIDList;
+      var member = _memberList.where((element) => element == AppModel.user.uid);
+      if (member.length != 0) {
+        isActive = true;
+      }
+      setState(() {});
+    });
+  }
+
+  _getWaitting(String id) async {
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(id)
+        .collection("Waitting")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        if (value.documentID == AppModel.user.uid) {
+          _uidWaitting = value.documentID;
+          setState(() {});
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    _getGroup(widget.keyGroup);
+    _getWaitting(widget.keyGroup);
+    super.initState();
+    _getTime();
+    // Timer(Duration(milliseconds: 500), () {
+    //   setState(() {});
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -100,9 +155,7 @@ class _PromotionCardState extends State<PromotionCard> {
                       width: 50,
                       height: 50,
                     ),
-                    SizedBox(
-                      width: 5,
-                    ),
+                    SizedBox(width: 5),
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -119,20 +172,17 @@ class _PromotionCardState extends State<PromotionCard> {
                         ],
                       ),
                     ),
-                    !widget.isActive
+                    !isActive
                         ? Container(
-                            width: 80,
                             height: 30,
                             child: RaisedButton(
-                              onPressed: widget.waitting != "null"
+                              onPressed: _uidWaitting == AppModel.user.uid
                                   ? null
                                   : widget.callback,
-                              color: widget.waitting == "null"
-                                  ? Colors.black
-                                  : Colors.grey,
+                              color: Colors.black,
                               child: Row(
                                 children: <Widget>[
-                                  widget.waitting == "null"
+                                  _uidWaitting == ""
                                       ? Icon(
                                           Icons.add,
                                           size: 12,
@@ -140,9 +190,9 @@ class _PromotionCardState extends State<PromotionCard> {
                                         )
                                       : Container(),
                                   Text(
-                                    widget.waitting == "null"
+                                    _uidWaitting == ""
                                         ? 'เข้ากลุ่ม'
-                                        : 'เข้าร่วมแล้ว',
+                                        : 'รอกการอนุมัติ',
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 10),
                                   ),
@@ -173,9 +223,9 @@ class _PromotionCardState extends State<PromotionCard> {
                       width: MediaQuery.of(context).size.width,
                       height: 250,
                       margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: Image.network(
-                        widget.imageUrlPromotion,
+                      child: CachedNetworkImage(
                         fit: BoxFit.cover,
+                        imageUrl: widget.imageUrlPromotion,
                       ),
                     )
                   : Container(),

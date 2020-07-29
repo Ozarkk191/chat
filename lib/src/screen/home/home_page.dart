@@ -5,6 +5,7 @@ import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/helpers/user_dialog_helper.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/models/waitting_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/list_admin_item.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
@@ -31,7 +32,8 @@ class _HomePageState extends State<HomePage> {
   Firestore _databaseReference = Firestore.instance;
   FirebaseAuth _auth = FirebaseAuth.instance;
   GroupModel _group;
-  List<String> _waittingList = List<String>();
+  int waittingLength = 0;
+  List<WaittingModel> _waittingList = List<WaittingModel>();
 
   user() async {
     FirebaseUser user = await _auth.currentUser();
@@ -139,7 +141,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   _getWaitting(String id) async {
-    String uid = "null";
+    List<String> uidList = List<String>();
+
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -149,11 +152,14 @@ class _HomePageState extends State<HomePage> {
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
-        _waittingList.add(value.documentID);
-        // if (value.documentID == AppModel.user.uid) {
-        //   uid = value.documentID;
-        // }
+        uidList.add(value.documentID);
       });
+    }).then((value) {
+      if (uidList.length != 0) {
+        var data = WaittingModel(idGroup: id, uidList: uidList);
+        _waittingList.add(data);
+      }
+      setState(() {});
     });
   }
 
@@ -317,8 +323,9 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              WaittingPage()));
+                                          builder: (context) => WaittingPage(
+                                                waittingList: _waittingList,
+                                              )));
                                 },
                                 child: Row(
                                   children: <Widget>[

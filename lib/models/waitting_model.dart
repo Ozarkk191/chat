@@ -1,6 +1,6 @@
 class WaittingModel {
   String idGroup;
-  String uidList;
+  List<String> uidList;
 
   WaittingModel({this.idGroup, this.uidList});
 }
