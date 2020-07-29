@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 
 class ListWaittingItem extends StatelessWidget {
   final String profileUrl, name, groupName;
+  final Function onCancel;
+  final Function onConfirm;
 
   const ListWaittingItem({
     Key key,
     @required this.profileUrl,
     @required this.name,
     @required this.groupName,
+    @required this.onCancel,
+    @required this.onConfirm,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -40,11 +44,20 @@ class ListWaittingItem extends StatelessWidget {
               ],
             ),
           ),
-          Image.asset('assets/images/ic_cancel.png'),
+          InkWell(
+            onTap: onCancel,
+            child: Container(
+              child: Image.asset('assets/images/ic_cancel.png'),
+            ),
+          ),
           SizedBox(
             width: 20,
           ),
-          Image.asset('assets/images/ic_confirm.png'),
+          InkWell(
+              onTap: onConfirm,
+              child: Container(
+                child: Image.asset('assets/images/ic_confirm.png'),
+              )),
         ],
       ),
     );

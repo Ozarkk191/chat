@@ -19,6 +19,7 @@ class _WaittingPageState extends State<WaittingPage> {
   Firestore _databaseReference = Firestore.instance;
   List<UserModel> _userList = List<UserModel>();
   List<String> _groupList = List<String>();
+  List<String> _groupUIDList = List<String>();
   GroupModel _group;
   bool _loading = true;
   _getWaitting() async {
@@ -34,6 +35,7 @@ class _WaittingPageState extends State<WaittingPage> {
             .then((value) {
           _group = GroupModel.fromJson(value.data);
           _groupList.add(_group.nameGroup);
+          _groupUIDList.add(widget.waittingList[i].idGroup);
           // _group.nameGroup;
         });
         await _databaseReference
@@ -50,6 +52,73 @@ class _WaittingPageState extends State<WaittingPage> {
         });
       }
     }
+  }
+
+  _addToGroup(String uidGroup, List<dynamic> list) async {
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(uidGroup)
+        .updateData({"memberUIDList": list}).then((value) {
+      setState(() {
+        _loading = false;
+      });
+    });
+  }
+
+  _getMember(String uidGroup, String uid) async {
+    List<dynamic> _list = List<String>();
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(uidGroup)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      _list = group.memberUIDList;
+      _list.add(uid);
+      _addToGroup(uidGroup, _list);
+    });
+  }
+
+  _confirm(int index, String uidGroup, String uid) async {
+    setState(() {
+      _loading = true;
+    });
+    _userList.removeAt(index);
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(uidGroup)
+        .collection("Waitting")
+        .document(uid)
+        .delete()
+        .then((_) {
+      _getMember(uidGroup, uid);
+    });
+  }
+
+  _cancel(int index, String uidGroup, String uid) async {
+    setState(() {
+      _loading = true;
+    });
+    _userList.removeAt(index);
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(uidGroup)
+        .collection("Waitting")
+        .document(uid)
+        .delete()
+        .then((_) {
+      setState(() {
+        _loading = false;
+      });
+    });
   }
 
   @override
@@ -103,6 +172,14 @@ class _WaittingPageState extends State<WaittingPage> {
                               profileUrl: _userList[index].avatarUrl,
                               name: _userList[index].displayName,
                               groupName: _groupList[index],
+                              onCancel: () {
+                                _cancel(index, _groupUIDList[index],
+                                    _userList[index].uid);
+                              },
+                              onConfirm: () {
+                                _confirm(index, _groupUIDList[index],
+                                    _userList[index].uid);
+                              },
                             ));
                           },
                           itemCount: _userList.length,

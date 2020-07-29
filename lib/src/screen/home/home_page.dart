@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -335,9 +337,10 @@ class _HomePageState extends State<HomePage> {
                                       width: 50,
                                       height: 50,
                                     ),
+                                    SizedBox(width: 5),
                                     Expanded(
                                       child: Text(
-                                        'มีคำร้องขอเข้ากลุ่ม ${_waittingList.length} คำร้อง',
+                                        'มีคำร้องขอเข้ากลุ่มที่รอการอนุมัติ',
                                         style: TextStyle(color: Colors.grey),
                                       ),
                                     ),

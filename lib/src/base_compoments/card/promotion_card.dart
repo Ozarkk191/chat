@@ -39,7 +39,7 @@ class _PromotionCardState extends State<PromotionCard> {
   String _lastTime = "";
   String _uidWaitting = "";
   List<dynamic> _memberList = List<String>();
-  bool isActive = false;
+  bool isActive = true;
 
   _getTime() {
     var text = widget.status.split(":");
@@ -78,6 +78,7 @@ class _PromotionCardState extends State<PromotionCard> {
         }
       }
     }
+    setState(() {});
   }
 
   _getGroup(String id) async {
@@ -90,11 +91,13 @@ class _PromotionCardState extends State<PromotionCard> {
         .then((value) {
       var group = GroupModel.fromJson(value.data);
       _memberList = group.memberUIDList;
-      var member = _memberList.where((element) => element == AppModel.user.uid);
-      if (member.length != 0) {
-        isActive = true;
-      }
-      setState(() {});
+      setState(() {
+        var member =
+            _memberList.where((element) => element == AppModel.user.uid);
+        if (member.length != 0) {
+          isActive = false;
+        }
+      });
     });
   }
 
@@ -173,7 +176,8 @@ class _PromotionCardState extends State<PromotionCard> {
                       ),
                     ),
                     !isActive
-                        ? Container(
+                        ? Container()
+                        : Container(
                             height: 30,
                             child: RaisedButton(
                               onPressed: _uidWaitting == AppModel.user.uid
@@ -200,7 +204,6 @@ class _PromotionCardState extends State<PromotionCard> {
                               ),
                             ),
                           )
-                        : Container()
                   ],
                 ),
               ),

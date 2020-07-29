@@ -96,6 +96,7 @@ class _UserNavBottomState extends State<UserNavBottom>
               return;
             },
             child: PageView(
+              physics: const NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: <Widget>[
                 UserHomePage(),

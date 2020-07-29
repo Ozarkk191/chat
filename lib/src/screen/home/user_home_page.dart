@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'dart:async';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
@@ -30,6 +29,7 @@ class _UserHomePageState extends State<UserHomePage> {
   List<NewsModel> _newsList = List<NewsModel>();
   List<bool> _newsActiveList = List<bool>();
   NewsModel news;
+
   bool uidMember = false;
   List<String> waittingList = List<String>();
 
@@ -97,11 +97,10 @@ class _UserHomePageState extends State<UserHomePage> {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
           _getLastText();
-          setState(() {});
         }
         _getNews(value.documentID);
       });
-    });
+    }).then((value) {});
   }
 
   _getNews(String id) async {
@@ -118,42 +117,20 @@ class _UserHomePageState extends State<UserHomePage> {
 
         var oldTime = DateTime.parse(news.timePost);
         var time = DateTime.now().difference(oldTime);
-        log(time.toString());
+
         var strSpit = time.toString().split(".");
         news.timePost = strSpit[0];
         news.timeCheck = int.parse(strSpit[0].replaceAll(":", ""));
-        log(news.timeCheck.toString());
+
         news.isActive = uidMember;
         _newsList.add(news);
         _newsList.sort((a, b) => a.timeCheck.compareTo(b.timeCheck));
 
         // _getWaitting(news.groupUID);
         _getGroupProfile(news.groupUID);
-        setState(() {});
       });
     });
   }
-
-  // _getWaitting(String id) async {
-  //   String uid = "null";
-  //   await _databaseReference
-  //       .collection("Rooms")
-  //       .document("chats")
-  //       .collection("Group")
-  //       .document(id)
-  //       .collection("Waitting")
-  //       .getDocuments()
-  //       .then((QuerySnapshot snapshot) {
-  //     snapshot.documents.forEach((value) {
-  //       if (value.documentID == AppModel.user.uid) {
-  //         uid = value.documentID;
-  //       }
-  //     });
-  //   }).then((value) {
-  //     waittingList.add(uid);
-  //     setState(() {});
-  //   });
-  // }
 
   _getGroupProfile(String key) async {
     await _databaseReference
@@ -174,14 +151,15 @@ class _UserHomePageState extends State<UserHomePage> {
         uidMember = false;
         _newsActiveList.add(uidMember);
       }
-      // log(uidMember.toString());
       setState(() {});
+      // log(uidMember.toString());
     });
   }
 
   _getLastText() async {
     String lastText = "";
     String lastTime = "";
+
     if (AppList.groupKey.length != 0) {
       for (var i = 0; i < AppList.groupKey.length; i++) {
         await _databaseReference
@@ -213,12 +191,12 @@ class _UserHomePageState extends State<UserHomePage> {
               lastText = "";
               lastTime = "00:00 น.";
             }
+            AppList.lastTextList.add(lastText);
+            AppList.lastTimeList.add(lastTime);
           });
         });
-        // String timeRead = _getRead(id).toString();
-        // log("2 :: $lastText");
-        AppList.lastTextList.add(lastText);
-        AppList.lastTimeList.add(lastTime);
+
+        setState(() {});
       }
     }
   }
@@ -257,114 +235,129 @@ class _UserHomePageState extends State<UserHomePage> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 20,
+      body: AppList.lastTimeList.length != 0
+          ? SingleChildScrollView(
+              child: Container(
+                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SearchField(),
+                    buildMyProfile(
+                      profileUrl: AppModel.user.avatarUrl,
+                      context: context,
+                      displayName: AppModel.user.displayName,
+                    ),
+                    AppList.groupList.length != 0
+                        ? TextAndLine(title: 'กลุ่ม')
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    AppList.groupList.length != 0
+                        ? Container(
+                            height: 160,
+                            child: ListView.builder(
+                                itemBuilder: (BuildContext context, int index) {
+                                  return InkWell(
+                                    onTap: () {
+                                      GroupDialogHelper.adminDialog(
+                                        context: context,
+                                        titleLeft: 'Group',
+                                        titleRight: 'Delete',
+                                        pathIconLeft:
+                                            'assets/images/ic_group.png',
+                                        pathIconRight:
+                                            'assets/images/ic_trash.png',
+                                        groupName:
+                                            AppList.groupList[index].nameGroup,
+                                        profileUrl: AppList
+                                            .groupList[index].avatarGroup,
+                                        coverUrl:
+                                            AppList.groupList[index].coverUrl,
+                                        member: AppList.groupList[index]
+                                            .memberUIDList.length
+                                            .toString(),
+                                        statusGroup: AppList
+                                            .groupList[index].statusGroup,
+                                      );
+                                    },
+                                    child: ListGroupItem(
+                                      imgCoverUrl:
+                                          AppList.groupList[index].coverUrl,
+                                      imgGroupUrl:
+                                          AppList.groupList[index].avatarGroup,
+                                      nameGroup:
+                                          AppList.groupList[index].nameGroup,
+                                      numberUser: AppList
+                                          .groupList[index].memberUIDList.length
+                                          .toString(),
+                                      status:
+                                          AppList.groupList[index].statusGroup,
+                                    ),
+                                  );
+                                },
+                                itemCount: AppList.groupList.length,
+                                scrollDirection: Axis.horizontal),
+                          )
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    _newsList.length != 0
+                        ? TextAndLine(title: 'ข่าวสาร')
+                        : Container(),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    _newsList.length != 0 || waittingList.length != 0
+                        ? ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _newsList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return PromotionCard(
+                                imageUrlGroup: _newsList[index].imageGroup,
+                                imageUrlPromotion: _newsList[index].imageUrl,
+                                nameGroup: _newsList[index].nameGroup,
+                                status: _newsList[index].timePost,
+                                description: _newsList[index].title,
+                                keyGroup: _newsList[index].groupUID,
+                                waitting: "null",
+                                isActive: false,
+                                callback: () {
+                                  _databaseReference
+                                      .collection("Rooms")
+                                      .document("chats")
+                                      .collection("Group")
+                                      .document(_newsList[index].groupUID)
+                                      .collection("Waitting")
+                                      .document(AppModel.user.uid)
+                                      .setData({"uid": AppModel.user.uid});
+                                  _dialogShowBack(
+                                      title: "แจ้งเตือน",
+                                      content:
+                                          "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
+                                  setState(() {});
+                                },
+                              );
+                            },
+                          )
+                        : Container(),
+                  ],
+                ),
               ),
-              SearchField(),
-              buildMyProfile(
-                profileUrl: AppModel.user.avatarUrl,
-                context: context,
-                displayName: AppModel.user.displayName,
+            )
+          : Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
-              AppList.groupList.length != 0
-                  ? TextAndLine(title: 'กลุ่ม')
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              AppList.groupList.length != 0
-                  ? Container(
-                      height: 160,
-                      child: ListView.builder(
-                          itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                              onTap: () {
-                                GroupDialogHelper.adminDialog(
-                                  context: context,
-                                  titleLeft: 'Group',
-                                  titleRight: 'Delete',
-                                  pathIconLeft: 'assets/images/ic_group.png',
-                                  pathIconRight: 'assets/images/ic_trash.png',
-                                  groupName: AppList.groupList[index].nameGroup,
-                                  profileUrl:
-                                      AppList.groupList[index].avatarGroup,
-                                  coverUrl: AppList.groupList[index].coverUrl,
-                                  member: AppList
-                                      .groupList[index].memberUIDList.length
-                                      .toString(),
-                                  statusGroup:
-                                      AppList.groupList[index].statusGroup,
-                                );
-                              },
-                              child: ListGroupItem(
-                                imgCoverUrl: AppList.groupList[index].coverUrl,
-                                imgGroupUrl:
-                                    AppList.groupList[index].avatarGroup,
-                                nameGroup: AppList.groupList[index].nameGroup,
-                                numberUser: AppList
-                                    .groupList[index].memberUIDList.length
-                                    .toString(),
-                                status: AppList.groupList[index].statusGroup,
-                              ),
-                            );
-                          },
-                          itemCount: AppList.groupList.length,
-                          scrollDirection: Axis.horizontal),
-                    )
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              _newsList.length != 0
-                  ? TextAndLine(title: 'ข่าวสาร')
-                  : Container(),
-              SizedBox(
-                height: 5,
-              ),
-              _newsList.length != 0 || waittingList.length != 0
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _newsList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return PromotionCard(
-                          imageUrlGroup: _newsList[index].imageGroup,
-                          imageUrlPromotion: _newsList[index].imageUrl,
-                          nameGroup: _newsList[index].nameGroup,
-                          status: _newsList[index].timePost,
-                          description: _newsList[index].title,
-                          keyGroup: _newsList[index].groupUID,
-                          waitting: "null",
-                          isActive: false,
-                          callback: () {
-                            _databaseReference
-                                .collection("Rooms")
-                                .document("chats")
-                                .collection("Group")
-                                .document(_newsList[index].groupUID)
-                                .collection("Waitting")
-                                .document(AppModel.user.uid)
-                                .setData({"uid": AppModel.user.uid});
-                            _dialogShowBack(
-                                title: "แจ้งเตือน",
-                                content:
-                                    "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
-                            setState(() {});
-                          },
-                        );
-                      },
-                    )
-                  : Container(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
