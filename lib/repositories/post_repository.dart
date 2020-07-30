@@ -8,4 +8,9 @@ class PostRepository {
     return await _client.post('get-otp',
         data: parameters, withAccessToken: false);
   }
+
+  Future sendNotification(SendNotiParameters parameters) async {
+    return await _client.post('secretChat/notification/send',
+        data: parameters, withAccessToken: false);
+  }
 }

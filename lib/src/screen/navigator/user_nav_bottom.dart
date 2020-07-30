@@ -4,6 +4,7 @@ import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -26,6 +27,7 @@ class _UserNavBottomState extends State<UserNavBottom>
   PageController _pageController;
   MenuPositionController _menuPositionController;
   bool userPageDragging = false;
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
   @override
   void initState() {
@@ -35,8 +37,35 @@ class _UserNavBottomState extends State<UserNavBottom>
         PageController(initialPage: 0, keepPage: false, viewportFraction: 1.0);
     _pageController.addListener(handlePageChange);
 
+    initFirebaseMessaging();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  void initFirebaseMessaging() {
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+
+    firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+
+    firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      print("Token : $token");
+    });
   }
 
   void handlePageChange() {

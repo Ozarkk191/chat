@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/group_model.dart';
+import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/repositories/post_repository.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
@@ -29,6 +32,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   final picker = ImagePicker();
   Firestore _databaseReference = Firestore.instance;
   List<UserModel> _memberList = List<UserModel>();
+  List<String> _tokenList = List<String>();
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -76,6 +80,16 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     _getMemberUID();
   }
 
+  void _sendNotification(String text, String token) async {
+    var parameter = SendNotiParameters(
+      title: widget.groupName,
+      body: "คุณได้รับข้อความ",
+      data: text,
+      token: token,
+    );
+    await PostRepository().sendNotification(parameter);
+  }
+
   void systemMessage() {
     Timer(Duration(milliseconds: 0), () {
       if (i < 6) {
@@ -109,6 +123,32 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         documentReference,
         message.toJson(),
       );
+    });
+    Firestore.instance
+        .collection('Rooms')
+        .document('chats')
+        .collection('Group')
+        .document(AppString.uidRoomChat)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      var member = group.memberUIDList;
+      for (var i = 0; i < member.length; i++) {
+        _getNotiToken(member[i]);
+      }
+    });
+    log(message.text);
+    // _sendNotification(message.text);
+  }
+
+  void _getNotiToken(uid) async {
+    await Firestore.instance
+        .collection("Users")
+        .document(uid)
+        .get()
+        .then((value) {
+      var user = UserModel.fromJson(value.data);
+      _tokenList.add(user.notiToken);
     });
   }
 

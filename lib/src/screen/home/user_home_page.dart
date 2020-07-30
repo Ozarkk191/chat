@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
-import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/news_model.dart';
@@ -27,13 +27,12 @@ class _UserHomePageState extends State<UserHomePage> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _databaseReference = Firestore.instance;
   List<NewsModel> _newsList = List<NewsModel>();
-  List<bool> _newsActiveList = List<bool>();
+  // List<bool> _newsActiveList = List<bool>();
   NewsModel news;
 
   bool uidMember = false;
   List<String> waittingList = List<String>();
 
-  var uid;
   user() async {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
@@ -43,39 +42,9 @@ class _UserHomePageState extends State<UserHomePage> {
           .document(user.uid)
           .get()
           .then((value) {
-        var userModel = UserModel.fromJson(value.data);
-        AppString.displayName = userModel.displayName;
-        AppString.firstname = userModel.firstName;
-        AppString.lastname = userModel.lastName;
-        AppString.birthDate = userModel.birthDate;
-        AppString.email = userModel.email;
-        AppString.notiToken = userModel.notiToken;
-        AppString.phoneNumber = userModel.phoneNumber;
-        AppString.roles = userModel.roles.toString();
-        AppString.dateTime = userModel.updatedAt;
-        AppString.isActive = userModel.isActive;
-        AppString.gender = userModel.gender;
+        AppModel.user = UserModel.fromJson(value.data);
       });
     }
-  }
-
-  getAllUser() async {
-    AppList.userList.clear();
-    AppList.uidList.clear();
-    await _databaseReference
-        .collection("Users")
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((value) {
-        var allUser = UserModel.fromJson(value.data);
-        if (allUser.roles != "${TypeStatus.USER}") {
-          // if (allUser.displayName != AppModel.user.displayName) {
-          AppList.userList.add(allUser);
-          AppList.uidList.add(value.documentID);
-          // }
-        }
-      });
-    });
   }
 
   _getGroup() async {
@@ -96,7 +65,7 @@ class _UserHomePageState extends State<UserHomePage> {
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
-          _getLastText();
+          _getLastText(value.documentID);
         }
         _getNews(value.documentID);
       });
@@ -121,18 +90,17 @@ class _UserHomePageState extends State<UserHomePage> {
         var strSpit = time.toString().split(".");
         news.timePost = strSpit[0];
         news.timeCheck = int.parse(strSpit[0].replaceAll(":", ""));
+        _getGroupProfile(news.groupUID);
 
         news.isActive = uidMember;
         _newsList.add(news);
         _newsList.sort((a, b) => a.timeCheck.compareTo(b.timeCheck));
-
-        // _getWaitting(news.groupUID);
-        _getGroupProfile(news.groupUID);
       });
     });
   }
 
   _getGroupProfile(String key) async {
+    var uid;
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -141,63 +109,59 @@ class _UserHomePageState extends State<UserHomePage> {
         .get()
         .then((value) {
       var group = GroupModel.fromJson(value.data);
-      var uid =
-          group.memberUIDList.where((element) => element == AppString.uid);
-
+      uid = group.memberUIDList.where((element) => element == AppString.uid);
+    }).then((_) {
       if (uid.length != 0) {
         uidMember = true;
-        _newsActiveList.add(uidMember);
-      } else {
-        uidMember = false;
-        _newsActiveList.add(uidMember);
+        setState(() {});
       }
-      setState(() {});
-      // log(uidMember.toString());
     });
   }
 
-  _getLastText() async {
+  _getLastText(String key) async {
     String lastText = "";
     String lastTime = "";
 
     if (AppList.groupKey.length != 0) {
-      for (var i = 0; i < AppList.groupKey.length; i++) {
-        await _databaseReference
-            .collection("Rooms")
-            .document("chats")
-            .collection("Group")
-            .document(AppList.groupKey[i])
-            .collection("messages")
-            .getDocuments()
-            .then((QuerySnapshot snapshot) {
-          snapshot.documents.forEach((value) {
-            var message = ChatMessage.fromJson(value.data);
+      // for (var i = 0; i < AppList.groupKey.length; i++) {
+      await _databaseReference
+          .collection("Rooms")
+          .document("chats")
+          .collection("Group")
+          .document(key)
+          .collection("messages")
+          .getDocuments()
+          .then((QuerySnapshot snapshot) {
+        snapshot.documents.forEach((value) {
+          var message = ChatMessage.fromJson(value.data);
 
-            if (message != null) {
-              if (message.text.isEmpty) {
-                lastText = "คุณได้รับรูปภาพ";
-              } else {
-                lastText = message.text;
-              }
-
-              lastTime = DateTime.fromMillisecondsSinceEpoch(
-                      message.createdAt.millisecondsSinceEpoch)
-                  .toString();
-              var str = lastTime.split(" ");
-              var str2 = str[1].split(".");
-              str = str2[0].split(":");
-              lastTime = "${str[0]}:${str[1]} น.";
+          if (message != null) {
+            if (message.text.isEmpty) {
+              lastText = "คุณได้รับรูปภาพ";
             } else {
-              lastText = "";
-              lastTime = "00:00 น.";
+              lastText = message.text;
             }
-            AppList.lastTextList.add(lastText);
-            AppList.lastTimeList.add(lastTime);
-          });
-        });
 
+            lastTime = DateTime.fromMillisecondsSinceEpoch(
+                    message.createdAt.millisecondsSinceEpoch)
+                .toString();
+            var str = lastTime.split(" ");
+            var str2 = str[1].split(".");
+            str = str2[0].split(":");
+            lastTime = "${str[0]}:${str[1]} น.";
+          } else {
+            lastText = "";
+            lastTime = "00:00 น.";
+          }
+          log(lastText);
+        });
+      }).then((value) {
+        AppList.lastTextList.add(lastText);
+        AppList.lastTimeList.add(lastTime);
         setState(() {});
-      }
+      });
+
+      // }
     }
   }
 
@@ -211,7 +175,7 @@ class _UserHomePageState extends State<UserHomePage> {
   void initState() {
     super.initState();
     user();
-    getAllUser();
+    // getAllUser();
     _getGroup();
   }
 
@@ -327,7 +291,7 @@ class _UserHomePageState extends State<UserHomePage> {
                                 description: _newsList[index].title,
                                 keyGroup: _newsList[index].groupUID,
                                 waitting: "null",
-                                isActive: false,
+                                isActive: _newsList[index].isActive,
                                 callback: () {
                                   _databaseReference
                                       .collection("Rooms")

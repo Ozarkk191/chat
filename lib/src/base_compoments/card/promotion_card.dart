@@ -121,13 +121,10 @@ class _PromotionCardState extends State<PromotionCard> {
 
   @override
   void initState() {
+    _getTime();
     _getGroup(widget.keyGroup);
     _getWaitting(widget.keyGroup);
     super.initState();
-    _getTime();
-    // Timer(Duration(milliseconds: 500), () {
-    //   setState(() {});
-    // });
   }
 
   @override

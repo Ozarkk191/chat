@@ -96,6 +96,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
               return;
             },
             child: PageView(
+              physics: const NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: <Widget>[HomePage(), GroupPage(), ChatPage()],
               onPageChanged: (page) {},
