@@ -5,7 +5,7 @@ import 'package:chat/models/request_body_parameters.dart';
 import 'package:http/http.dart' as http;
 
 class OTPService {
-  final _host = '128.199.237.150';
+  final _host = 'us-central1-chat-ae407.cloudfunctions.net';
 
   Future<dynamic> post(String path,
       {RequestBodyParameters data, bool withAccessToken = false}) async {

@@ -5,7 +5,7 @@ class PostRepository {
   final _client = OTPService();
 
   Future sendOTP(SendOTPParameters parameters) async {
-    return await _client.post('get-otp',
+    return await _client.post('secretChat/get-otp/',
         data: parameters, withAccessToken: false);
   }
 

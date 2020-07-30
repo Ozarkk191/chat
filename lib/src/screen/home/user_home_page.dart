@@ -123,7 +123,6 @@ class _UserHomePageState extends State<UserHomePage> {
     String lastTime = "";
 
     if (AppList.groupKey.length != 0) {
-      // for (var i = 0; i < AppList.groupKey.length; i++) {
       await _databaseReference
           .collection("Rooms")
           .document("chats")
@@ -160,8 +159,6 @@ class _UserHomePageState extends State<UserHomePage> {
         AppList.lastTimeList.add(lastTime);
         setState(() {});
       });
-
-      // }
     }
   }
 

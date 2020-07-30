@@ -68,6 +68,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
             .then((value) {
           var member = UserModel.fromJson(value.data);
           _memberList.add(member);
+          _tokenList.add(member.notiToken);
           setState(() {});
         });
       }
@@ -78,6 +79,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   void initState() {
     super.initState();
     _getMemberUID();
+    // _getMemer();
   }
 
   void _sendNotification(String text, String token) async {
@@ -87,7 +89,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
       data: text,
       token: token,
     );
-    await PostRepository().sendNotification(parameter);
+    var response = await PostRepository().sendNotification(parameter);
+    log(response['message'].toString());
   }
 
   void systemMessage() {
@@ -124,33 +127,37 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         message.toJson(),
       );
     });
-    Firestore.instance
-        .collection('Rooms')
-        .document('chats')
-        .collection('Group')
-        .document(AppString.uidRoomChat)
-        .get()
-        .then((value) {
-      var group = GroupModel.fromJson(value.data);
-      var member = group.memberUIDList;
-      for (var i = 0; i < member.length; i++) {
-        _getNotiToken(member[i]);
-      }
-    });
-    log(message.text);
-    // _sendNotification(message.text);
+    for (var i = 0; i < _tokenList.length; i++) {
+      _sendNotification(message.text, _tokenList[i]);
+    }
   }
 
-  void _getNotiToken(uid) async {
-    await Firestore.instance
-        .collection("Users")
-        .document(uid)
-        .get()
-        .then((value) {
-      var user = UserModel.fromJson(value.data);
-      _tokenList.add(user.notiToken);
-    });
-  }
+  // void _getMemer() async {
+  //   Firestore.instance
+  //       .collection('Rooms')
+  //       .document('chats')
+  //       .collection('Group')
+  //       .document(AppString.uidRoomChat)
+  //       .get()
+  //       .then((value) {
+  //     var group = GroupModel.fromJson(value.data);
+  //     var member = group.memberUIDList;
+  //     for (var i = 0; i < member.length; i++) {
+  //       _getNotiToken(member[i]);
+  //     }
+  //   });
+  // }
+
+  // void _getNotiToken(uid) async {
+  //   await Firestore.instance
+  //       .collection("Users")
+  //       .document(uid)
+  //       .get()
+  //       .then((value) {
+  //     var user = UserModel.fromJson(value.data);
+  //     _tokenList.add(user.notiToken);
+  //   });
+  // }
 
   void _saveRead(String value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
