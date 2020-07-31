@@ -95,6 +95,7 @@ class _UserHomePageState extends State<UserHomePage> {
         news.isActive = uidMember;
         _newsList.add(news);
         _newsList.sort((a, b) => a.timeCheck.compareTo(b.timeCheck));
+        setState(() {});
       });
     });
   }
@@ -196,7 +197,7 @@ class _UserHomePageState extends State<UserHomePage> {
           )
         ],
       ),
-      body: AppList.lastTimeList.length != 0
+      body: _newsList.length != 0
           ? SingleChildScrollView(
               child: Container(
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),

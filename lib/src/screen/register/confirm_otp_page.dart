@@ -52,7 +52,7 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
     final _databaseReference = Firestore.instance;
     _databaseReference
         .collection("Users")
-        .document(AppModel.user.uid)
+        .document(user.uid)
         .setData(user.toJson())
         .then((_) {
       Navigator.of(context).pushReplacementNamed('/navuserhome');
@@ -72,9 +72,8 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
   void _sendOTP() async {
     var parameter = SendOTPParameters(phoneNumber: widget.phoneNumber);
     var response = await PostRepository().sendOTP(parameter);
-    switch (response['statusCode']) {
-      case 200:
-      case 201:
+    switch (response['message']) {
+      case "success":
         setState(() {
           _loading = false;
         });

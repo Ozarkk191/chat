@@ -4,9 +4,11 @@ import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class TestNav extends StatefulWidget {
   final titles = ['Home', 'Group', 'Chat'];
@@ -25,9 +27,27 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
   PageController _pageController;
   MenuPositionController _menuPositionController;
   bool userPageDragging = false;
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('ic_launcher');
+
+    var initializationSettingsIOS = IOSInitializationSettings(
+        onDidReceiveLocalNotification: (id, title, body, payload) {
+      print("onDidReceiveLocalNotification called.");
+    });
+    var initializationSettings = InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (payload) {
+      // when user tap on notification.
+      print("onSelectNotification called.");
+    });
     _menuPositionController = MenuPositionController(initPosition: 0);
 
     _pageController =
@@ -36,6 +56,53 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  void initFirebaseMessaging() {
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: ${message['notification']}");
+        sendNotification(
+          title: message['notification']['title'],
+          body: message['notification']['body'],
+        );
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+
+    firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+
+    firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      print("Token : $token");
+    });
+  }
+
+  void sendNotification({String title, String body}) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails('10000',
+        'FLUTTER_NOTIFICATION_CHANNEL', 'FLUTTER_NOTIFICATION_CHANNEL_DETAIL',
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      111,
+      title,
+      body,
+      platformChannelSpecifics,
+    );
   }
 
   @override

@@ -310,9 +310,8 @@ class _DataCollectPageState extends State<DataCollectPage> {
   void _sendOTP(UserModel user) async {
     var parameter = SendOTPParameters(phoneNumber: _phone.text);
     var response = await PostRepository().sendOTP(parameter);
-    switch (response['statusCode']) {
-      case 200:
-      case 201:
+    switch (response['message']) {
+      case "success":
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -325,6 +324,8 @@ class _DataCollectPageState extends State<DataCollectPage> {
         );
         break;
       default:
+        _dialogShow(
+            title: "แจ้งเตือน", content: "เกิดข้อผิดพลาด\nกรุณาลองอีกครั้ง");
         setState(() {
           _loading = false;
         });
