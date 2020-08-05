@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:chat/models/group_model.dart';
@@ -58,6 +59,7 @@ class _WaittingPageState extends State<WaittingPage> {
   }
 
   _addToGroup(String uidGroup, List<dynamic> list) async {
+    log(list.toString());
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -72,6 +74,7 @@ class _WaittingPageState extends State<WaittingPage> {
 
   _getMember(String uidGroup, String uid) async {
     List<dynamic> _list = List<String>();
+
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -90,6 +93,7 @@ class _WaittingPageState extends State<WaittingPage> {
     setState(() {
       _loading = true;
     });
+
     _userList.removeAt(index);
     await _databaseReference
         .collection("Rooms")
@@ -103,29 +107,6 @@ class _WaittingPageState extends State<WaittingPage> {
       _getMember(uidGroup, uid);
     });
   }
-
-  // _confirmAll(List<UserModel> userList, List<String> groupList) async {
-  //   setState(() {
-  //     _loading = true;
-  //   });
-  //   groupList.forEach((element) { });
-  //   for (var i = 0; i < groupList.length; i++) {
-  //     log(userList[i].uid);
-  //     log(groupList[i]);
-
-  //     await _databaseReference
-  //         .collection("Rooms")
-  //         .document("chats")
-  //         .collection("Group")
-  //         .document(groupList[i])
-  //         .collection("Waitting")
-  //         .document(userList[i].uid)
-  //         .delete()
-  //         .then((_) {
-
-  //     });
-  //   }
-  // }
 
   _cancel(int index, String uidGroup, String uid) async {
     setState(() {
@@ -173,11 +154,9 @@ class _WaittingPageState extends State<WaittingPage> {
               },
               child: Icon(Icons.arrow_back_ios)),
           actions: <Widget>[
-            InkWell(
+            GestureDetector(
               onTap: () {
-                for (var i = 0; i < _groupList.length; i++) {
-                  _confirm(i, _groupUIDList[i], _userList[i].uid);
-                }
+                _allConfirm();
               },
               child: Container(
                 width: 70,
@@ -230,4 +209,29 @@ class _WaittingPageState extends State<WaittingPage> {
       ),
     );
   }
+
+  void _allConfirm() async {
+    List<ListModel> list = List<ListModel>();
+    for (var i = 0; i < _groupList.length; i++) {
+      var data = ListModel(
+        _groupUIDList[i],
+        _userList[i].uid,
+        i,
+      );
+      list.add(data);
+    }
+    list.forEach((element) {
+      Timer(Duration(seconds: 1), () {
+        _confirm(0, element.groupID, element.uid);
+      });
+    });
+  }
+}
+
+class ListModel {
+  String groupID;
+  String uid;
+  int index;
+
+  ListModel(this.groupID, this.uid, this.index);
 }
