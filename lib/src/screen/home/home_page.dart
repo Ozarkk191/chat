@@ -1,10 +1,8 @@
 import 'dart:async';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
-import 'package:chat/helpers/user_dialog_helper.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/models/waitting_model.dart';
@@ -15,6 +13,9 @@ import 'package:chat/src/base_compoments/group_item/list_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/text/text_and_line_edit.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/chat/chat_room_page.dart';
+import 'package:chat/src/screen/search/search_page.dart';
 import 'package:chat/src/screen/settingpage/add_admin_page/add_admin_page.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
@@ -70,18 +71,20 @@ class _HomePageState extends State<HomePage> {
     AppList.user.clear();
     AppList.admin.clear();
     AppList.superAdmin.clear();
+    AppList.allAdminList.clear();
     await _databaseReference
         .collection("Users")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
-        if (allUser.displayName != AppModel.user.displayName) {
-          if (allUser.roles != "${TypeStatus.USER}") {
-            var oldTime = DateTime.parse(allUser.lastTimeUpdate);
-            var time = DateTime.now().difference(oldTime);
-            var strSpit = time.toString().split(".");
-            allUser.lastTimeUpdate = strSpit[0];
+        if (allUser.roles != "${TypeStatus.USER}") {
+          var oldTime = DateTime.parse(allUser.lastTimeUpdate);
+          var time = DateTime.now().difference(oldTime);
+          var strSpit = time.toString().split(".");
+          allUser.lastTimeUpdate = strSpit[0];
+          AppList.allAdminList.add(allUser);
+          if (allUser.displayName != AppModel.user.displayName) {
             AppList.adminList.add(allUser);
             AppList.adminUidList.add(value.documentID);
           }
@@ -94,6 +97,7 @@ class _HomePageState extends State<HomePage> {
   _getGroup() async {
     AppList.groupList.clear();
     AppList.groupKey.clear();
+    AppList.groupAllList.clear();
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -102,6 +106,7 @@ class _HomePageState extends State<HomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         _group = GroupModel.fromJson(value.data);
+        AppList.groupAllList.add(_group);
         _getWaitting(value.documentID);
         var uid =
             _group.memberUIDList.where((element) => element == AppString.uid);
@@ -227,6 +232,9 @@ class _HomePageState extends State<HomePage> {
     _getGroup();
     _getAllUser();
     _getAllAdmin();
+    // Random random = new Random();
+    // int randomNumber = random.nextInt(999999) + 100000;
+    // log(randomNumber);
   }
 
   @override
@@ -251,7 +259,7 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Stack(
           children: <Widget>[
-            AppList.groupList.length != 0
+            AppList.userList.length != 0
                 ? Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                     width: MediaQuery.of(context).size.width,
@@ -260,7 +268,19 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 20,
                         ),
-                        SearchField(),
+                        SearchField(
+                          enable: false,
+                          callback: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SearchPage(
+                                  group: AppList.groupAllList,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                         buildMyProfile(
                           profileUrl: AppModel.user.avatarUrl,
                           context: context,
@@ -292,10 +312,33 @@ class _HomePageState extends State<HomePage> {
                               return InkWell(
                                 onTap: () {
                                   DialogHelper.adminDialog(
-                                    context,
-                                    AppList.adminList[index].avatarUrl,
-                                    AppList.adminList[index].displayName,
-                                    AppList.adminList[index].coverUrl,
+                                    context: context,
+                                    profileUrl:
+                                        AppList.adminList[index].avatarUrl,
+                                    username:
+                                        AppList.adminList[index].displayName,
+                                    coverUrl: AppList.adminList[index].coverUrl,
+                                    callbackItem1: () {
+                                      Navigator.pop(context);
+                                      List<String> uidsList = [
+                                        AppList.adminList[index].uid,
+                                        AppModel.user.uid
+                                      ];
+                                      uidsList.sort();
+                                      String keyRoom =
+                                          "${uidsList[0]}_${uidsList[1]}";
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatRoomPage(
+                                            keyRoom: keyRoom,
+                                            uid: AppList.adminList[index].uid,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    callbackItem2: () {},
+                                    callbackItem3: () {},
                                   );
                                 },
                                 child: ListAdminItem(
@@ -322,7 +365,7 @@ class _HomePageState extends State<HomePage> {
                         _waittingList.length != 0
                             ? InkWell(
                                 onTap: () {
-                                  Navigator.push(
+                                  Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => WaittingPage(
@@ -384,6 +427,25 @@ class _HomePageState extends State<HomePage> {
                                                 .memberUIDList.length
                                                 .toString(),
                                             statusGroup: _group.statusGroup,
+                                            callbackItem1: () {
+                                              Navigator.pop(context);
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ChatGroupPage(
+                                                    groupName: AppList
+                                                        .groupList[index]
+                                                        .nameGroup,
+                                                    groupID:
+                                                        AppList.groupKey[index],
+                                                    id: AppList
+                                                        .groupList[index].id,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            callbackItem2: () {},
                                           );
                                         },
                                         child: ListGroupItem(
@@ -421,13 +483,34 @@ class _HomePageState extends State<HomePage> {
                             itemBuilder: (BuildContext context, int index) {
                               return InkWell(
                                 onTap: () {
-                                  UserDialogHelper.adminDialog(
+                                  DialogHelper.adminDialog(
                                     context: context,
                                     profileUrl:
                                         AppList.userList[index].avatarUrl,
                                     username:
                                         AppList.userList[index].displayName,
                                     coverUrl: AppList.userList[index].coverUrl,
+                                    callbackItem1: () {
+                                      Navigator.pop(context);
+                                      List<String> uidsList = [
+                                        AppList.userList[index].uid,
+                                        AppModel.user.uid
+                                      ];
+                                      uidsList.sort();
+                                      String keyRoom =
+                                          "${uidsList[0]}_${uidsList[1]}";
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatRoomPage(
+                                            keyRoom: keyRoom,
+                                            uid: AppList.userList[index].uid,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    callbackItem2: () {},
+                                    callbackItem3: () {},
                                   );
                                 },
                                 child: ListUserItem(

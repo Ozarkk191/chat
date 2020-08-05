@@ -21,8 +21,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatGroupPage extends StatefulWidget {
   final String groupName;
+  final String groupID;
+  final String id;
 
-  const ChatGroupPage({Key key, @required this.groupName}) : super(key: key);
+  const ChatGroupPage(
+      {Key key,
+      @required this.groupName,
+      @required this.groupID,
+      @required this.id})
+      : super(key: key);
   @override
   _ChatGroupPageState createState() => _ChatGroupPageState();
 }
@@ -50,7 +57,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .collection('Rooms')
         .document('chats')
         .collection('Group')
-        .document(AppString.uidRoomChat)
+        .document(widget.groupID)
         .get()
         .then((value) {
       var member = GroupModel.fromJson(value.data);
@@ -68,7 +75,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
             .then((value) {
           var member = UserModel.fromJson(value.data);
           _memberList.add(member);
-          _tokenList.add(member.notiToken);
+          if (member.uid != AppModel.user.uid) {
+            _tokenList.add(member.notiToken);
+          }
           setState(() {});
         });
       }
@@ -85,12 +94,12 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   void _sendNotification(String text, String token) async {
     var parameter = SendNotiParameters(
       title: widget.groupName,
-      body: "คุณได้รับข้อความ",
-      data: text,
+      body: text == "" ? "คุณได้รับรูปภาพ" : "คุณได้รับข้อความ",
+      data: "${widget.groupName}&&${widget.groupID}&&group&&${widget.id}",
       token: token,
     );
     var response = await PostRepository().sendNotification(parameter);
-    log(response['message'].toString());
+    log(response['message']);
   }
 
   void systemMessage() {
@@ -117,7 +126,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .collection('Rooms')
         .document('chats')
         .collection('Group')
-        .document(AppString.uidRoomChat)
+        .document(widget.groupID)
         .collection('messages')
         .document(DateTime.now().millisecondsSinceEpoch.toString());
 
@@ -131,33 +140,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
       _sendNotification(message.text, _tokenList[i]);
     }
   }
-
-  // void _getMemer() async {
-  //   Firestore.instance
-  //       .collection('Rooms')
-  //       .document('chats')
-  //       .collection('Group')
-  //       .document(AppString.uidRoomChat)
-  //       .get()
-  //       .then((value) {
-  //     var group = GroupModel.fromJson(value.data);
-  //     var member = group.memberUIDList;
-  //     for (var i = 0; i < member.length; i++) {
-  //       _getNotiToken(member[i]);
-  //     }
-  //   });
-  // }
-
-  // void _getNotiToken(uid) async {
-  //   await Firestore.instance
-  //       .collection("Users")
-  //       .document(uid)
-  //       .get()
-  //       .then((value) {
-  //     var user = UserModel.fromJson(value.data);
-  //     _tokenList.add(user.notiToken);
-  //   });
-  // }
 
   void _saveRead(String value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -198,7 +180,19 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text(widget.groupName),
+        title: Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(widget.groupName),
+              Text(
+                "ID : ${widget.id}",
+                style: TextStyle(fontSize: 8),
+              ),
+            ],
+          ),
+        ),
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -211,7 +205,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               .collection('Rooms')
               .document('chats')
               .collection('Group')
-              .document(AppString.uidRoomChat)
+              .document(widget.groupID)
               .collection('messages')
               .snapshots(),
           builder: (context, snapshot) {
@@ -239,7 +233,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 messages: messages,
                 showUserAvatar: false,
                 showAvatarForEveryMessage: false,
-                scrollToBottom: false,
+                scrollToBottom: true,
                 readOnly:
                     AppString.roles == '${TypeStatus.USER}' ? true : false,
                 onPressAvatar: (ChatUser user) {
@@ -293,11 +287,14 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                         ChatMessage message =
                             ChatMessage(text: "", user: user, image: url);
 
+                        for (var i = 0; i < _tokenList.length; i++) {
+                          _sendNotification(message.text, _tokenList[i]);
+                        }
                         var documentReference = Firestore.instance
                             .collection('Rooms')
                             .document('chats')
                             .collection('Group')
-                            .document(AppString.uidRoomChat)
+                            .document(widget.groupID)
                             .collection('messages')
                             .document(DateTime.now()
                                 .millisecondsSinceEpoch
@@ -339,6 +336,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
           builder: (context) => SettingGroupPage(
             memberList: _memberList,
             groupName: widget.groupName,
+            groupId: widget.groupID,
+            id: widget.id,
           ),
         ),
       );

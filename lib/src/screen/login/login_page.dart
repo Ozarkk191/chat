@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
@@ -85,10 +87,16 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _logout() async {
+    FirebaseAuth.instance.signOut();
+    await FacebookLogin().logOut();
+    await GoogleSignIn().signOut();
+  }
+
   @override
   void initState() {
     super.initState();
-    // AuthService().signOut();
+    _logout();
     AppModel.user = null;
     _messaging.getToken().then((token) {
       AppString.notiToken = token;
@@ -182,6 +190,8 @@ class _LoginPageState extends State<LoginPage> {
         // AppString.isActive = userModel.isActive;
         AppString.gender = AppModel.user.gender;
         AppString.coverUrl = AppModel.user.coverUrl;
+
+        log(AppModel.user.displayName);
 
         AppModel.user.lastTimeUpdate = DateTime.now().toString();
         _databaseReference

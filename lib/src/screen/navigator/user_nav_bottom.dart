@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
+import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,6 +36,8 @@ class _UserNavBottomState extends State<UserNavBottom>
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  var _messages;
+
   @override
   void initState() {
     var initializationSettingsAndroid =
@@ -39,6 +45,7 @@ class _UserNavBottomState extends State<UserNavBottom>
 
     var initializationSettingsIOS = IOSInitializationSettings(
         onDidReceiveLocalNotification: (id, title, body, payload) {
+      log(payload);
       print("onDidReceiveLocalNotification called.");
     });
     var initializationSettings = InitializationSettings(
@@ -47,6 +54,33 @@ class _UserNavBottomState extends State<UserNavBottom>
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (payload) {
       // when user tap on notification.
+      setState(() {
+        payload = _messages['data']['data'].toString();
+        var data = payload.split("&&");
+        if (data[2] == "room") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatRoomPage(
+                keyRoom: data[0],
+                uid: data[1],
+              ),
+            ),
+          );
+        } else if (data[2] == "group") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatGroupPage(
+                groupID: data[1],
+                groupName: data[0],
+                id: data[3],
+              ),
+            ),
+          );
+        }
+      });
+
       print("onSelectNotification called.");
     });
 
@@ -64,7 +98,9 @@ class _UserNavBottomState extends State<UserNavBottom>
   void initFirebaseMessaging() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: ${message['notification']}");
+        print("onMessage: ${message['data']}");
+        _messages = message;
+        setState(() {});
         sendNotification(
           title: message['notification']['title'],
           body: message['notification']['body'],
@@ -100,12 +136,8 @@ class _UserNavBottomState extends State<UserNavBottom>
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(
-      111,
-      title,
-      body,
-      platformChannelSpecifics,
-    );
+    await flutterLocalNotificationsPlugin
+        .show(111, title, body, platformChannelSpecifics, payload: "");
   }
 
   void handlePageChange() {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class GroupDialogHelper {
   static adminDialog({
-    context,
+    BuildContext context,
     String titleLeft,
     String titleRight,
     String pathIconLeft,
@@ -13,6 +13,8 @@ class GroupDialogHelper {
     String member,
     String coverUrl,
     String statusGroup,
+    Function callbackItem1,
+    Function callbackItem2,
   }) =>
       showDialog(
         context: context,
@@ -21,8 +23,8 @@ class GroupDialogHelper {
           title2: titleRight,
           pathIcon1: pathIconLeft,
           pathIcon2: pathIconRight,
-          callbackItem1: () {},
-          callbackItem2: () {},
+          callbackItem1: callbackItem1,
+          callbackItem2: callbackItem2,
           coverUrl: coverUrl,
           profileUrl: profileUrl,
           groupName: groupName,

@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-
-import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';

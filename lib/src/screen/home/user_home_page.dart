@@ -6,10 +6,11 @@ import 'package:chat/models/group_model.dart';
 import 'package:chat/models/news_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
-import 'package:chat/src/base_compoments/card/promotion_card.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/search/search_page.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,6 +53,7 @@ class _UserHomePageState extends State<UserHomePage> {
     AppList.groupKey.clear();
     AppList.lastTextList.clear();
     AppList.lastTimeList.clear();
+    AppList.groupAllList.clear();
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -60,6 +62,7 @@ class _UserHomePageState extends State<UserHomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var group = GroupModel.fromJson(value.data);
+        AppList.groupAllList.add(group);
         var uid =
             group.memberUIDList.where((element) => element == AppString.uid);
         if (uid.length != 0) {
@@ -180,147 +183,168 @@ class _UserHomePageState extends State<UserHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff202020),
-      appBar: AppBar(
-        title: Text('Home'),
-        centerTitle: true,
-        backgroundColor: Color(0xff242424),
-        leading: Container(),
-        actions: <Widget>[
-          InkWell(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SettingPage()));
-              // Navigator.of(context).pushReplacementNamed('/setting');
-            },
-            child: Image.asset('assets/images/ic_setting.png'),
-          )
-        ],
-      ),
-      body: _newsList.length != 0
-          ? SingleChildScrollView(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 20,
-                    ),
-                    SearchField(),
-                    buildMyProfile(
-                      profileUrl: AppModel.user.avatarUrl,
-                      context: context,
-                      displayName: AppModel.user.displayName,
-                    ),
-                    AppList.groupList.length != 0
-                        ? TextAndLine(title: 'กลุ่ม')
-                        : Container(),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    AppList.groupList.length != 0
-                        ? Container(
-                            height: 160,
-                            child: ListView.builder(
-                                itemBuilder: (BuildContext context, int index) {
-                                  return InkWell(
-                                    onTap: () {
-                                      GroupDialogHelper.adminDialog(
-                                        context: context,
-                                        titleLeft: 'Group',
-                                        titleRight: 'Delete',
-                                        pathIconLeft:
-                                            'assets/images/ic_group.png',
-                                        pathIconRight:
-                                            'assets/images/ic_trash.png',
-                                        groupName:
-                                            AppList.groupList[index].nameGroup,
-                                        profileUrl: AppList
-                                            .groupList[index].avatarGroup,
-                                        coverUrl:
-                                            AppList.groupList[index].coverUrl,
-                                        member: AppList.groupList[index]
-                                            .memberUIDList.length
-                                            .toString(),
-                                        statusGroup: AppList
-                                            .groupList[index].statusGroup,
+        backgroundColor: Color(0xff202020),
+        appBar: AppBar(
+          title: Text('Home'),
+          centerTitle: true,
+          backgroundColor: Color(0xff242424),
+          leading: Container(),
+          actions: <Widget>[
+            InkWell(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingPage()));
+                // Navigator.of(context).pushReplacementNamed('/setting');
+              },
+              child: Image.asset('assets/images/ic_setting.png'),
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  height: 20,
+                ),
+                SearchField(
+                  enable: false,
+                  callback: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchPage(
+                          group: AppList.groupAllList,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                buildMyProfile(
+                  profileUrl: AppModel.user.avatarUrl,
+                  context: context,
+                  displayName: AppModel.user.displayName,
+                ),
+                AppList.groupList.length != 0
+                    ? TextAndLine(title: 'กลุ่ม')
+                    : Container(),
+                SizedBox(
+                  height: 5,
+                ),
+                AppList.groupList.length != 0
+                    ? Container(
+                        height: 160,
+                        child: ListView.builder(
+                            itemBuilder: (BuildContext context, int index) {
+                              return InkWell(
+                                onTap: () {
+                                  GroupDialogHelper.adminDialog(
+                                    context: context,
+                                    titleLeft: 'Group',
+                                    titleRight: 'Delete',
+                                    pathIconLeft: 'assets/images/ic_group.png',
+                                    pathIconRight: 'assets/images/ic_trash.png',
+                                    groupName:
+                                        AppList.groupList[index].nameGroup,
+                                    profileUrl:
+                                        AppList.groupList[index].avatarGroup,
+                                    coverUrl: AppList.groupList[index].coverUrl,
+                                    member: AppList
+                                        .groupList[index].memberUIDList.length
+                                        .toString(),
+                                    statusGroup:
+                                        AppList.groupList[index].statusGroup,
+                                    callbackItem1: () {
+                                      Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatGroupPage(
+                                            groupName: AppList
+                                                .groupList[index].nameGroup,
+                                            groupID: AppList.groupKey[index],
+                                            id: AppList.groupList[index].id,
+                                          ),
+                                        ),
                                       );
                                     },
-                                    child: ListGroupItem(
-                                      imgCoverUrl:
-                                          AppList.groupList[index].coverUrl,
-                                      imgGroupUrl:
-                                          AppList.groupList[index].avatarGroup,
-                                      nameGroup:
-                                          AppList.groupList[index].nameGroup,
-                                      numberUser: AppList
-                                          .groupList[index].memberUIDList.length
-                                          .toString(),
-                                      status:
-                                          AppList.groupList[index].statusGroup,
-                                    ),
+                                    callbackItem2: () {},
                                   );
                                 },
-                                itemCount: AppList.groupList.length,
-                                scrollDirection: Axis.horizontal),
-                          )
-                        : Container(),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    _newsList.length != 0
-                        ? TextAndLine(title: 'ข่าวสาร')
-                        : Container(),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    _newsList.length != 0 || waittingList.length != 0
-                        ? ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _newsList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return PromotionCard(
-                                imageUrlGroup: _newsList[index].imageGroup,
-                                imageUrlPromotion: _newsList[index].imageUrl,
-                                nameGroup: _newsList[index].nameGroup,
-                                status: _newsList[index].timePost,
-                                description: _newsList[index].title,
-                                keyGroup: _newsList[index].groupUID,
-                                waitting: "null",
-                                isActive: _newsList[index].isActive,
-                                callback: () {
-                                  _databaseReference
-                                      .collection("Rooms")
-                                      .document("chats")
-                                      .collection("Group")
-                                      .document(_newsList[index].groupUID)
-                                      .collection("Waitting")
-                                      .document(AppModel.user.uid)
-                                      .setData({"uid": AppModel.user.uid});
-                                  _dialogShowBack(
-                                      title: "แจ้งเตือน",
-                                      content:
-                                          "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
-                                  setState(() {});
-                                },
+                                child: ListGroupItem(
+                                  imgCoverUrl:
+                                      AppList.groupList[index].coverUrl,
+                                  imgGroupUrl:
+                                      AppList.groupList[index].avatarGroup,
+                                  nameGroup: AppList.groupList[index].nameGroup,
+                                  numberUser: AppList
+                                      .groupList[index].memberUIDList.length
+                                      .toString(),
+                                  status: AppList.groupList[index].statusGroup,
+                                ),
                               );
                             },
-                          )
-                        : Container(),
-                  ],
+                            itemCount: AppList.groupList.length,
+                            scrollDirection: Axis.horizontal),
+                      )
+                    : Container(),
+                SizedBox(
+                  height: 5,
                 ),
-              ),
-            )
-          : Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+                // _newsList.length != 0
+                //     ? TextAndLine(title: 'ข่าวสาร')
+                //     : Container(),
+                // SizedBox(
+                //   height: 5,
+                // ),
+                // _newsList.length != 0 || waittingList.length != 0
+                //     ? ListView.builder(
+                //         shrinkWrap: true,
+                //         physics: const NeverScrollableScrollPhysics(),
+                //         itemCount: _newsList.length,
+                //         itemBuilder: (BuildContext context, int index) {
+                //           return PromotionCard(
+                //             imageUrlGroup: _newsList[index].imageGroup,
+                //             imageUrlPromotion: _newsList[index].imageUrl,
+                //             nameGroup: _newsList[index].nameGroup,
+                //             status: _newsList[index].timePost,
+                //             description: _newsList[index].title,
+                //             keyGroup: _newsList[index].groupUID,
+                //             waitting: "null",
+                //             isActive: _newsList[index].isActive,
+                //             callback: () {
+                //               _databaseReference
+                //                   .collection("Rooms")
+                //                   .document("chats")
+                //                   .collection("Group")
+                //                   .document(_newsList[index].groupUID)
+                //                   .collection("Waitting")
+                //                   .document(AppModel.user.uid)
+                //                   .setData({"uid": AppModel.user.uid});
+                //               _dialogShowBack(
+                //                   title: "แจ้งเตือน",
+                //                   content:
+                //                       "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
+                //               setState(() {});
+                //             },
+                //           );
+                //         },
+                //       )
+                //     : Container(),
+              ],
             ),
-    );
+          ),
+        )
+        // : Container(
+        //     width: MediaQuery.of(context).size.width,
+        //     height: MediaQuery.of(context).size.height,
+        //     child: Center(
+        //       child: CircularProgressIndicator(),
+        //     ),
+        //   ),
+        );
   }
 
   Container buildMyProfile(
@@ -380,26 +404,26 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  Future<bool> _dialogShowBack({String title, String content}) {
-    return showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: new Text('$title'),
-            content: new Text('$content'),
-            actions: <Widget>[
-              new GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop(false);
-                  setState(() {});
-                },
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text("ตกลง"),
-                ),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
+  // Future<bool> _dialogShowBack({String title, String content}) {
+  //   return showDialog(
+  //         context: context,
+  //         builder: (context) => new AlertDialog(
+  //           title: new Text('$title'),
+  //           content: new Text('$content'),
+  //           actions: <Widget>[
+  //             new GestureDetector(
+  //               onTap: () {
+  //                 Navigator.of(context).pop(false);
+  //                 setState(() {});
+  //               },
+  //               child: Container(
+  //                 padding: EdgeInsets.all(10),
+  //                 child: Text("ตกลง"),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ) ??
+  //       false;
+  // }
 }

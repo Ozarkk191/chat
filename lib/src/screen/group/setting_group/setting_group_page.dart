@@ -17,8 +17,11 @@ import 'package:toggle_switch/toggle_switch.dart';
 class SettingGroupPage extends StatefulWidget {
   final List<UserModel> memberList;
   final String groupName;
+  final String groupId;
+  final String id;
 
-  const SettingGroupPage({Key key, this.memberList, this.groupName})
+  const SettingGroupPage(
+      {Key key, this.memberList, this.groupName, this.groupId, this.id})
       : super(key: key);
   @override
   _SettingGroupPageState createState() => _SettingGroupPageState();
@@ -79,6 +82,8 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
         MaterialPageRoute(
           builder: (context) => ChatGroupPage(
             groupName: widget.groupName,
+            groupID: AppString.uidRoomChat,
+            id: widget.id,
           ),
         ),
       );
@@ -115,7 +120,18 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
           title: Text('ตั้งค่าโปรไฟล์กลุ่ม'),
           backgroundColor: Color(0xff202020),
           leading: InkWell(
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatGroupPage(
+                      groupName: widget.groupName,
+                      groupID: widget.groupId,
+                      id: widget.id,
+                    ),
+                  ),
+                );
+              },
               child: Icon(Icons.arrow_back_ios)),
           actions: <Widget>[
             InkWell(

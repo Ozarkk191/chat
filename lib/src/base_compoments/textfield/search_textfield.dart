@@ -2,6 +2,18 @@ import 'package:chat/src/screen/scan_qr/scan_qrcode_page.dart';
 import 'package:flutter/material.dart';
 
 class SearchField extends StatelessWidget {
+  final bool enable;
+  final Function onChanged;
+  final Function callback;
+  final TextEditingController controller;
+
+  const SearchField({
+    Key key,
+    this.enable = true,
+    this.onChanged,
+    this.controller,
+    this.callback,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -12,18 +24,24 @@ class SearchField extends StatelessWidget {
       height: 40,
       child: Stack(
         children: <Widget>[
-          TextField(
-            textAlign: TextAlign.justify,
-            cursorColor: Colors.black,
-            decoration: InputDecoration(
-                hintText: 'ค้นหา',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.black,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusColor: Colors.black),
+          InkWell(
+            onTap: enable ? null : callback,
+            child: TextField(
+              enabled: enable,
+              controller: controller,
+              textAlign: TextAlign.justify,
+              cursorColor: Colors.black,
+              onChanged: onChanged,
+              decoration: InputDecoration(
+                  hintText: 'ค้นหา',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.black,
+                  ),
+                  filled: false,
+                  border: InputBorder.none,
+                  focusColor: Colors.black),
+            ),
           ),
           Align(
             alignment: Alignment.centerRight,

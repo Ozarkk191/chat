@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/group_model.dart';
@@ -17,6 +16,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:random_string/random_string.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class CreateGroup extends StatefulWidget {
@@ -105,16 +105,23 @@ class _CreateGroupState extends State<CreateGroup> {
     List<String> uidlist = List<String>();
     for (int i = 0; i < _memberList.length; i++) {
       uidlist.add(_memberList[i].uid);
-      print(_memberList[i].uid);
     }
-    uidlist.add(AppString.uid);
 
+    for (int i = 0; i < AppList.allAdminList.length; i++) {
+      uidlist.add(AppList.allAdminList[i].uid);
+    }
+
+    // uidlist.add(AppString.uid);
+    var id = randomBetween(100000, 200000).toString();
     var group = GroupModel(
         nameGroup: _nameGroup.text,
         avatarGroup: _profileUrl,
         memberUIDList: uidlist,
         statusGroup: _statusGroup,
-        coverUrl: _coverUrl);
+        coverUrl: _coverUrl,
+        idCustom: "ใส่ ID กลุ่ม",
+        id: id,
+        groupID: now2);
     var _documentReference = Firestore.instance;
     _documentReference
         .collection('Rooms')
@@ -153,6 +160,8 @@ class _CreateGroupState extends State<CreateGroup> {
             MaterialPageRoute(
                 builder: (context) => ChatGroupPage(
                       groupName: _nameGroup.text,
+                      groupID: now2,
+                      id: id,
                     )));
         AppList.indexList.clear();
 
@@ -180,7 +189,9 @@ class _CreateGroupState extends State<CreateGroup> {
   // @override
   // void initState() {
   //   super.initState();
-  //   // _nameGroup.text = _profileUrl;
+  //   Random random = new Random();
+  //   int randomNumber = random.nextInt(999999) + 100000;
+  //   log(randomNumber);
   // }
 
   @override
@@ -196,7 +207,7 @@ class _CreateGroupState extends State<CreateGroup> {
       child: Scaffold(
         backgroundColor: Color(0xff292929),
         appBar: AppBar(
-          title: Text('ตั้งค่าโปรไฟล์กลุ่ม'),
+          title: Text('สร้างกลุ่ม'),
           backgroundColor: Color(0xff202020),
           leading: InkWell(
               onTap: () {

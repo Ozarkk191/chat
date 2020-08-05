@@ -63,6 +63,8 @@ class GroupPage extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => ChatGroupPage(
                               groupName: AppString.nameGroup,
+                              groupID: AppString.uidRoomChat,
+                              id: AppList.groupList[index].id,
                             ),
                           ),
                         );

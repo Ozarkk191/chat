@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:flutter/material.dart';
 

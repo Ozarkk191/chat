@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/models/waitting_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_waitting_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -101,6 +104,29 @@ class _WaittingPageState extends State<WaittingPage> {
     });
   }
 
+  // _confirmAll(List<UserModel> userList, List<String> groupList) async {
+  //   setState(() {
+  //     _loading = true;
+  //   });
+  //   groupList.forEach((element) { });
+  //   for (var i = 0; i < groupList.length; i++) {
+  //     log(userList[i].uid);
+  //     log(groupList[i]);
+
+  //     await _databaseReference
+  //         .collection("Rooms")
+  //         .document("chats")
+  //         .collection("Group")
+  //         .document(groupList[i])
+  //         .collection("Waitting")
+  //         .document(userList[i].uid)
+  //         .delete()
+  //         .then((_) {
+
+  //     });
+  //   }
+  // }
+
   _cancel(int index, String uidGroup, String uid) async {
     setState(() {
       _loading = true;
@@ -137,11 +163,22 @@ class _WaittingPageState extends State<WaittingPage> {
           title: Text('Waitting list'),
           backgroundColor: Color(0xff202020),
           leading: InkWell(
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TestNav(),
+                  ),
+                );
+              },
               child: Icon(Icons.arrow_back_ios)),
           actions: <Widget>[
             InkWell(
-              onTap: () {},
+              onTap: () {
+                for (var i = 0; i < _groupList.length; i++) {
+                  _confirm(i, _groupUIDList[i], _userList[i].uid);
+                }
+              },
               child: Container(
                 width: 70,
                 margin: EdgeInsets.only(right: 10),

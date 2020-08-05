@@ -179,10 +179,14 @@ class _ChatPageState extends State<ChatPage> {
                                     AppString.uidRoomChat = test;
 
                                     Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                ChatRoomPage()));
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatRoomPage(
+                                          uid: AppString.uidAdmin,
+                                          keyRoom: AppString.uidRoomChat,
+                                        ),
+                                      ),
+                                    );
                                   },
                                   child: ListChatItem(
                                     profileUrl: _chatList[index].user.avatarUrl,

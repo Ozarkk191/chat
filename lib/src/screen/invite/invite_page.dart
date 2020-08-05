@@ -22,16 +22,14 @@ class _InvitePageState extends State<InvitePage> {
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i <= AppList.allUserList.length; i++) {
+    for (int i = 0; i <= AppList.userList.length; i++) {
       _boolList.add(false);
     }
     Timer(Duration(milliseconds: 500), () {
       if (AppList.indexList.length != 0) {
         for (int i = 0; i <= AppList.indexList.length; i++) {
-          // if (widget.user[i].displayName == AppList.allUserList[i].displayName) {
           _boolList[AppList.indexList[i]] = true;
           setState(() {});
-          // }
         }
       }
     });
@@ -40,10 +38,8 @@ class _InvitePageState extends State<InvitePage> {
   void _addUser() {
     AppList.indexList.clear();
     for (int i = 0; i < _boolList.length; i++) {
-      // log(_boolList[i].toString());
-      // log(AppList.allUserList[1].displayName.toString());
       if (_boolList[i]) {
-        UserModel data = AppList.allUserList[i];
+        UserModel data = AppList.userList[i];
         data.uid = AppList.allUidList[i];
         AppList.indexList.add(i);
         _addUserList.add(data);
@@ -114,7 +110,7 @@ class _InvitePageState extends State<InvitePage> {
                 itemBuilder: (BuildContext context, int index) {
                   return ListUserInviteItem(
                     index: index,
-                    profileUrl: AppList.allUserList[index].avatarUrl,
+                    profileUrl: AppList.userList[index].avatarUrl,
                     value: _boolList[index],
                     onChanged: (val) {
                       setState(() {
@@ -125,10 +121,10 @@ class _InvitePageState extends State<InvitePage> {
                         // }
                       });
                     },
-                    userName: AppList.allUserList[index].displayName,
+                    userName: AppList.userList[index].displayName,
                   );
                 },
-                itemCount: AppList.allUserList.length,
+                itemCount: AppList.userList.length,
               ),
             ),
           ],

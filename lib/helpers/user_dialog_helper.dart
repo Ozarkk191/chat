@@ -8,6 +8,8 @@ class UserDialogHelper {
     String profileUrl,
     String username,
     String coverUrl,
+    Function callbackItem1,
+    Function callbackItem2,
   }) =>
       showDialog(
         context: context,
@@ -16,8 +18,8 @@ class UserDialogHelper {
           title2: 'Delete',
           pathIcon1: 'assets/images/ic_group.png',
           pathIcon2: 'assets/images/ic_trash.png',
-          callbackItem1: () {},
-          callbackItem2: () {},
+          callbackItem1: callbackItem1,
+          callbackItem2: callbackItem2,
           coverUrl: coverUrl,
           profileUrl: profileUrl,
           username: username,

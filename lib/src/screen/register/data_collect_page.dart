@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/request_body_parameters.dart';
@@ -40,12 +38,12 @@ class _DataCollectPageState extends State<DataCollectPage> {
     _phone.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    AuthService().signOut();
-    log('didChangeDependencies');
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   AuthService().signOut();
+  //   log('didChangeDependencies');
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -92,11 +90,15 @@ class _DataCollectPageState extends State<DataCollectPage> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(5))),
                           child: Center(
-                            child: Text(
-                              "+66",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white),
+                            child: Icon(
+                              Icons.phone,
+                              color: Colors.white,
                             ),
+                            // child: Text(
+                            //   "+66",
+                            //   textAlign: TextAlign.center,
+                            //   style: TextStyle(color: Colors.white),
+                            // ),
                           ),
                         ),
                         SizedBox(width: 10),

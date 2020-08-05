@@ -51,12 +51,14 @@ class AppList {
   static List<String> lastTextList = List<String>();
   static List<String> lastTimeList = List<String>();
   static List<UserModel> userList = [];
+  static List<UserModel> allAdminList = [];
   static List<UserModel> allUserList = [];
   static List<String> allUidList = [];
   static List<UserModel> adminList = [];
   static List<String> uidList = [];
   static List<String> adminUidList = [];
   static List<GroupModel> groupList = [];
+  static List<GroupModel> groupAllList = [];
   static List<String> groupKey = [];
   static List<int> indexList = List<int>();
 

@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
+import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/repositories/post_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +15,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ChatRoomPage extends StatefulWidget {
+  final String uid;
+  final String keyRoom;
+
+  const ChatRoomPage({Key key, this.uid, this.keyRoom}) : super(key: key);
   @override
   _ChatRoomPageState createState() => _ChatRoomPageState();
 }
@@ -22,6 +29,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   final picker = ImagePicker();
   UserModel userModel;
+  String _token;
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -46,13 +54,26 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       AppString.uid = user.uid;
       await _databaseReference
           .collection('Users')
-          .document(AppString.uidAdmin)
+          .document(widget.uid)
           .get()
           .then((value) {
         userModel = UserModel.fromJson(value.data);
+        _token = userModel.notiToken;
         setState(() {});
       });
     }
+  }
+
+  void _sendNotification(String text, String token) async {
+    log(token);
+    var parameter = SendNotiParameters(
+      title: AppModel.user.displayName,
+      body: text == "" ? "คุณได้รับรูปภาพ" : "คุณได้รับข้อความ",
+      data: "${widget.keyRoom}&&${AppModel.user.uid}&&room",
+      token: token,
+    );
+    var response = await PostRepository().sendNotification(parameter);
+    log(response['message']);
   }
 
   void systemMessage() {
@@ -79,7 +100,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         .collection('Rooms')
         .document('chats')
         .collection('ChatRoom')
-        .document(AppString.uidRoomChat)
+        .document(widget.keyRoom)
         .collection('messages')
         .document(DateTime.now().millisecondsSinceEpoch.toString());
 
@@ -89,6 +110,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         message.toJson(),
       );
     });
+    _sendNotification(message.text, _token);
   }
 
   @override
@@ -112,7 +134,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               .collection('Rooms')
               .document('chats')
               .collection('ChatRoom')
-              .document(AppString.uidRoomChat)
+              .document(widget.keyRoom)
               .collection('messages')
               .snapshots(),
           builder: (context, snapshot) {
@@ -190,12 +212,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
 
                         ChatMessage message =
                             ChatMessage(text: "", user: user, image: url);
+                        _sendNotification(message.text, _token);
 
                         var documentReference = Firestore.instance
                             .collection('Rooms')
                             .document('chats')
                             .collection('ChatRoom')
-                            .document(AppString.uidRoomChat)
+                            .document(widget.keyRoom)
                             .collection('messages')
                             .document(DateTime.now()
                                 .millisecondsSinceEpoch

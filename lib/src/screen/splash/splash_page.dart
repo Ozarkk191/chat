@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/services/authservice.dart';
+import 'package:chat/src/screen/login/login_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,11 +19,94 @@ class _SplashPageState extends State<SplashPage> {
   String tokenCheck = "";
   @override
   void initState() {
+    _check();
+
     super.initState();
     _messaging.getToken().then((token) {
       tokenCheck = token;
     });
-    _loggedIn();
+    // _loggedIn();
+  }
+
+  _check() async {
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    Firestore _databaseReference = Firestore.instance;
+    FirebaseUser user = await _auth.currentUser();
+    List<String> _listUID = List<String>();
+    if (user != null) {
+      await _databaseReference
+          .collection('Users')
+          .getDocuments()
+          .then((QuerySnapshot snapshot) {
+        snapshot.documents.forEach((value) {
+          _listUID.add(value.documentID);
+        });
+      }).then((value) {
+        var uid = _listUID.where((element) => element == user.uid);
+        if (uid.length != 0) {
+          _getPorfile();
+        } else {
+          AuthService().signOut();
+          Timer(Duration(seconds: 3), () {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => LoginPage()));
+          });
+        }
+      });
+    } else {
+      Timer(Duration(seconds: 3), () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => LoginPage()));
+      });
+    }
+  }
+
+  _getPorfile() async {
+    AppModel.user = null;
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    Firestore _databaseReference = Firestore.instance;
+    FirebaseUser user = await _auth.currentUser();
+    AppString.uid = user.uid;
+    _databaseReference
+        .collection('Users')
+        .document(user.uid)
+        .get()
+        .then((value) {
+      var userModel = UserModel.fromJson(value.data);
+      AppModel.user = UserModel.fromJson(value.data);
+      if (userModel.notiToken != tokenCheck) {
+        userModel.notiToken = tokenCheck;
+        _databaseReference
+            .collection('Users')
+            .document(user.uid)
+            .setData(userModel.toJson());
+      }
+      AppString.displayName = userModel.displayName;
+      AppString.firstname = userModel.firstName;
+      AppString.lastname = userModel.lastName;
+      AppString.birthDate = userModel.birthDate;
+      AppString.email = userModel.email;
+      AppString.notiToken = userModel.notiToken;
+      AppString.phoneNumber = userModel.phoneNumber;
+      AppString.roles = userModel.roles;
+      AppString.dateTime = userModel.updatedAt;
+      AppString.isActive = userModel.isActive;
+      AppString.gender = userModel.gender;
+      AppString.photoUrl = userModel.avatarUrl;
+      AppString.coverUrl = userModel.coverUrl;
+      userModel.isActive = true;
+      userModel.lastTimeUpdate = DateTime.now().toString();
+      _databaseReference
+          .collection('Users')
+          .document(user.uid)
+          .setData(userModel.toJson());
+
+      if (AppString.roles == TypeStatus.USER.toString()) {
+        Navigator.of(context).pushReplacementNamed('/navuserhome');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/navhome');
+      }
+    });
   }
 
   @override
@@ -37,57 +122,56 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  _loggedIn() async {
-    FirebaseAuth _auth = FirebaseAuth.instance;
-    Firestore _databaseReference = Firestore.instance;
-    FirebaseUser user = await _auth.currentUser();
+  // _loggedIn() async {
+  //   FirebaseAuth _auth = FirebaseAuth.instance;
+  //   Firestore _databaseReference = Firestore.instance;
+  //   FirebaseUser user = await _auth.currentUser();
 
-    if (user != null) {
-      AppString.uid = user.uid;
-      _databaseReference
-          .collection('Users')
-          .document(user.uid)
-          .get()
-          .then((value) {
-        var userModel = UserModel.fromJson(value.data);
-        AppModel.user = UserModel.fromJson(value.data);
-        if (userModel.notiToken != tokenCheck) {
-          userModel.notiToken = tokenCheck;
-          _databaseReference
-              .collection('Users')
-              .document(user.uid)
-              .setData(userModel.toJson());
-        }
-        AppString.displayName = userModel.displayName;
-        AppString.firstname = userModel.firstName;
-        AppString.lastname = userModel.lastName;
-        AppString.birthDate = userModel.birthDate;
-        AppString.email = userModel.email;
-        AppString.notiToken = userModel.notiToken;
-        AppString.phoneNumber = userModel.phoneNumber;
-        AppString.roles = userModel.roles;
-        AppString.dateTime = userModel.updatedAt;
-        AppString.isActive = userModel.isActive;
-        AppString.gender = userModel.gender;
-        AppString.photoUrl = userModel.avatarUrl;
-        AppString.coverUrl = userModel.coverUrl;
-        userModel.isActive = true;
-        userModel.lastTimeUpdate = DateTime.now().toString();
-        _databaseReference
-            .collection('Users')
-            .document(user.uid)
-            .setData(userModel.toJson());
+  //   if (user != null) {
+  //     _databaseReference
+  //         .collection('Users')
+  //         .document(user.uid)
+  //         .get()
+  //         .then((value) {
+  //       var userModel = UserModel.fromJson(value.data);
+  //       AppModel.user = UserModel.fromJson(value.data);
+  //       if (userModel.notiToken != tokenCheck) {
+  //         userModel.notiToken = tokenCheck;
+  //         _databaseReference
+  //             .collection('Users')
+  //             .document(user.uid)
+  //             .setData(userModel.toJson());
+  //       }
+  //       AppString.displayName = userModel.displayName;
+  //       AppString.firstname = userModel.firstName;
+  //       AppString.lastname = userModel.lastName;
+  //       AppString.birthDate = userModel.birthDate;
+  //       AppString.email = userModel.email;
+  //       AppString.notiToken = userModel.notiToken;
+  //       AppString.phoneNumber = userModel.phoneNumber;
+  //       AppString.roles = userModel.roles;
+  //       AppString.dateTime = userModel.updatedAt;
+  //       AppString.isActive = userModel.isActive;
+  //       AppString.gender = userModel.gender;
+  //       AppString.photoUrl = userModel.avatarUrl;
+  //       AppString.coverUrl = userModel.coverUrl;
+  //       userModel.isActive = true;
+  //       userModel.lastTimeUpdate = DateTime.now().toString();
+  //       _databaseReference
+  //           .collection('Users')
+  //           .document(user.uid)
+  //           .setData(userModel.toJson());
 
-        if (AppString.roles == TypeStatus.USER.toString()) {
-          Navigator.of(context).pushReplacementNamed('/navuserhome');
-        } else {
-          Navigator.of(context).pushReplacementNamed('/navhome');
-        }
-      });
-    } else {
-      Timer(Duration(seconds: 3), () {
-        Navigator.of(context).pushReplacementNamed('/login');
-      });
-    }
-  }
+  //       if (AppString.roles == TypeStatus.USER.toString()) {
+  //         Navigator.of(context).pushReplacementNamed('/navuserhome');
+  //       } else {
+  //         Navigator.of(context).pushReplacementNamed('/navhome');
+  //       }
+  //     });
+  //   } else {
+  //     Timer(Duration(seconds: 3), () {
+  //       Navigator.of(context).pushReplacementNamed('/login');
+  //     });
+  //   }
+  // }
 }
