@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'bloc/validate_bloc/validate_bloc.dart';
 import 'src/screen/home/home_page.dart';
 import 'src/screen/login/login_page.dart';
@@ -36,6 +38,19 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          DefaultCupertinoLocalizations.delegate,
+          GlobalCupertinoLocalizations
+              .delegate, // Add global cupertino localiztions.
+        ],
+        locale: Locale('th', 'TH'), // Current locale
+        supportedLocales: [
+          const Locale('en', 'US'), // English
+          const Locale('th', 'TH'), // Thai
+        ],
         title: 'Flutter Demo',
         initialRoute: '/splash',
         routes: {

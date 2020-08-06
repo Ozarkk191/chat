@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class ListUserItem extends StatelessWidget {
   final String profileUrl, userName;
   final Function callback;
+  final bool banned;
 
   const ListUserItem({
     Key key,
     @required this.profileUrl,
     @required this.userName,
     @required this.callback,
+    this.banned = false,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class ListUserItem extends StatelessWidget {
           Expanded(
             child: Text(
               '$userName',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: banned ? Colors.red : Colors.grey),
             ),
           ),
           InkWell(

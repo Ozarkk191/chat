@@ -19,12 +19,14 @@ import 'package:chat/src/screen/search/search_page.dart';
 import 'package:chat/src/screen/settingpage/add_admin_page/add_admin_page.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:chat/src/screen/settingpage/setting_page.dart';
+import 'package:chat/src/screen/unbanned/unbanned_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toast/toast.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -37,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   GroupModel _group;
   int waittingLength = 0;
   List<WaittingModel> _waittingList = List<WaittingModel>();
+  List<UserModel> _userBannedList = List<UserModel>();
 
   user() async {
     FirebaseUser user = await _auth.currentUser();
@@ -78,6 +81,9 @@ class _HomePageState extends State<HomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
+        if (allUser.banned) {
+          _userBannedList.add(allUser);
+        }
         if (allUser.roles != "${TypeStatus.USER}") {
           var oldTime = DateTime.parse(allUser.lastTimeUpdate);
           var time = DateTime.now().difference(oldTime);
@@ -89,6 +95,7 @@ class _HomePageState extends State<HomePage> {
             AppList.adminUidList.add(value.documentID);
           }
         }
+
         setState(() {});
       });
     });
@@ -337,19 +344,40 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       );
                                     },
-                                    callbackItem2: () {},
+                                    callbackItem2: AppModel.user.roles !=
+                                            TypeStatus.SUPERADMIN.toString()
+                                        ? () {
+                                            Toast.show(
+                                                "คุณไม่มีสิทธิ์แบน ADMIN",
+                                                context,
+                                                duration: Toast.LENGTH_SHORT,
+                                                gravity: Toast.BOTTOM);
+                                          }
+                                        : () {
+                                            Navigator.pop(context);
+                                            _dialogShow(
+                                                title: "แจ้งเตือน",
+                                                content:
+                                                    "คุณต้องการแบน ${AppList.adminList[index].displayName} ออกจากระบบหรือไม่",
+                                                index: index,
+                                                uid: AppList
+                                                    .adminList[index].uid,
+                                                status: "admin");
+                                          },
                                     callbackItem3: () {},
                                   );
                                 },
                                 child: ListAdminItem(
                                   profileUrl:
                                       AppList.adminList[index].avatarUrl,
-                                  adminName:
-                                      AppList.adminList[index].displayName,
+                                  adminName: AppList.adminList[index].banned
+                                      ? "${AppList.adminList[index].displayName}(ถูกแบน)"
+                                      : AppList.adminList[index].displayName,
                                   callback: () {},
                                   status: AppList.adminList[index].isActive,
                                   lastTime:
                                       AppList.adminList[index].lastTimeUpdate,
+                                  banned: AppList.adminList[index].banned,
                                 ),
                               );
                             },
@@ -471,7 +499,20 @@ class _HomePageState extends State<HomePage> {
                           height: 5,
                         ),
                         AppList.userList.length != 0
-                            ? TextAndLine(title: 'ลูกค้า')
+                            ? TextAndLineEdit(
+                                title: "ลูกค้า (${AppList.userList.length})",
+                                textButton: "ปลดแบน",
+                                callback: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UnBanned(
+                                        userBannedList: _userBannedList,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
                             : Container(),
                         SizedBox(
                           height: 5,
@@ -509,13 +550,25 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       );
                                     },
-                                    callbackItem2: () {},
+                                    callbackItem2: () {
+                                      Navigator.pop(context);
+                                      _dialogShow(
+                                          title: "แจ้งเตือน",
+                                          content:
+                                              "คุณต้องการแบน ${AppList.userList[index].displayName} ออกจากระบบหรือไม่",
+                                          index: index,
+                                          uid: AppList.userList[index].uid,
+                                          status: "user");
+                                    },
                                     callbackItem3: () {},
                                   );
                                 },
                                 child: ListUserItem(
                                   profileUrl: AppList.userList[index].avatarUrl,
-                                  userName: AppList.userList[index].displayName,
+                                  userName: AppList.userList[index].banned
+                                      ? "${AppList.userList[index].displayName}(ถูกแบน)"
+                                      : AppList.userList[index].displayName,
+                                  banned: AppList.userList[index].banned,
                                   callback: () {},
                                 ),
                               );
@@ -598,5 +651,56 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<bool> _dialogShow({
+    String title,
+    String content,
+    int index,
+    String uid,
+    String status,
+  }) async {
+    return showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('$title'),
+            content: Text('$content'),
+            actions: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                  if (status == "user") {
+                    AppList.userList[index].banned = true;
+                    _userBannedList.add(AppList.userList[index]);
+                  } else {
+                    AppList.adminList[index].banned = true;
+                    _userBannedList.add(AppList.adminList[index]);
+                  }
+
+                  _databaseReference
+                      .collection("Users")
+                      .document(uid)
+                      .updateData({"banned": true}).then((_) {
+                    setState(() {});
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ใช่"),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ไม่"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

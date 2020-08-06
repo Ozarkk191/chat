@@ -72,39 +72,43 @@ class _SplashPageState extends State<SplashPage> {
         .document(user.uid)
         .get()
         .then((value) {
-      var userModel = UserModel.fromJson(value.data);
+      // var userModel = UserModel.fromJson(value.data);
       AppModel.user = UserModel.fromJson(value.data);
-      if (userModel.notiToken != tokenCheck) {
-        userModel.notiToken = tokenCheck;
+      if (AppModel.user.banned) {
+        _dialogShow(title: "แจ้งเตือน", content: "คุณถูกแบนออกจากระบบ");
+      } else {
+        if (AppModel.user.notiToken != tokenCheck) {
+          AppModel.user.notiToken = tokenCheck;
+          _databaseReference
+              .collection('Users')
+              .document(user.uid)
+              .setData(AppModel.user.toJson());
+        }
+        AppString.displayName = AppModel.user.displayName;
+        AppString.firstname = AppModel.user.firstName;
+        AppString.lastname = AppModel.user.lastName;
+        AppString.birthDate = AppModel.user.birthDate;
+        AppString.email = AppModel.user.email;
+        AppString.notiToken = AppModel.user.notiToken;
+        AppString.phoneNumber = AppModel.user.phoneNumber;
+        AppString.roles = AppModel.user.roles;
+        AppString.dateTime = AppModel.user.updatedAt;
+        AppString.isActive = AppModel.user.isActive;
+        AppString.gender = AppModel.user.gender;
+        AppString.photoUrl = AppModel.user.avatarUrl;
+        AppString.coverUrl = AppModel.user.coverUrl;
+        AppModel.user.isActive = true;
+        AppModel.user.lastTimeUpdate = DateTime.now().toString();
         _databaseReference
             .collection('Users')
             .document(user.uid)
-            .setData(userModel.toJson());
-      }
-      AppString.displayName = userModel.displayName;
-      AppString.firstname = userModel.firstName;
-      AppString.lastname = userModel.lastName;
-      AppString.birthDate = userModel.birthDate;
-      AppString.email = userModel.email;
-      AppString.notiToken = userModel.notiToken;
-      AppString.phoneNumber = userModel.phoneNumber;
-      AppString.roles = userModel.roles;
-      AppString.dateTime = userModel.updatedAt;
-      AppString.isActive = userModel.isActive;
-      AppString.gender = userModel.gender;
-      AppString.photoUrl = userModel.avatarUrl;
-      AppString.coverUrl = userModel.coverUrl;
-      userModel.isActive = true;
-      userModel.lastTimeUpdate = DateTime.now().toString();
-      _databaseReference
-          .collection('Users')
-          .document(user.uid)
-          .setData(userModel.toJson());
+            .setData(AppModel.user.toJson());
 
-      if (AppString.roles == TypeStatus.USER.toString()) {
-        Navigator.of(context).pushReplacementNamed('/navuserhome');
-      } else {
-        Navigator.of(context).pushReplacementNamed('/navhome');
+        if (AppString.roles == TypeStatus.USER.toString()) {
+          Navigator.of(context).pushReplacementNamed('/navuserhome');
+        } else {
+          Navigator.of(context).pushReplacementNamed('/navhome');
+        }
       }
     });
   }
@@ -122,56 +126,28 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  // _loggedIn() async {
-  //   FirebaseAuth _auth = FirebaseAuth.instance;
-  //   Firestore _databaseReference = Firestore.instance;
-  //   FirebaseUser user = await _auth.currentUser();
-
-  //   if (user != null) {
-  //     _databaseReference
-  //         .collection('Users')
-  //         .document(user.uid)
-  //         .get()
-  //         .then((value) {
-  //       var userModel = UserModel.fromJson(value.data);
-  //       AppModel.user = UserModel.fromJson(value.data);
-  //       if (userModel.notiToken != tokenCheck) {
-  //         userModel.notiToken = tokenCheck;
-  //         _databaseReference
-  //             .collection('Users')
-  //             .document(user.uid)
-  //             .setData(userModel.toJson());
-  //       }
-  //       AppString.displayName = userModel.displayName;
-  //       AppString.firstname = userModel.firstName;
-  //       AppString.lastname = userModel.lastName;
-  //       AppString.birthDate = userModel.birthDate;
-  //       AppString.email = userModel.email;
-  //       AppString.notiToken = userModel.notiToken;
-  //       AppString.phoneNumber = userModel.phoneNumber;
-  //       AppString.roles = userModel.roles;
-  //       AppString.dateTime = userModel.updatedAt;
-  //       AppString.isActive = userModel.isActive;
-  //       AppString.gender = userModel.gender;
-  //       AppString.photoUrl = userModel.avatarUrl;
-  //       AppString.coverUrl = userModel.coverUrl;
-  //       userModel.isActive = true;
-  //       userModel.lastTimeUpdate = DateTime.now().toString();
-  //       _databaseReference
-  //           .collection('Users')
-  //           .document(user.uid)
-  //           .setData(userModel.toJson());
-
-  //       if (AppString.roles == TypeStatus.USER.toString()) {
-  //         Navigator.of(context).pushReplacementNamed('/navuserhome');
-  //       } else {
-  //         Navigator.of(context).pushReplacementNamed('/navhome');
-  //       }
-  //     });
-  //   } else {
-  //     Timer(Duration(seconds: 3), () {
-  //       Navigator.of(context).pushReplacementNamed('/login');
-  //     });
-  //   }
-  // }
+  Future<bool> _dialogShow({String title, String content}) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('$title'),
+            content: new Text('$content'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                  AuthService().signOut();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ตกลง"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 }

@@ -8,8 +8,10 @@ import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_rounded_date_picker/rounded_picker.dart';
+// import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
@@ -33,6 +35,7 @@ class _EditPageState extends State<EditPage> {
   final validNameTh = RegExp(r'^[ก-๏\s]+$');
   final validNameEn = RegExp(r'^[a-zA-Z]+$');
   final validName = RegExp(r'^[a-zA-Zก-๙]+$');
+  DateTime _newDateTime;
 
   String _errorText = "";
   String _errorText2 = "";
@@ -124,6 +127,68 @@ class _EditPageState extends State<EditPage> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => EditProfilPage()));
     });
+  }
+
+  _time() async {
+    CupertinoRoundedDatePicker.show(
+      context,
+      fontFamily: "Mali",
+      textColor: Colors.white,
+      background: Color(0xff202020),
+      borderRadius: 16,
+      maximumYear: 2020,
+      minimumYear: 1950,
+      initialDatePickerMode: CupertinoDatePickerMode.date,
+      onDateTimeChanged: (newDateTime) {
+        var date = newDateTime.toString().split(" ");
+        date = date[0].split("-");
+        String month = _month(date[1]);
+        _birthday.text = "${date[2]} $month ${date[0]}";
+        setState(() {});
+      },
+    );
+  }
+
+  String _month(String month) {
+    switch (month) {
+      case "01":
+        month = "มกราคม";
+        break;
+      case "02":
+        month = "กุมภาพันธ์";
+        break;
+      case "03":
+        month = "มีนาคม";
+        break;
+      case "04":
+        month = "เมษายน";
+        break;
+      case "05":
+        month = "พฤษภาคม";
+        break;
+      case "06":
+        month = "มิถุนายน";
+        break;
+      case "07":
+        month = "กรกฏาคม";
+        break;
+      case "08":
+        month = "สิงหาคม";
+        break;
+      case "09":
+        month = "กันยายน";
+        break;
+      case "10":
+        month = "ตุลาคม";
+        break;
+      case "11":
+        month = "พฤศจิกายน";
+        break;
+      case "12":
+        month = "ธันวาคม";
+        break;
+    }
+    return month;
   }
 
   @override
@@ -257,11 +322,7 @@ class _EditPageState extends State<EditPage> {
                 ),
                 InkWell(
                   onTap: () {
-                    DatePicker.showDatePicker(context, showTitleActions: true,
-                        onConfirm: (date) {
-                      var dateList = date.toString().split(" ");
-                      _birthday.text = dateList[0];
-                    }, currentTime: DateTime.now(), locale: LocaleType.th);
+                    _time();
                   },
                   child: BigRoundTextField(
                     controller: _birthday,

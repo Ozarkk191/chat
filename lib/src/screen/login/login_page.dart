@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/services/authservice.dart';
 import 'package:chat/src/base_compoments/button/custom_icon_button.dart';
 import 'package:chat/src/screen/register/data_collect_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -177,36 +178,40 @@ class _LoginPageState extends State<LoginPage> {
           .then((value) {
         // var userModel = UserModel.fromJson(value.data);
         AppModel.user = UserModel.fromJson(value.data);
-        AppString.displayName = AppModel.user.displayName;
-        AppString.firstname = AppModel.user.firstName;
-        AppString.lastname = AppModel.user.lastName;
-        AppString.birthDate = AppModel.user.birthDate;
-        AppString.email = AppModel.user.email;
-        // AppString.notiToken = userModel.notiToken;
-        AppString.phoneNumber = AppModel.user.phoneNumber;
-        AppString.roles = AppModel.user.roles;
-        AppString.photoUrl = AppModel.user.avatarUrl;
-        AppString.dateTime = AppModel.user.updatedAt;
-        // AppString.isActive = userModel.isActive;
-        AppString.gender = AppModel.user.gender;
-        AppString.coverUrl = AppModel.user.coverUrl;
-
-        log(AppModel.user.displayName);
-
-        AppModel.user.lastTimeUpdate = DateTime.now().toString();
-        _databaseReference
-            .collection('Users')
-            .document(AppModel.user.uid)
-            .updateData({
-          "lastTimeUpdate": DateTime.now().toString(),
-          "notiToken": AppString.notiToken,
-          "isActive": true
-        });
-
-        if (AppString.roles == '${TypeStatus.USER}') {
-          Navigator.of(context).pushReplacementNamed('/navuserhome');
+        if (AppModel.user.banned) {
+          _dialogShow(title: "แจ้งเตือน", content: "คุณถูกแบนออกจากระบบ");
         } else {
-          Navigator.of(context).pushReplacementNamed('/navhome');
+          AppString.displayName = AppModel.user.displayName;
+          AppString.firstname = AppModel.user.firstName;
+          AppString.lastname = AppModel.user.lastName;
+          AppString.birthDate = AppModel.user.birthDate;
+          AppString.email = AppModel.user.email;
+          // AppString.notiToken = userModel.notiToken;
+          AppString.phoneNumber = AppModel.user.phoneNumber;
+          AppString.roles = AppModel.user.roles;
+          AppString.photoUrl = AppModel.user.avatarUrl;
+          AppString.dateTime = AppModel.user.updatedAt;
+          // AppString.isActive = userModel.isActive;
+          AppString.gender = AppModel.user.gender;
+          AppString.coverUrl = AppModel.user.coverUrl;
+
+          log(AppModel.user.displayName);
+
+          AppModel.user.lastTimeUpdate = DateTime.now().toString();
+          _databaseReference
+              .collection('Users')
+              .document(AppModel.user.uid)
+              .updateData({
+            "lastTimeUpdate": DateTime.now().toString(),
+            "notiToken": AppString.notiToken,
+            "isActive": true
+          });
+
+          if (AppString.roles == '${TypeStatus.USER}') {
+            Navigator.of(context).pushReplacementNamed('/navuserhome');
+          } else {
+            Navigator.of(context).pushReplacementNamed('/navhome');
+          }
         }
       });
     } else {
@@ -234,6 +239,7 @@ class _LoginPageState extends State<LoginPage> {
       coverUrl: "null",
       uid: "null",
       lastTimeUpdate: "null",
+      banned: false,
     );
     if (user.displayName.contains(" ")) {
       var name = user.displayName.split(" ");
@@ -254,5 +260,31 @@ class _LoginPageState extends State<LoginPage> {
     AppModel.user.avatarUrl = user.photoUrl;
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => DataCollectPage()));
+  }
+
+  Future<bool> _dialogShow({String title, String content}) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('$title'),
+            content: new Text('$content'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                  setState(() {
+                    AuthService().signOut();
+                    _loadingOverlay = false;
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ตกลง"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

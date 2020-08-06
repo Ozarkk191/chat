@@ -18,6 +18,7 @@ class UserModel {
   String uid;
   String coverUrl;
   String lastTimeUpdate;
+  bool banned;
 
   UserModel({
     @required this.firstName,
@@ -37,6 +38,7 @@ class UserModel {
     @required this.coverUrl,
     @required this.uid,
     @required this.lastTimeUpdate,
+    @required this.banned,
   });
 
   UserModel.fromJson(Map<String, dynamic> json)
@@ -56,6 +58,7 @@ class UserModel {
         groupKey = json['groupKey'],
         coverUrl = json['coverUrl'],
         lastTimeUpdate = json['lastTimeUpdate'],
+        banned = json['banned'],
         uid = json['uid'];
 
   toJson() {
@@ -76,6 +79,7 @@ class UserModel {
       "groupKey": groupKey,
       "coverUrl": coverUrl,
       "lastTimeUpdate": lastTimeUpdate,
+      "banned": banned,
       "uid": uid,
     };
   }

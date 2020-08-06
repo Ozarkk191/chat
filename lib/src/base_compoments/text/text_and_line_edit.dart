@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class TextAndLineEdit extends StatelessWidget {
   final String title;
   final Function callback;
+  final String textButton;
 
-  const TextAndLineEdit({
-    Key key,
-    @required this.title,
-    @required this.callback,
-  }) : super(key: key);
+  const TextAndLineEdit(
+      {Key key,
+      @required this.title,
+      @required this.callback,
+      this.textButton = "เพิ่มแอดมิน"})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,7 +32,7 @@ class TextAndLineEdit extends StatelessWidget {
                   height: 20,
                   child: Center(
                     child: Text(
-                      'เพิ่มแอดมิน',
+                      textButton,
                       style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                   ),

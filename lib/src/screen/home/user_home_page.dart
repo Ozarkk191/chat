@@ -6,7 +6,7 @@ import 'package:chat/models/group_model.dart';
 import 'package:chat/models/news_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
-import 'package:chat/src/base_compoments/group_item/list_group_item.dart';
+import 'package:chat/src/base_compoments/group_item/list_group_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
@@ -235,7 +235,6 @@ class _UserHomePageState extends State<UserHomePage> {
                 ),
                 AppList.groupList.length != 0
                     ? Container(
-                        height: 160,
                         child: ListView.builder(
                             itemBuilder: (BuildContext context, int index) {
                               return InkWell(
@@ -273,7 +272,7 @@ class _UserHomePageState extends State<UserHomePage> {
                                     callbackItem2: () {},
                                   );
                                 },
-                                child: ListGroupItem(
+                                child: ListGroupUserItem(
                                   imgCoverUrl:
                                       AppList.groupList[index].coverUrl,
                                   imgGroupUrl:
@@ -287,7 +286,9 @@ class _UserHomePageState extends State<UserHomePage> {
                               );
                             },
                             itemCount: AppList.groupList.length,
-                            scrollDirection: Axis.horizontal),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical),
                       )
                     : Container(),
                 SizedBox(

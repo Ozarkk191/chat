@@ -6,6 +6,7 @@ class ListAdminItem extends StatefulWidget {
   final Function callback;
   final bool status;
   final String lastTime;
+  final bool banned;
 
   const ListAdminItem({
     Key key,
@@ -14,6 +15,7 @@ class ListAdminItem extends StatefulWidget {
     @required this.callback,
     @required this.status,
     @required this.lastTime,
+    this.banned = false,
   }) : super(key: key);
 
   @override
@@ -82,7 +84,8 @@ class _ListAdminItemState extends State<ListAdminItem> {
               children: <Widget>[
                 Text(
                   '${widget.adminName}',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                      color: widget.banned ? Colors.red : Colors.grey),
                 ),
                 SizedBox(
                   height: 5,
