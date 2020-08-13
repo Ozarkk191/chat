@@ -195,8 +195,6 @@ class _LoginPageState extends State<LoginPage> {
           AppString.gender = AppModel.user.gender;
           AppString.coverUrl = AppModel.user.coverUrl;
 
-          log(AppModel.user.displayName);
-
           AppModel.user.lastTimeUpdate = DateTime.now().toString();
           _databaseReference
               .collection('Users')
@@ -259,7 +257,11 @@ class _LoginPageState extends State<LoginPage> {
     AppModel.user.roles = TypeStatus.USER.toString();
     AppModel.user.avatarUrl = user.photoUrl;
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => DataCollectPage()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => DataCollectPage(
+                  user: user,
+                )));
   }
 
   Future<bool> _dialogShow({String title, String content}) {

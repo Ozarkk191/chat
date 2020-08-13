@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
@@ -29,6 +30,7 @@ class UserNavBottom extends StatefulWidget {
 
 class _UserNavBottomState extends State<UserNavBottom>
     with WidgetsBindingObserver {
+  int _currentIndex = 0;
   PageController _pageController;
   MenuPositionController _menuPositionController;
   bool userPageDragging = false;
@@ -85,10 +87,11 @@ class _UserNavBottomState extends State<UserNavBottom>
     });
 
     _menuPositionController = MenuPositionController(initPosition: 0);
+    _pageController = PageController();
 
-    _pageController =
-        PageController(initialPage: 0, keepPage: false, viewportFraction: 1.0);
-    _pageController.addListener(handlePageChange);
+    // _pageController =
+    //     PageController(initialPage: 0, keepPage: false, viewportFraction: 1.0);
+    // _pageController.addListener(handlePageChange);
 
     initFirebaseMessaging();
     super.initState();
@@ -174,6 +177,7 @@ class _UserNavBottomState extends State<UserNavBottom>
 
   @override
   void dispose() {
+    _pageController.dispose();
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
@@ -191,47 +195,60 @@ class _UserNavBottomState extends State<UserNavBottom>
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-          body: NotificationListener<ScrollNotification>(
-            onNotification: (scrollNotification) {
-              checkUserDragging(scrollNotification);
-              return;
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (scrollNotification) {
+            checkUserDragging(scrollNotification);
+            return;
+          },
+          child: PageView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: <Widget>[
+              UserHomePage(),
+              GroupPage(),
+              ChatPage(),
+            ],
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
             },
-            child: PageView(
-              physics: const NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: <Widget>[
-                UserHomePage(),
-                GroupPage(),
-                ChatPage(),
-              ],
-              onPageChanged: (page) {},
-            ),
           ),
-          bottomNavigationBar: BubbledNavigationBar(
-            controller: _menuPositionController,
-            initialIndex: 0,
-            itemMargin: EdgeInsets.symmetric(horizontal: 10),
-            backgroundColor: Color(0xff242424),
-            defaultBubbleColor: Colors.blue,
-            onTap: (index) {
-              _pageController.animateToPage(index,
-                  curve: Curves.easeInOutQuad,
-                  duration: Duration(milliseconds: 600));
-            },
-            items: widget.titles.map((title) {
-              var index = widget.titles.indexOf(title);
-
-              return BubbledNavigationBarItem(
-                icon: getIcon(index, Colors.white),
-                activeIcon: getIcon(index, Colors.black),
-                bubbleColor: Colors.white,
-                title: Text(
-                  title,
-                  style: TextStyle(color: Colors.black, fontSize: 12),
-                ),
-              );
-            }).toList(),
-          )),
+        ),
+        bottomNavigationBar: BottomNavyBar(
+          backgroundColor: Color(0xff202020),
+          selectedIndex: _currentIndex,
+          onItemSelected: (index) {
+            setState(() => _currentIndex = index);
+            _pageController.jumpToPage(index);
+          },
+          items: <BottomNavyBarItem>[
+            BottomNavyBarItem(
+              title: Text('Home'),
+              textAlign: TextAlign.center,
+              activeColor: Colors.white,
+              icon: Image.asset('assets/images/ic_home_nav.png',
+                  color: Colors.white),
+            ),
+            BottomNavyBarItem(
+              title: Text('Group'),
+              textAlign: TextAlign.center,
+              activeColor: Colors.white,
+              icon: Image.asset(
+                'assets/images/ic_group.png',
+                color: Colors.white,
+              ),
+            ),
+            BottomNavyBarItem(
+              title: Text('Chat'),
+              textAlign: TextAlign.center,
+              activeColor: Colors.white,
+              icon: Image.asset(
+                'assets/images/ic_chat.png',
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -26,6 +26,7 @@ dependencies:
   provider: ^4.0.1
   
   bubbled_navigation_bar: ^0.0.3
+  bottom_navy_bar: ^5.5.0
   badges: ^1.1.1
   firebase_database: ^3.1.3
   firebase_core: ^0.4.5
@@ -54,6 +55,9 @@ dependencies:
   flutter_local_notifications: ^1.4.4+2
   random_string: ^2.1.0
   toast: ^0.1.5
+  share: ^0.6.4+3
+  image_gallery_saver: ^1.5.0
+  screenshot: ^0.2.0
   flutter_localizations:
     sdk: flutter
   flutter_rounded_date_picker: ^1.0.4
@@ -71,6 +75,9 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon/icon.png"
+
+flutter_launcher_name:
+  name: "Secret Chat"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -387,21 +387,6 @@ class _CreateGroupState extends State<CreateGroup> {
                             ),
                             maxLength: 20,
                           ),
-                          // TextField(
-                          //   textAlign: TextAlign.center,
-                          //   maxLength: 20,
-                          //   controller: _nameGroup,
-                          //   style: TextStyle(color: Colors.grey),
-                          //   decoration: InputDecoration(
-                          //     hintText: '',
-                          //     hintStyle: TextStyle(
-                          //       color: Colors.grey,
-                          //     ),
-                          //     enabledBorder: UnderlineInputBorder(
-                          //       borderSide: BorderSide(color: Colors.cyan),
-                          //     ),
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),

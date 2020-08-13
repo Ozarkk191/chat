@@ -7,8 +7,8 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="chat"
-        android:icon="@mipmap/ic_launcher"
+        android:label="Secret Chat"
+        android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
           const Locale('en', 'US'), // English
           const Locale('th', 'TH'), // Thai
         ],
-        title: 'Flutter Demo',
+        title: 'Secret Chat',
         initialRoute: '/splash',
         routes: {
           '/splash': (context) => SplashPage(),

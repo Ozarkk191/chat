@@ -4,7 +4,10 @@ import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_invite_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share/share.dart';
 
 class InvitePage extends StatefulWidget {
   final List<UserModel> user;
@@ -16,6 +19,7 @@ class InvitePage extends StatefulWidget {
 
 class _InvitePageState extends State<InvitePage> {
   List<bool> _boolList = List<bool>();
+  String _link = "XXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
   List<UserModel> _addUserList = List<UserModel>();
 
@@ -88,14 +92,14 @@ class _InvitePageState extends State<InvitePage> {
                   'assets/images/ic_qr_code.png',
                   'QR Code',
                   () {
-                    _qrCodeBottomSheet(context);
+                    _qrCodeBottomSheet(context, _link);
                   },
                 ),
                 boxQRandLink(
                   'assets/images/ic_link.png',
                   ' Link',
                   () {
-                    _linkBottomSheet(context);
+                    _linkBottomSheet(context, _link);
                   },
                 ),
               ],
@@ -161,7 +165,7 @@ class _InvitePageState extends State<InvitePage> {
   }
 }
 
-void _qrCodeBottomSheet(context) {
+void _qrCodeBottomSheet(context, String link) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext bc) {
@@ -186,13 +190,24 @@ void _qrCodeBottomSheet(context) {
                 width: 150,
                 height: 150,
                 child: QrImage(
-                  data: "rrrrr",
+                  data: "$link",
                   version: QrVersions.auto,
                   size: 200.0,
+                  gapless: false,
                   embeddedImage: AssetImage('assets/images/logo.png'),
                   embeddedImageStyle: QrEmbeddedImageStyle(
                     size: Size(40, 50),
                   ),
+                  errorStateBuilder: (cxt, err) {
+                    return Container(
+                      child: Center(
+                        child: Text(
+                          "Uh oh! Something went wrong...",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               SizedBox(
@@ -240,7 +255,7 @@ void _qrCodeBottomSheet(context) {
   );
 }
 
-void _linkBottomSheet(context) {
+void _linkBottomSheet(context, String link) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext bc) {
@@ -256,42 +271,12 @@ void _linkBottomSheet(context) {
               topRight: const Radius.circular(20.0),
             ),
           ),
-          child: Stack(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Container(
                 width: MediaQuery.of(context).size.width,
-                height: 200,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: 40,
-                    color: Colors.black,
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            color: Colors.white,
-                            child: Center(
-                              child: Text('คัดลอกลิงค์'),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              'แชร์',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 200,
+                height: 160,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -310,7 +295,7 @@ void _linkBottomSheet(context) {
                       child: Container(
                         color: Colors.white,
                         child: Center(
-                          child: Text("XXXXXXXXXXXXXXXXXXXXXXXXXXX"),
+                          child: Text("$link"),
                         ),
                       ),
                     ),
@@ -325,6 +310,52 @@ void _linkBottomSheet(context) {
                       height: 40,
                     ),
                   ],
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.black,
+                height: 40,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: link));
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 2,
+                          color: Colors.black,
+                          child: Center(
+                            child: Text(
+                              'คัดลอกลิงค์',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                          final RenderBox box = context.findRenderObject();
+                          Share.share("$link",
+                              subject: "subject",
+                              sharePositionOrigin:
+                                  box.localToGlobal(Offset.zero) & box.size);
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 2,
+                          color: Colors.white,
+                          child: Center(
+                            child: Text('แชร์'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

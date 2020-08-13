@@ -9,13 +9,16 @@ import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
 import 'package:chat/src/screen/login/login_page.dart';
 import 'package:chat/src/screen/register/confirm_otp_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
 class DataCollectPage extends StatefulWidget {
   final String phoneNumber;
+  final FirebaseUser user;
 
-  const DataCollectPage({Key key, this.phoneNumber}) : super(key: key);
+  const DataCollectPage({Key key, this.phoneNumber, this.user})
+      : super(key: key);
   @override
   _DataCollectPageState createState() => _DataCollectPageState();
 }
@@ -26,6 +29,11 @@ class _DataCollectPageState extends State<DataCollectPage> {
   bool _loading = false;
   final validPhone = RegExp(r'^(?:[+0]9)?[0-9]{10}$');
 
+  void _deleteUser() async {
+    AuthService().signOut();
+    widget.user.delete().then((value) {});
+  }
+
   @override
   void initState() {
     _phone.text = widget.phoneNumber ?? "";
@@ -35,6 +43,7 @@ class _DataCollectPageState extends State<DataCollectPage> {
   @override
   void dispose() {
     super.dispose();
+    _deleteUser();
     _phone.dispose();
   }
 
@@ -226,7 +235,8 @@ class _DataCollectPageState extends State<DataCollectPage> {
               new GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop(false);
-                  AuthService().signOut();
+                  _deleteUser();
+                  // AuthService().signOut();
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => LoginPage()));
                 },
