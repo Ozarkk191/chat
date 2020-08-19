@@ -43,7 +43,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
 
     var initializationSettingsIOS = IOSInitializationSettings(
         onDidReceiveLocalNotification: (id, title, body, payload) {
-      print("onDidReceiveLocalNotification called.");
+      return null;
     });
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -51,6 +51,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (payload) {
       // when user tap on notification.
+
       setState(() {
         payload = _messages['data']['data'].toString();
         var data = payload.split("&&");
@@ -77,8 +78,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
           );
         }
       });
-
-      print("onSelectNotification called.");
+      return null;
     });
     _menuPositionController = MenuPositionController(initPosition: 0);
     _pageController = PageController();

@@ -35,7 +35,7 @@ class _EditPageState extends State<EditPage> {
   final validNameTh = RegExp(r'^[ก-๏\s]+$');
   final validNameEn = RegExp(r'^[a-zA-Z]+$');
   final validName = RegExp(r'^[a-zA-Zก-๙]+$');
-  DateTime _newDateTime;
+  // DateTime _newDateTime;
 
   String _errorText = "";
   String _errorText2 = "";

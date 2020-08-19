@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
@@ -17,7 +16,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget {
   @override
@@ -166,11 +164,11 @@ class _UserHomePageState extends State<UserHomePage> {
     }
   }
 
-  Future<String> _getRead(String key) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String read = prefs.getString(key);
-    return read ?? "";
-  }
+  // Future<String> _getRead(String key) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String read = prefs.getString(key);
+  //   return read ?? "";
+  // }
 
   @override
   void initState() {

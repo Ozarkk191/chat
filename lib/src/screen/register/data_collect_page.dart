@@ -47,13 +47,6 @@ class _DataCollectPageState extends State<DataCollectPage> {
     _phone.dispose();
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   AuthService().signOut();
-  //   log('didChangeDependencies');
-  // }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

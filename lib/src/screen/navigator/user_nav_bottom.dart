@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
@@ -47,15 +45,13 @@ class _UserNavBottomState extends State<UserNavBottom>
 
     var initializationSettingsIOS = IOSInitializationSettings(
         onDidReceiveLocalNotification: (id, title, body, payload) {
-      log(payload);
-      print("onDidReceiveLocalNotification called.");
+      return null;
     });
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
 
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: (payload) {
-      // when user tap on notification.
       setState(() {
         payload = _messages['data']['data'].toString();
         var data = payload.split("&&");
@@ -82,8 +78,7 @@ class _UserNavBottomState extends State<UserNavBottom>
           );
         }
       });
-
-      print("onSelectNotification called.");
+      return null;
     });
 
     _menuPositionController = MenuPositionController(initPosition: 0);

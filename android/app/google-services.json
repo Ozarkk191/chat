@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "907090104212-q8g9h1a4fvkofvrkfqt11ia0klk4f4ch.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.secret.chat",
+            "certificate_hash": "c827612df33313b5b72184380f96efc1d9eb5cad"
+          }
+        },
+        {
           "client_id": "907090104212-o1unm6gu1s4g3q1r55lu09r88n6jasjv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -46,6 +54,49 @@
             {
               "client_id": "907090104212-1s02uqth64npfulfl6kpqie1j5a0dbul.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "907090104212-jooohe07pcpagtacfmi9jk6po17gkfrc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.secretchat"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:907090104212:android:5e46b753ce193b8a240981",
+        "android_client_info": {
+          "package_name": "com.secret.chat2020"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "907090104212-1s02uqth64npfulfl6kpqie1j5a0dbul.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCR7Yn1arHqkxZ9-Ldx67UbQuG3wlsQjsU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "907090104212-1s02uqth64npfulfl6kpqie1j5a0dbul.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "907090104212-jooohe07pcpagtacfmi9jk6po17gkfrc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.secretchat"
+              }
             }
           ]
         }
