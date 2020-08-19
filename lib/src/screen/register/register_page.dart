@@ -25,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     super.initState();
     _messaging.getToken().then((token) {
-      print("token :: $token");
+      // print("token :: $token");
     });
   }
 
@@ -128,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         setState(() {
                           if (value.length == 10) {
                             this._phoneNo = "+66${value.substring(1, 10)}";
-                            print("${this._phoneNo}");
+                            // print("${this._phoneNo}");
                           }
                         });
                       },
@@ -143,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         setState(() {
                           if (value.length == 10) {
                             this._phoneNo = "+66${value.substring(1, 10)}";
-                            print("${this._phoneNo}");
+                            // print("${this._phoneNo}");
                           }
                         });
                       },
@@ -213,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     final PhoneVerificationFailed verificationfailed =
         (AuthException authException) {
-      print('${authException.message}');
+      // print('${authException.message}');
     };
 
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
@@ -19,13 +20,23 @@ class _SplashPageState extends State<SplashPage> {
   String tokenCheck = "";
   @override
   void initState() {
-    _check();
-
+    _checkInternet();
     super.initState();
     _messaging.getToken().then((token) {
       tokenCheck = token;
     });
-    // _loggedIn();
+  }
+
+  _checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        _check();
+      }
+    } on SocketException catch (_) {
+      _dialogInternetShow(
+          title: "แจ้งเตือน", content: "ไม่พบสัญญาณอินเตอร์เน็ต");
+    }
   }
 
   _check() async {
@@ -49,14 +60,22 @@ class _SplashPageState extends State<SplashPage> {
           AuthService().signOut();
           Timer(Duration(seconds: 3), () {
             Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => LoginPage()));
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginPage(),
+              ),
+            );
           });
         }
       });
     } else {
       Timer(Duration(seconds: 3), () {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginPage(),
+          ),
+        );
       });
     }
   }
@@ -139,6 +158,28 @@ class _SplashPageState extends State<SplashPage> {
                   AuthService().signOut();
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => LoginPage()));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ตกลง"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<bool> _dialogInternetShow({String title, String content}) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('$title'),
+            content: new Text('$content'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
                 },
                 child: Container(
                   padding: EdgeInsets.all(10),

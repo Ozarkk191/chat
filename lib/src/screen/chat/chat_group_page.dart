@@ -236,12 +236,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 scrollToBottom: true,
                 readOnly:
                     AppString.roles == '${TypeStatus.USER}' ? true : false,
-                onPressAvatar: (ChatUser user) {
-                  print("OnPressAvatar: ${user.name}");
-                },
-                onLongPressAvatar: (ChatUser user) {
-                  print("OnLongPressAvatar: ${user.name}");
-                },
                 inputMaxLines: 5,
                 messageContainerPadding: EdgeInsets.only(left: 5.0, right: 5.0),
                 alwaysShowSend: true,
@@ -251,7 +245,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                   color: Colors.white,
                 ),
                 onLoadEarlier: () {
-                  print("laoding...");
+                  // print("laoding...");
                 },
                 shouldShowLoadEarlier: false,
                 showTraillingBeforeSend: true,

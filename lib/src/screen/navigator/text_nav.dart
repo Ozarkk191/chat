@@ -94,7 +94,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
   void initFirebaseMessaging() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: ${message['notification']}");
+        // print("onMessage: ${message['notification']}");
         _messages = message;
         setState(() {});
         sendNotification(
@@ -103,10 +103,10 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
         );
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+        // print("onLaunch: $message");
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+        // print("onResume: $message");
       },
     );
 
@@ -114,12 +114,12 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
         const IosNotificationSettings(sound: true, badge: true, alert: true));
     firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
+      // print("Settings registered: $settings");
     });
 
     firebaseMessaging.getToken().then((String token) {
       assert(token != null);
-      print("Token : $token");
+      // print("Token : $token");
     });
   }
 

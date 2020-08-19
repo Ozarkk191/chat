@@ -19,7 +19,6 @@ class OTPService {
       final response = await http.post(uri,
           headers: headers,
           body: data != null ? json.encode(data.toJson()) : null);
-      // print('response :: $response');
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -46,7 +45,6 @@ class OTPService {
       case 409:
         if (response.body != null) {
           var responseJson = json.decode(response.body);
-          print(responseJson);
           return responseJson;
         }
         return '';

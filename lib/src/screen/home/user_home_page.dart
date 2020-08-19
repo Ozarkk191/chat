@@ -154,7 +154,6 @@ class _UserHomePageState extends State<UserHomePage> {
             lastText = "";
             lastTime = "00:00 น.";
           }
-          log(lastText);
         });
       }).then((value) {
         AppList.lastTextList.add(lastText);

@@ -96,7 +96,7 @@ class _UserNavBottomState extends State<UserNavBottom>
   void initFirebaseMessaging() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: ${message['data']}");
+        // print("onMessage: ${message['data']}");
         _messages = message;
         setState(() {});
         sendNotification(
@@ -105,10 +105,10 @@ class _UserNavBottomState extends State<UserNavBottom>
         );
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+        // print("onLaunch: $message");
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+        // print("onResume: $message");
       },
     );
 
@@ -116,12 +116,12 @@ class _UserNavBottomState extends State<UserNavBottom>
         const IosNotificationSettings(sound: true, badge: true, alert: true));
     firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
+      // print("Settings registered: $settings");
     });
 
     firebaseMessaging.getToken().then((String token) {
       assert(token != null);
-      print("Token : $token");
+      // print("Token : $token");
     });
   }
 
