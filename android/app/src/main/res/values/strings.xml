@@ -5,7 +5,7 @@
     <string name="fb_login_protocol_scheme">fb268331731108999</string>
 
 
-    <string name="asset_statements" translatable="false">[{\"include\": \"https://rock.in.th/.well-known/assetlinks.json\"}]</string>
+    <string name="asset_statements" translatable="false">[{\"include\": \"https://secretchat.store/.well-known/assetlinks.json\"}]</string>
 
 
 </resources>

@@ -102,7 +102,7 @@ class _GroupPageState extends State<GroupPage> {
       appBar: AppBar(
         leading: Container(),
         actions: <Widget>[
-          AppString.roles == '${TypeStatus.USER}'
+          AppModel.user.roles == '${TypeStatus.USER}'
               ? Container()
               : PopupMenuButton<String>(
                   child: Image.asset('assets/images/ic_add_group.png'),

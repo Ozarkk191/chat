@@ -29,10 +29,10 @@ class _DataCollectPageState extends State<DataCollectPage> {
   bool _loading = false;
   final validPhone = RegExp(r'^(?:[+0]9)?[0-9]{10}$');
 
-  void _deleteUser() async {
-    AuthService().signOut();
-    widget.user.delete().then((value) {});
-  }
+  // void _deleteUser() async {
+  //   AuthService().signOut();
+  //   widget.user.delete().then((value) {});
+  // }
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class _DataCollectPageState extends State<DataCollectPage> {
   @override
   void dispose() {
     super.dispose();
-    _deleteUser();
+    // _deleteUser();
     _phone.dispose();
   }
 
@@ -228,7 +228,7 @@ class _DataCollectPageState extends State<DataCollectPage> {
               new GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop(false);
-                  _deleteUser();
+                  AuthService().signOut();
                   // AuthService().signOut();
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => LoginPage()));
@@ -316,8 +316,10 @@ class _DataCollectPageState extends State<DataCollectPage> {
   void _sendOTP(UserModel user) async {
     var parameter = SendOTPParameters(phoneNumber: _phone.text);
     var response = await PostRepository().sendOTP(parameter);
+
     switch (response['message']) {
       case "success":
+        print(response['otp'].toString());
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
