@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/chat_model.dart';
@@ -65,7 +63,6 @@ class _ChatPageState extends State<ChatPage> {
     String lastText = "";
     String lastTime = "";
     String checktime = "";
-    log("message0123");
 
     await _databaseReference
         .collection("Rooms")
@@ -143,7 +140,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         leading: Container(),
         backgroundColor: Color(0xff202020),
-        title: AppString.roles == "${TypeStatus.USER}"
+        title: AppModel.user.roles == "${TypeStatus.USER}"
             ? Text('แชทกับแอดมิน')
             : Text('แชทกับลูกค้า'),
         centerTitle: true,

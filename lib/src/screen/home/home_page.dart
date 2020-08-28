@@ -43,24 +43,13 @@ class _HomePageState extends State<HomePage> {
   user() async {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
-      AppString.uid = user.uid;
+      AppModel.user.uid = user.uid;
       await _databaseReference
           .collection('Users')
           .document(user.uid)
           .get()
           .then((value) {
-        var userModel = UserModel.fromJson(value.data);
-        AppString.displayName = userModel.displayName;
-        AppString.firstname = userModel.firstName;
-        AppString.lastname = userModel.lastName;
-        AppString.birthDate = userModel.birthDate;
-        AppString.email = userModel.email;
-        AppString.notiToken = userModel.notiToken;
-        AppString.phoneNumber = userModel.phoneNumber;
-        AppString.roles = userModel.roles.toString();
-        AppString.dateTime = userModel.updatedAt;
-        AppString.isActive = userModel.isActive;
-        AppString.gender = userModel.gender;
+        AppModel.user = UserModel.fromJson(value.data);
       }).then((value) {
         setState(() {});
       });
@@ -114,8 +103,8 @@ class _HomePageState extends State<HomePage> {
         _group = GroupModel.fromJson(value.data);
         AppList.groupAllList.add(_group);
         _getWaitting(value.documentID);
-        var uid =
-            _group.memberUIDList.where((element) => element == AppString.uid);
+        var uid = _group.memberUIDList
+            .where((element) => element == AppModel.user.uid);
         if (uid.length != 0) {
           // _getLastText(value.documentID);
 

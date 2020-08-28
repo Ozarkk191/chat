@@ -2,9 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'bloc/validate_bloc/validate_bloc.dart';
 import 'src/screen/home/home_page.dart';
 import 'src/screen/login/login_page.dart';
 import 'src/screen/navigator/text_nav.dart';
@@ -29,45 +27,35 @@ class MyApp extends StatelessWidget {
       ),
     );
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (BuildContext context) => ValidateBloc(),
-        )
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          DefaultCupertinoLocalizations.delegate,
-          GlobalCupertinoLocalizations
-              .delegate, // Add global cupertino localiztions.
-        ],
-        locale: Locale('th', 'TH'), // Current locale
-        supportedLocales: [
-          const Locale('en', 'US'), // English
-          const Locale('th', 'TH'), // Thai
-        ],
-        title: 'Secret Chat',
-        initialRoute: '/splash',
-        routes: {
-          '/splash': (context) => SplashPage(),
-          '/login': (context) => LoginPage(),
-          '/home': (context) => HomePage(),
-          '/editprofile': (context) => EditProfilPage(),
-          '/navhome': (context) => TestNav(),
-          '/navuserhome': (context) => UserNavBottom(),
-          '/data': (context) => DataCollectPage(),
-          '/setting': (context) => SettingPage(),
-        },
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          accentColor: Colors.green,
-          // brightness: Brightness.dark,
-          canvasColor: Colors.transparent,
-        ),
+      locale: Locale('th', 'TH'),
+      supportedLocales: [
+        const Locale('en', 'US'),
+        const Locale('th', 'TH'),
+      ],
+      title: 'Secret Chat',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashPage(),
+        '/login': (context) => LoginPage(),
+        '/home': (context) => HomePage(),
+        '/editprofile': (context) => EditProfilPage(),
+        '/navhome': (context) => TestNav(),
+        '/navuserhome': (context) => UserNavBottom(),
+        '/data': (context) => DataCollectPage(),
+        '/setting': (context) => SettingPage(),
+      },
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        accentColor: Colors.green,
+        canvasColor: Colors.transparent,
       ),
     );
   }

@@ -11,6 +11,8 @@ import 'package:chat/repositories/post_repository.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
+import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:chat/src/screen/post/post_news_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
@@ -195,7 +197,25 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         ),
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context);
+            if (AppModel.user.roles == TypeStatus.USER.toString()) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserNavBottom(
+                    currentIndex: 1,
+                  ),
+                ),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TestNav(
+                    currentIndex: 1,
+                  ),
+                ),
+              );
+            }
           },
           child: Icon(Icons.arrow_back_ios),
         ),
@@ -235,7 +255,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 showAvatarForEveryMessage: false,
                 scrollToBottom: true,
                 readOnly:
-                    AppString.roles == '${TypeStatus.USER}' ? true : false,
+                    AppModel.user.roles == '${TypeStatus.USER}' ? true : false,
                 inputMaxLines: 5,
                 messageContainerPadding: EdgeInsets.only(left: 5.0, right: 5.0),
                 alwaysShowSend: true,
@@ -313,7 +333,13 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   void _selecteMenu(String menu, BuildContext context) {
     if (menu == MenuSettings.invite) {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => InvitePage()));
+        context,
+        MaterialPageRoute(
+          builder: (context) => InvitePage(
+            groupID: widget.groupID,
+          ),
+        ),
+      );
     } else if (menu == MenuSettings.member) {
       Navigator.push(
         context,

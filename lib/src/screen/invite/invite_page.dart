@@ -7,24 +7,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share/share.dart';
+import 'package:toast/toast.dart';
 
 class InvitePage extends StatefulWidget {
   final List<UserModel> user;
+  final String groupID;
 
-  const InvitePage({Key key, this.user}) : super(key: key);
+  const InvitePage({Key key, this.user, this.groupID}) : super(key: key);
   @override
   _InvitePageState createState() => _InvitePageState();
 }
 
 class _InvitePageState extends State<InvitePage> {
   List<bool> _boolList = List<bool>();
-  String _link = "XXXXXXXXXXXXXXXXXXXXXXXXXXX";
+  String _link = "https://secretchat.store/group?uid=";
 
   List<UserModel> _addUserList = List<UserModel>();
 
   @override
   void initState() {
     super.initState();
+    _link = "$_link${widget.groupID}";
     for (int i = 0; i <= AppList.userList.length; i++) {
       _boolList.add(false);
     }
@@ -324,6 +327,9 @@ void _linkBottomSheet(context, String link) {
                       InkWell(
                         onTap: () {
                           Clipboard.setData(ClipboardData(text: link));
+                          Toast.show("คัดลอกลิงค์เรียบร้อย", context,
+                              duration: Toast.LENGTH_SHORT,
+                              gravity: Toast.BOTTOM);
                         },
                         child: Container(
                           width: MediaQuery.of(context).size.width / 2,

@@ -1,14 +1,21 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/services/authservice.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/login/login_page.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
+import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:uni_links/uni_links.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -18,20 +25,38 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   final FirebaseMessaging _messaging = FirebaseMessaging();
   String tokenCheck = "";
+  String _initialLink;
+  Uri _initialUri;
+  String _latestLink = 'Unknown';
+  Uri _latestUri;
+
+  StreamSubscription _sub;
+
+  UniLinksType _type = UniLinksType.string;
+
   @override
   void initState() {
-    _checkInternet();
     super.initState();
+    if (_initialUri != null) {
+      log(_initialUri.toString());
+    }
+    initPlatformState();
     _messaging.getToken().then((token) {
       tokenCheck = token;
     });
   }
 
-  _checkInternet() async {
+  @override
+  void dispose() {
+    if (_sub != null) _sub.cancel();
+    super.dispose();
+  }
+
+  _checkInternet({String link}) async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        _check();
+        _check(link: link);
       }
     } on SocketException catch (_) {
       _dialogInternetShow(
@@ -39,7 +64,7 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
-  _check() async {
+  _check({String link}) async {
     FirebaseAuth _auth = FirebaseAuth.instance;
     Firestore _databaseReference = Firestore.instance;
     FirebaseUser user = await _auth.currentUser();
@@ -55,7 +80,7 @@ class _SplashPageState extends State<SplashPage> {
       }).then((value) {
         var uid = _listUID.where((element) => element == user.uid);
         if (uid.length != 0) {
-          _getPorfile();
+          _getPorfile(link: link);
         } else {
           AuthService().signOut();
           Timer(Duration(seconds: 3), () {
@@ -80,12 +105,10 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
-  _getPorfile() async {
-    AppModel.user = null;
+  _getPorfile({String link}) async {
     FirebaseAuth _auth = FirebaseAuth.instance;
     Firestore _databaseReference = Firestore.instance;
     FirebaseUser user = await _auth.currentUser();
-    AppString.uid = user.uid;
     _databaseReference
         .collection('Users')
         .document(user.uid)
@@ -103,19 +126,6 @@ class _SplashPageState extends State<SplashPage> {
               .document(user.uid)
               .setData(AppModel.user.toJson());
         }
-        AppString.displayName = AppModel.user.displayName;
-        AppString.firstname = AppModel.user.firstName;
-        AppString.lastname = AppModel.user.lastName;
-        AppString.birthDate = AppModel.user.birthDate;
-        AppString.email = AppModel.user.email;
-        AppString.notiToken = AppModel.user.notiToken;
-        AppString.phoneNumber = AppModel.user.phoneNumber;
-        AppString.roles = AppModel.user.roles;
-        AppString.dateTime = AppModel.user.updatedAt;
-        AppString.isActive = AppModel.user.isActive;
-        AppString.gender = AppModel.user.gender;
-        AppString.photoUrl = AppModel.user.avatarUrl;
-        AppString.coverUrl = AppModel.user.coverUrl;
         AppModel.user.isActive = true;
         AppModel.user.lastTimeUpdate = DateTime.now().toString();
         _databaseReference
@@ -123,12 +133,127 @@ class _SplashPageState extends State<SplashPage> {
             .document(user.uid)
             .setData(AppModel.user.toJson());
 
-        if (AppString.roles == TypeStatus.USER.toString()) {
-          Navigator.of(context).pushReplacementNamed('/navuserhome');
+        if (link == null) {
+          if (AppModel.user.roles == TypeStatus.USER.toString()) {
+            Navigator.of(context).pushReplacementNamed('/navuserhome');
+          } else {
+            Navigator.of(context).pushReplacementNamed('/navhome');
+          }
         } else {
-          Navigator.of(context).pushReplacementNamed('/navhome');
+          _goToGroup(link);
         }
       }
+    });
+  }
+
+  Future<void> initPlatformState() async {
+    if (_type == UniLinksType.string) {
+      await initPlatformStateForStringUniLinks();
+    } else {
+      await initPlatformStateForUriUniLinks();
+    }
+  }
+
+  /// An implementation using a [String] link
+  Future<void> initPlatformStateForStringUniLinks() async {
+    // Attach a listener to the links stream
+    _sub = getLinksStream().listen((String link) {
+      if (!mounted) return;
+      setState(() {
+        _latestLink = link ?? 'Unknown';
+        _latestUri = null;
+        try {
+          if (link != null) _latestUri = Uri.parse(link);
+        } on FormatException {}
+      });
+    }, onError: (Object err) {
+      if (!mounted) return;
+      setState(() {
+        _latestLink = 'Failed to get latest link: $err.';
+        _latestUri = null;
+      });
+    });
+
+    // Attach a second listener to the stream
+    getLinksStream().listen((String link) {
+      log('got link: $link');
+      // _checkLink = true;
+    }, onError: (Object err) {
+      print('got err: $err');
+    });
+
+    // Get the latest link
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      _initialLink = await getInitialLink();
+      _checkInternet(link: _initialLink);
+      log('initial link: $_initialLink');
+      if (_initialLink != null) _initialUri = Uri.parse(_initialLink);
+    } on PlatformException {
+      _initialLink = 'Failed to get initial link.';
+      _initialUri = null;
+    } on FormatException {
+      _initialLink = 'Failed to parse the initial link as Uri.';
+      _initialUri = null;
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _latestLink = _initialLink;
+      _latestUri = _initialUri;
+    });
+  }
+
+  Future<void> initPlatformStateForUriUniLinks() async {
+    // Attach a listener to the Uri links stream
+    _sub = getUriLinksStream().listen((Uri uri) {
+      if (!mounted) return;
+      setState(() {
+        _latestUri = uri;
+        _latestLink = uri?.toString() ?? 'Unknown';
+      });
+    }, onError: (Object err) {
+      if (!mounted) return;
+      setState(() {
+        _latestUri = null;
+        _latestLink = 'Failed to get latest link: $err.';
+      });
+    });
+
+    // Attach a second listener to the stream
+    getUriLinksStream().listen((Uri uri) {
+      print('got uri: ${uri?.path} ${uri?.queryParametersAll}');
+    }, onError: (Object err) {
+      print('got err: $err');
+    });
+
+    // Get the latest Uri
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      _initialUri = await getInitialUri();
+      print('initial uri: ${_initialUri?.path}'
+          ' ${_initialUri?.queryParametersAll}');
+      _initialLink = _initialUri?.toString();
+    } on PlatformException {
+      _initialUri = null;
+      _initialLink = 'Failed to get initial uri.';
+    } on FormatException {
+      _initialUri = null;
+      _initialLink = 'Bad parse the initial link as Uri.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _latestUri = _initialUri;
+      _latestLink = _initialLink;
     });
   }
 
@@ -190,5 +315,64 @@ class _SplashPageState extends State<SplashPage> {
           ),
         ) ??
         false;
+  }
+
+  void _goToGroup(String link) async {
+    if (link != null) {
+      List<String> _groupID = List<String>();
+      var str = link.split("uid=");
+      link = str[1];
+      log(link);
+      Firestore _databaseReference = Firestore.instance;
+      await _databaseReference
+          .collection("Rooms")
+          .document("chats")
+          .collection("Group")
+          .getDocuments()
+          .then((QuerySnapshot snapshot) {
+        snapshot.documents.forEach((value) {
+          _groupID.add(value.documentID);
+        });
+      }).then((value) {
+        var id = _groupID.where((element) => element == link).toList();
+        log(id.length.toString());
+        if (id.length == 0) {
+          if (AppModel.user.roles == TypeStatus.USER.toString()) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => UserNavBottom()));
+          } else {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => TestNav()));
+            // Navigator.of(context).pushReplacementNamed('/navhome');
+          }
+        } else {
+          _getGroup(link);
+        }
+        setState(() {});
+      });
+    }
+  }
+
+  _getGroup(String groupID) async {
+    Firestore _databaseReference = Firestore.instance;
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(groupID)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatGroupPage(
+            groupName: group.nameGroup,
+            groupID: group.groupID,
+            id: group.id,
+          ),
+        ),
+      );
+    });
   }
 }

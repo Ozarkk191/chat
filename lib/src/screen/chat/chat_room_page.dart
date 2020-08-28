@@ -51,7 +51,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   _admin() async {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
-      AppString.uid = user.uid;
+      AppModel.user.uid = user.uid;
       await _databaseReference
           .collection('Users')
           .document(widget.uid)
@@ -119,7 +119,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
         backgroundColor: Color(0xff202020),
-        title: AppString.roles == "${TypeStatus.USER}"
+        title: AppModel.user.roles == "${TypeStatus.USER}"
             ? Text(userModel != null ? 'แอดมิน ${userModel.firstName}' : "")
             : Text(userModel != null ? "${userModel.firstName}" : ""),
         leading: InkWell(

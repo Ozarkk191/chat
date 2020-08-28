@@ -17,7 +17,9 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
-
+             <meta-data
+                android:name="asset_statements"
+                android:resource="@string/asset_statements"/>
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -29,9 +31,7 @@
                     android:pathPrefix="/group" />
             </intent-filter>
 
-            <meta-data
-                android:name="asset_statements"
-                android:resource="@string/asset_statements"/>
+            
 
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
@@ -73,6 +73,4 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    
-    
 </manifest>

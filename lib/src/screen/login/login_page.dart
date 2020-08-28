@@ -26,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isLogged = false;
   bool _loadingOverlay = false;
+  String _token;
 
   var toDay = new DateTime.now();
   String dateTime = "";
@@ -96,9 +97,8 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _logout();
-    AppModel.user = null;
     _messaging.getToken().then((token) {
-      AppString.notiToken = token;
+      _token = token;
     });
     var date = toDay.toString().split(".");
     dateTime = date[0];
@@ -118,14 +118,6 @@ class _LoginPageState extends State<LoginPage> {
               alignment: Alignment.center,
               child: Image.asset('assets/images/logo.png'),
             ),
-            // GradientButton(
-            //   title: 'Register',
-            //   callBack: () {
-            //     // Navigator.push(context,
-            //     //     MaterialPageRoute(builder: (context) => LoginNewPage()));
-            //     // Navigator.pushNamed(context, '/register');
-            //   },
-            // ),
             SizedBox(
               height: 20,
             ),
@@ -179,19 +171,19 @@ class _LoginPageState extends State<LoginPage> {
         if (AppModel.user.banned) {
           _dialogShow(title: "แจ้งเตือน", content: "คุณถูกแบนออกจากระบบ");
         } else {
-          AppString.displayName = AppModel.user.displayName;
-          AppString.firstname = AppModel.user.firstName;
-          AppString.lastname = AppModel.user.lastName;
-          AppString.birthDate = AppModel.user.birthDate;
-          AppString.email = AppModel.user.email;
-          // AppString.notiToken = userModel.notiToken;
-          AppString.phoneNumber = AppModel.user.phoneNumber;
-          AppString.roles = AppModel.user.roles;
-          AppString.photoUrl = AppModel.user.avatarUrl;
-          AppString.dateTime = AppModel.user.updatedAt;
-          // AppString.isActive = userModel.isActive;
-          AppString.gender = AppModel.user.gender;
-          AppString.coverUrl = AppModel.user.coverUrl;
+          // AppString.displayName = AppModel.user.displayName;
+          // AppString.firstname = AppModel.user.firstName;
+          // AppString.lastname = AppModel.user.lastName;
+          // AppString.birthDate = AppModel.user.birthDate;
+          // AppString.email = AppModel.user.email;
+          // // AppString.notiToken = userModel.notiToken;
+          // AppString.phoneNumber = AppModel.user.phoneNumber;
+          // AppString.roles = AppModel.user.roles;
+          // AppString.photoUrl = AppModel.user.avatarUrl;
+          // AppString.dateTime = AppModel.user.updatedAt;
+          // // AppString.isActive = userModel.isActive;
+          // AppString.gender = AppModel.user.gender;
+          // AppString.coverUrl = AppModel.user.coverUrl;
 
           AppModel.user.lastTimeUpdate = DateTime.now().toString();
           _databaseReference
@@ -199,11 +191,11 @@ class _LoginPageState extends State<LoginPage> {
               .document(AppModel.user.uid)
               .updateData({
             "lastTimeUpdate": DateTime.now().toString(),
-            "notiToken": AppString.notiToken,
+            "notiToken": _token,
             "isActive": true
           });
 
-          if (AppString.roles == '${TypeStatus.USER}') {
+          if (AppModel.user.roles == '${TypeStatus.USER}') {
             Navigator.of(context).pushReplacementNamed('/navuserhome');
           } else {
             Navigator.of(context).pushReplacementNamed('/navhome');
@@ -249,7 +241,6 @@ class _LoginPageState extends State<LoginPage> {
     AppModel.user.email = user.email;
     AppModel.user.createdAt = dateTime;
     AppModel.user.updatedAt = dateTime;
-    AppModel.user.notiToken = AppString.notiToken;
     AppModel.user.displayName = user.displayName;
     AppModel.user.phoneNumber = "null";
     AppModel.user.roles = TypeStatus.USER.toString();

@@ -21,21 +21,6 @@ class MenuSettings {
 }
 
 class AppString {
-  static String firstname = "";
-  static String lastname = "";
-  static String notiToken = "";
-  static String phoneNumber = "";
-  static String email = "";
-  static String displayName = "";
-  static String gender = "";
-  static String birthDate = "";
-  static String dateTime = "";
-  static String photoUrl = "";
-  static String uid = "";
-  static String coverUrl = "";
-  static String roles;
-  static bool isActive;
-
   static String uidRoomChat;
   static String uidAdmin;
   static String keyChatRooms;
@@ -50,6 +35,8 @@ class AppModel {
 class AppList {
   static List<String> lastTextList = List<String>();
   static List<String> lastTimeList = List<String>();
+  static List<String> lastGroupTextList = List<String>();
+  static List<String> lastGroupTimeList = List<String>();
   static List<UserModel> userList = [];
   static List<UserModel> allAdminList = [];
   static List<UserModel> allUserList = [];
@@ -57,6 +44,7 @@ class AppList {
   static List<UserModel> adminList = [];
   static List<String> uidList = [];
   static List<String> adminUidList = [];
+  static List<GroupModel> myGroupList = [];
   static List<GroupModel> groupList = [];
   static List<GroupModel> groupAllList = [];
   static List<String> groupKey = [];

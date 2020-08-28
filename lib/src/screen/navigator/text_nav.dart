@@ -1,12 +1,14 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +18,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class TestNav extends StatefulWidget {
   final titles = ['Home', 'Group', 'Chat'];
 
+  final int currentIndex;
+
   final icons = [
     AssetImage('assets/images/ic_home_nav.png'),
     AssetImage('assets/images/ic_group.png'),
     AssetImage('assets/images/ic_chat.png'),
   ];
+
+  TestNav({Key key, this.currentIndex = 0}) : super(key: key);
 
   @override
   _TestNavState createState() => _TestNavState();
@@ -30,6 +36,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
   PageController _pageController;
   int _currentIndex = 0;
   var _messages;
+  final _databaseReference = Firestore.instance;
   MenuPositionController _menuPositionController;
   bool userPageDragging = false;
   FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -38,6 +45,9 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    _currentIndex = widget.currentIndex;
+
+    // _pageController.jumpToPage(widget.currentIndex);
     var initializationSettingsAndroid =
         AndroidInitializationSettings('ic_launcher');
 
@@ -56,7 +66,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
         payload = _messages['data']['data'].toString();
         var data = payload.split("&&");
         if (data[2] == "room") {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => ChatRoomPage(
@@ -66,7 +76,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
             ),
           );
         } else if (data[2] == "group") {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => ChatGroupPage(
@@ -80,13 +90,16 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
       });
       return null;
     });
-    _menuPositionController = MenuPositionController(initPosition: 0);
+    _menuPositionController =
+        MenuPositionController(initPosition: _currentIndex);
     _pageController = PageController();
 
-    // _pageController =
-    //     PageController(initialPage: 0, keepPage: false, viewportFraction: 1.0);
-    // _pageController.addListener(handlePageChange);
+    _pageController = PageController(
+        initialPage: _currentIndex, keepPage: false, viewportFraction: 1.0);
+    _pageController.addListener(_handlePageChange);
+
     initFirebaseMessaging();
+    _getGroupData();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -168,15 +181,15 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
     Firestore _databaseReference = Firestore.instance;
     _databaseReference
         .collection('Users')
-        .document(AppString.uid)
+        .document(AppModel.user.uid)
         .setData(AppModel.user.toJson());
   }
 
-  void handlePageChange() {
+  void _handlePageChange() {
     _menuPositionController.absolutePosition = _pageController.page;
   }
 
-  void checkUserDragging(ScrollNotification scrollNotification) {
+  void _checkUserDragging(ScrollNotification scrollNotification) {
     if (scrollNotification is UserScrollNotification &&
         scrollNotification.direction != ScrollDirection.idle) {
       userPageDragging = true;
@@ -188,6 +201,79 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
     }
   }
 
+  _getGroupData() async {
+    AppList.lastGroupTextList.clear();
+    AppList.lastGroupTimeList.clear();
+    AppList.myGroupList.clear();
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+      snapshot.documents.forEach((value) {
+        var group = GroupModel.fromJson(value.data);
+        var uid = group.memberUIDList
+            .where((element) => element == AppModel.user.uid);
+        if (uid.length != 0) {
+          AppList.myGroupList.add(group);
+          setState(() {});
+        }
+      });
+    }).then((value) {
+      _getLastText();
+    });
+  }
+
+  _getLastText() async {
+    String lastText = "";
+    String lastTime = "";
+
+    if (AppList.myGroupList.length != 0) {
+      for (var i = 0; i < AppList.myGroupList.length; i++) {
+        await _databaseReference
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(AppList.myGroupList[i].groupID)
+            .collection("messages")
+            .getDocuments()
+            .then((QuerySnapshot snapshot) {
+          snapshot.documents.forEach((value) {
+            var message = ChatMessage.fromJson(value.data);
+
+            if (message != null) {
+              if (message.text.isEmpty) {
+                if (message.user.uid == AppModel.user.uid) {
+                  lastText = "คุณได้ส่งรูปภาพ";
+                } else {
+                  lastText = "คุณได้รับรูปภาพ";
+                }
+              } else {
+                lastText = message.text;
+              }
+
+              lastTime = DateTime.fromMillisecondsSinceEpoch(
+                      message.createdAt.millisecondsSinceEpoch)
+                  .toString();
+              var str = lastTime.split(" ");
+              var str2 = str[1].split(".");
+              str = str2[0].split(":");
+              lastTime = "${str[0]}:${str[1]} น.";
+            } else {
+              lastText = "";
+              lastTime = "00:00 น.";
+            }
+          });
+        });
+        AppList.lastGroupTextList.add(lastText);
+        AppList.lastGroupTimeList.add(lastTime);
+
+        setState(() {});
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -195,7 +281,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
       child: Scaffold(
         body: NotificationListener<ScrollNotification>(
           onNotification: (scrollNotification) {
-            checkUserDragging(scrollNotification);
+            _checkUserDragging(scrollNotification);
             return;
           },
           child: PageView(

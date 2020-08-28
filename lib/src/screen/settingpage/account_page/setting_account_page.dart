@@ -21,13 +21,13 @@ class SettingAccountPage extends StatelessWidget {
           TwoTextAndLine(
             context: context,
             title: 'หมายเลขโทรศัพท์',
-            data: AppString.phoneNumber,
+            data: AppModel.user.phoneNumber,
             onTap: () {},
           ),
           TwoTextAndLine(
             context: context,
             title: 'อีเมล',
-            data: AppString.email,
+            data: AppModel.user.email,
             onTap: () {},
           ),
           TwoTextAndLine(

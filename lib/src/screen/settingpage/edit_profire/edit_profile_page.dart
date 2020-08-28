@@ -22,7 +22,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
         backgroundColor: Color(0xff242424),
         leading: InkWell(
           onTap: () {
-            if (AppString.roles == "${TypeStatus.USER}") {
+            if (AppModel.user.roles == "${TypeStatus.USER}") {
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => UserNavBottom()));
             } else {

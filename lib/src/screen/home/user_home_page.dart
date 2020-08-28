@@ -34,7 +34,7 @@ class _UserHomePageState extends State<UserHomePage> {
   user() async {
     FirebaseUser user = await _auth.currentUser();
     if (user != null) {
-      AppString.uid = user.uid;
+      AppModel.user.uid = user.uid;
       await _databaseReference
           .collection('Users')
           .document(user.uid)
@@ -60,8 +60,8 @@ class _UserHomePageState extends State<UserHomePage> {
       snapshot.documents.forEach((value) {
         var group = GroupModel.fromJson(value.data);
         AppList.groupAllList.add(group);
-        var uid =
-            group.memberUIDList.where((element) => element == AppString.uid);
+        var uid = group.memberUIDList
+            .where((element) => element == AppModel.user.uid);
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(group);
@@ -110,7 +110,8 @@ class _UserHomePageState extends State<UserHomePage> {
         .get()
         .then((value) {
       var group = GroupModel.fromJson(value.data);
-      uid = group.memberUIDList.where((element) => element == AppString.uid);
+      uid =
+          group.memberUIDList.where((element) => element == AppModel.user.uid);
     }).then((_) {
       if (uid.length != 0) {
         uidMember = true;
@@ -157,6 +158,7 @@ class _UserHomePageState extends State<UserHomePage> {
       }).then((value) {
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
+        // log(AppList.lastTimeList[0]);
         setState(() {});
       });
     }
