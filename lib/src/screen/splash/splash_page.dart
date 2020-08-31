@@ -354,6 +354,7 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   _getGroup(String groupID) async {
+    List<dynamic> _memberList = List<String>();
     Firestore _databaseReference = Firestore.instance;
     await _databaseReference
         .collection("Rooms")
@@ -363,16 +364,41 @@ class _SplashPageState extends State<SplashPage> {
         .get()
         .then((value) {
       var group = GroupModel.fromJson(value.data);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatGroupPage(
-            groupName: group.nameGroup,
-            groupID: group.groupID,
-            id: group.id,
+      _memberList = group.memberUIDList;
+
+      var member =
+          _memberList.where((element) => element == AppModel.user.uid).toList();
+      if (member.length == 0) {
+        _memberList.add(AppModel.user.uid);
+        _databaseReference
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(groupID)
+            .updateData({"memberUIDList": _memberList}).then((value) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatGroupPage(
+                groupName: group.nameGroup,
+                groupID: group.groupID,
+                id: group.id,
+              ),
+            ),
+          );
+        });
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatGroupPage(
+              groupName: group.nameGroup,
+              groupID: group.groupID,
+              id: group.id,
+            ),
           ),
-        ),
-      );
+        );
+      }
     });
   }
 }
