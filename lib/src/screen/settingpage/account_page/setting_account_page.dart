@@ -30,22 +30,22 @@ class SettingAccountPage extends StatelessWidget {
             data: AppModel.user.email,
             onTap: () {},
           ),
-          TwoTextAndLine(
-            context: context,
-            title: 'รหัสผ่าน',
-            data: '**********',
-            onTap: () {},
-          ),
-          TwoTextAndLine(
-            context: context,
-            title: 'Facebook',
-            onTap: () {},
-          ),
-          TwoTextAndLine(
-            context: context,
-            title: 'ล็อครหัสผ่าน',
-            onTap: () {},
-          ),
+          // TwoTextAndLine(
+          //   context: context,
+          //   title: 'รหัสผ่าน',
+          //   data: '**********',
+          //   onTap: () {},
+          // ),
+          // TwoTextAndLine(
+          //   context: context,
+          //   title: 'Facebook',
+          //   onTap: () {},
+          // ),
+          // TwoTextAndLine(
+          //   context: context,
+          //   title: 'ล็อครหัสผ่าน',
+          //   onTap: () {},
+          // ),
         ],
       ),
     );

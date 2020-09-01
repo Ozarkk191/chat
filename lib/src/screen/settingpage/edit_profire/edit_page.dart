@@ -244,12 +244,32 @@ class _EditPageState extends State<EditPage> {
                   profileUrl: AppModel.user.avatarUrl,
                 ),
                 SizedBox(height: 20),
-                BigRoundTextField(
-                  controller: _firstName,
-                  maxLength: 20,
-                  onChanged: (val) {
-                    _validate(val);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 70,
+                      child: BigRoundTextField(
+                        enabled: false,
+                        maxLength: 15,
+                        backgroundColor: Color(0xff292929),
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        hintText: "ชื่อ :",
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    BigRoundTextField(
+                      controller: _firstName,
+                      maxLength: 15,
+                      fontSize: 14,
+                      onChanged: (val) {
+                        _validate(val);
+                      },
+                    ),
+                  ],
                 ),
                 Text(
                   _errorText,
@@ -259,12 +279,32 @@ class _EditPageState extends State<EditPage> {
                   ),
                 ),
                 SizedBox(height: 10),
-                BigRoundTextField(
-                  controller: _lastName,
-                  maxLength: 20,
-                  onChanged: (val) {
-                    _validate2(val);
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 70,
+                      child: BigRoundTextField(
+                        enabled: false,
+                        maxLength: 15,
+                        backgroundColor: Color(0xff292929),
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        hintText: "นามสกุล :",
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    BigRoundTextField(
+                      controller: _lastName,
+                      maxLength: 15,
+                      fontSize: 14,
+                      onChanged: (val) {
+                        _validate2(val);
+                      },
+                    ),
+                  ],
                 ),
                 Text(
                   _errorText2,
@@ -320,14 +360,34 @@ class _EditPageState extends State<EditPage> {
                     ),
                   ],
                 ),
-                InkWell(
-                  onTap: () {
-                    _time();
-                  },
-                  child: BigRoundTextField(
-                    controller: _birthday,
-                    enabled: false,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 70,
+                      child: BigRoundTextField(
+                        enabled: false,
+                        maxLength: 15,
+                        backgroundColor: Color(0xff292929),
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        hintText: "วันเกิด :",
+                      ),
+                    ),
+                    SizedBox(width: 5),
+                    InkWell(
+                      onTap: () {
+                        _time();
+                      },
+                      child: BigRoundTextField(
+                        controller: _birthday,
+                        enabled: false,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 50),
                 GradientButton(
@@ -347,6 +407,7 @@ class _EditPageState extends State<EditPage> {
   }
 
   void _validate(String value) {
+    setState(() {});
     if (value.length == 0) {
       setState(() {
         _errorText = "*กรุณากรอกข้อมูล";
@@ -388,15 +449,13 @@ class _EditPageState extends State<EditPage> {
           setState(() {
             _errorText = "*ชื่อและนามสกุลต้องเป็นภาษาเดียวกัน";
           });
-        } else {
-          _errorText = "";
-          _errorText2 = "";
         }
       }
     }
   }
 
   void _validate2(String value) {
+    setState(() {});
     if (value.length == 0) {
       setState(() {
         _errorText2 = "*กรุณากรอกข้อมูล";
@@ -438,9 +497,6 @@ class _EditPageState extends State<EditPage> {
           setState(() {
             _errorText2 = "*ชื่อและนามสกุลต้องเป็นภาษาเดียวกัน";
           });
-        } else {
-          _errorText = "";
-          _errorText2 = "";
         }
       }
     }
@@ -524,7 +580,7 @@ class _EditPageState extends State<EditPage> {
                 children: <Widget>[
                   Container(
                     child: Text(
-                      'Edit image',
+                      'เปลี่ยนรูปปก',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -583,7 +639,7 @@ class _EditPageState extends State<EditPage> {
                           color: Colors.black.withOpacity(0.7),
                           child: Center(
                             child: Text(
-                              'Edit image',
+                              'เปลี่ยนรูป',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

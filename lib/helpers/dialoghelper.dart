@@ -6,6 +6,7 @@ class DialogHelper {
     BuildContext context,
     String profileUrl,
     String username,
+    String title2,
     String coverUrl,
     Function callbackItem1,
     Function callbackItem2,
@@ -15,7 +16,7 @@ class DialogHelper {
         context: context,
         builder: (context) => AdminDialog(
           title1: 'Chat',
-          title2: 'Block and Ban',
+          title2: title2,
           title3: 'Delete',
           pathIcon1: 'assets/images/ic_chat.png',
           pathIcon2: 'assets/images/ic_block.png',

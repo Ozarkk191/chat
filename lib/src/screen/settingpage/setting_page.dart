@@ -1,12 +1,9 @@
 import 'package:chat/app_strings/menu_settings.dart';
-import 'package:chat/helpers/user_dialog_helper.dart';
 import 'package:chat/services/authservice.dart';
 import 'package:chat/src/base_compoments/text/two_text_and_line.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'account_page/setting_account_page.dart';
-import 'chat_page/setting_chat_page.dart';
-import 'notification_page/setting_notifition_page.dart';
 
 class SettingPage extends StatelessWidget {
   @override
@@ -36,24 +33,24 @@ class SettingPage extends StatelessWidget {
                       builder: (context) => SettingAccountPage()));
             },
           ),
-          TwoTextAndLine(
-              context: context,
-              title: 'การแจ้งเตือน',
-              data: ">",
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SettingNotificationPage()));
-              }),
-          TwoTextAndLine(
-              context: context,
-              title: 'แชท',
-              data: ">",
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SettingChatPage()));
-              }),
+          // TwoTextAndLine(
+          //     context: context,
+          //     title: 'การแจ้งเตือน',
+          //     data: ">",
+          //     onTap: () {
+          //       Navigator.push(
+          //           context,
+          //           MaterialPageRoute(
+          //               builder: (context) => SettingNotificationPage()));
+          //     }),
+          // TwoTextAndLine(
+          //     context: context,
+          //     title: 'แชท',
+          //     data: ">",
+          //     onTap: () {
+          //       Navigator.push(context,
+          //           MaterialPageRoute(builder: (context) => SettingChatPage()));
+          //     }),
           TwoTextAndLine(
               context: context,
               title: 'ออกจากระบบ',
@@ -61,12 +58,12 @@ class SettingPage extends StatelessWidget {
               onTap: () {
                 _login(context);
               }),
-          TwoTextAndLine(
-              context: context,
-              title: 'ลบบัญชีผู้ใช้',
-              onTap: () {
-                DeleteAccountDialogHelpers.delete(context);
-              }),
+          // TwoTextAndLine(
+          //     context: context,
+          //     title: 'ลบบัญชีผู้ใช้',
+          //     onTap: () {
+          //       DeleteAccountDialogHelpers.delete(context);
+          //     }),
         ],
       )),
     );

@@ -214,12 +214,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Future<String> _getRead(String key) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String read = prefs.getString(key);
-  //   return read ?? "";
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -227,9 +221,6 @@ class _HomePageState extends State<HomePage> {
     _getGroup();
     _getAllUser();
     _getAllAdmin();
-    // Random random = new Random();
-    // int randomNumber = random.nextInt(999999) + 100000;
-    // log(randomNumber);
   }
 
   @override
@@ -308,6 +299,9 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () {
                                   DialogHelper.adminDialog(
                                     context: context,
+                                    title2: !AppList.adminList[index].banned
+                                        ? "แบน"
+                                        : "ปลดแบน",
                                     profileUrl:
                                         AppList.adminList[index].avatarUrl,
                                     username:
@@ -343,14 +337,26 @@ class _HomePageState extends State<HomePage> {
                                           }
                                         : () {
                                             Navigator.pop(context);
-                                            _dialogShow(
-                                                title: "แจ้งเตือน",
-                                                content:
-                                                    "คุณต้องการแบน ${AppList.adminList[index].displayName} ออกจากระบบหรือไม่",
-                                                index: index,
-                                                uid: AppList
-                                                    .adminList[index].uid,
-                                                status: "admin");
+                                            if (AppList
+                                                .adminList[index].banned) {
+                                              _dialogShow2(
+                                                  title: "แจ้งเตือน",
+                                                  content:
+                                                      "คุณต้องการปลดแบน ${AppList.adminList[index].displayName} หรือไม่",
+                                                  index: index,
+                                                  uid: AppList
+                                                      .adminList[index].uid,
+                                                  status: "admin");
+                                            } else {
+                                              _dialogShow(
+                                                  title: "แจ้งเตือน",
+                                                  content:
+                                                      "คุณต้องการแบน ${AppList.adminList[index].displayName} ออกจากระบบหรือไม่",
+                                                  index: index,
+                                                  uid: AppList
+                                                      .adminList[index].uid,
+                                                  status: "admin");
+                                            }
                                           },
                                     callbackItem3: () {},
                                   );
@@ -514,6 +520,9 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () {
                                   DialogHelper.adminDialog(
                                     context: context,
+                                    title2: !AppList.userList[index].banned
+                                        ? "แบน"
+                                        : "ปลดแบน",
                                     profileUrl:
                                         AppList.userList[index].avatarUrl,
                                     username:
@@ -540,13 +549,23 @@ class _HomePageState extends State<HomePage> {
                                     },
                                     callbackItem2: () {
                                       Navigator.pop(context);
-                                      _dialogShow(
-                                          title: "แจ้งเตือน",
-                                          content:
-                                              "คุณต้องการแบน ${AppList.userList[index].displayName} ออกจากระบบหรือไม่",
-                                          index: index,
-                                          uid: AppList.userList[index].uid,
-                                          status: "user");
+                                      if (AppList.userList[index].banned) {
+                                        _dialogShow(
+                                            title: "แจ้งเตือน",
+                                            content:
+                                                "คุณต้องการปลดแบน ${AppList.userList[index].displayName} หรือไม่",
+                                            index: index,
+                                            uid: AppList.userList[index].uid,
+                                            status: "user");
+                                      } else {
+                                        _dialogShow(
+                                            title: "แจ้งเตือน",
+                                            content:
+                                                "คุณต้องการแบน ${AppList.userList[index].displayName} ออกจากระบบหรือไม่",
+                                            index: index,
+                                            uid: AppList.userList[index].uid,
+                                            status: "user");
+                                      }
                                     },
                                     callbackItem3: () {},
                                   );
@@ -656,21 +675,11 @@ class _HomePageState extends State<HomePage> {
             actions: <Widget>[
               GestureDetector(
                 onTap: () {
-                  Navigator.of(context).pop(false);
-                  if (status == "user") {
-                    AppList.userList[index].banned = true;
-                    _userBannedList.add(AppList.userList[index]);
+                  if (AppList.userList[index].banned) {
+                    unBanUser(context, status, index, uid);
                   } else {
-                    AppList.adminList[index].banned = true;
-                    _userBannedList.add(AppList.adminList[index]);
+                    banUser(context, status, index, uid);
                   }
-
-                  _databaseReference
-                      .collection("Users")
-                      .document(uid)
-                      .updateData({"banned": true}).then((_) {
-                    setState(() {});
-                  });
                 },
                 child: Container(
                   padding: EdgeInsets.all(10),
@@ -690,5 +699,81 @@ class _HomePageState extends State<HomePage> {
           ),
         ) ??
         false;
+  }
+
+  Future<bool> _dialogShow2({
+    String title,
+    String content,
+    int index,
+    String uid,
+    String status,
+  }) async {
+    return showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('$title'),
+            content: Text('$content'),
+            actions: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  if (AppList.adminList[index].banned) {
+                    unBanUser(context, status, index, uid);
+                  } else {
+                    banUser(context, status, index, uid);
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ใช่"),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text("ไม่"),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  void banUser(BuildContext context, String status, int index, String uid) {
+    Navigator.of(context).pop(false);
+    if (status == "user") {
+      AppList.userList[index].banned = true;
+      _userBannedList.add(AppList.userList[index]);
+    } else {
+      AppList.adminList[index].banned = true;
+      _userBannedList.add(AppList.adminList[index]);
+    }
+    _databaseReference
+        .collection("Users")
+        .document(uid)
+        .updateData({"banned": true}).then((_) {
+      setState(() {});
+    });
+  }
+
+  void unBanUser(
+      BuildContext context, String status, int index, String uid) async {
+    Navigator.of(context).pop(false);
+    if (status == "user") {
+      AppList.userList[index].banned = false;
+      _userBannedList.add(AppList.userList[index]);
+    } else {
+      AppList.adminList[index].banned = false;
+      _userBannedList.add(AppList.adminList[index]);
+    }
+    _databaseReference
+        .collection("Users")
+        .document(uid)
+        .updateData({"banned": false}).then((_) {
+      setState(() {});
+    });
   }
 }

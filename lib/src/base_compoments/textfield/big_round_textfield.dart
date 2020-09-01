@@ -21,8 +21,10 @@ class BigRoundTextField extends StatelessWidget {
   final bool autofocus;
   final double marginTop;
   final double opacity;
+  final double fontSize;
   final int maxLength;
   final Color textColor;
+  final Color backgroundColor;
   final List<TextInputFormatter> inputFormat;
 
   const BigRoundTextField({
@@ -49,6 +51,8 @@ class BigRoundTextField extends StatelessWidget {
     this.autofocus = false,
     this.inputFormat,
     this.onTap,
+    this.fontSize = 16,
+    this.backgroundColor = Colors.black,
   }) : super(key: key);
 
   @override
@@ -64,12 +68,12 @@ class BigRoundTextField extends StatelessWidget {
         width: MediaQuery.of(context).size.width - 160,
         margin: EdgeInsets.only(top: marginTop),
         decoration: BoxDecoration(
-            color: Color(0xff111111),
+            color: backgroundColor,
             borderRadius: BorderRadius.all(Radius.circular(5))),
         child: TextFormField(
           controller: controller,
           inputFormatters: inputFormat,
-          style: TextStyle(color: textColor),
+          style: TextStyle(color: textColor, fontSize: fontSize),
           onTap: onTap,
           decoration: new InputDecoration(
             enabledBorder: border,
@@ -82,7 +86,7 @@ class BigRoundTextField extends StatelessWidget {
                 hintStyle ?? new TextStyle(color: const Color(0x88707070)),
             hintText: hintText,
             errorText: errorText,
-            fillColor: const Color(0xff111111),
+            fillColor: backgroundColor,
             contentPadding: const EdgeInsets.symmetric(vertical: 12),
             labelText: labelText,
             labelStyle: new TextStyle(color: Color(0xffffffff)),

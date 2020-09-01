@@ -87,16 +87,16 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _logout() async {
-    FirebaseAuth.instance.signOut();
-    await FacebookLogin().logOut();
-    await GoogleSignIn().signOut();
-  }
+  // void _logout() async {
+  //   FirebaseAuth.instance.signOut();
+  //   await FacebookLogin().logOut();
+  //   await GoogleSignIn().signOut();
+  // }
 
   @override
   void initState() {
     super.initState();
-    _logout();
+    // _logout();
     _messaging.getToken().then((token) {
       _token = token;
     });

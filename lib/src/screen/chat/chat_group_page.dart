@@ -9,7 +9,7 @@ import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
-import 'package:chat/src/screen/invite/invite_page.dart';
+import 'package:chat/src/screen/invite/invite_with_link.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
 import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
@@ -53,7 +53,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   var m = List<ChatMessage>();
 
   var i = 0;
-
+  var member;
   void _getMemberUID() async {
     await _databaseReference
         .collection('Rooms')
@@ -62,7 +62,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .document(widget.groupID)
         .get()
         .then((value) {
-      var member = GroupModel.fromJson(value.data);
+      member = GroupModel.fromJson(value.data);
+    }).then((value) {
       _getMember(member.memberUIDList);
     });
   }
@@ -182,19 +183,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(widget.groupName),
-              Text(
-                "ID : ${widget.id}",
-                style: TextStyle(fontSize: 8),
-              ),
-            ],
-          ),
-        ),
+        title: Text("${widget.groupName} (id : ${widget.id})"),
         leading: InkWell(
           onTap: () {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
@@ -335,7 +324,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => InvitePage(
+          builder: (context) => InviteWithLink(
             groupID: widget.groupID,
           ),
         ),

@@ -126,9 +126,8 @@ class _GroupPageState extends State<GroupPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: AppList.myGroupList.length == 0
-            ? Container()
-            : Container(
+        child: AppList.myGroupList.length != 0
+            ? Container(
                 width: MediaQuery.of(context).size.width,
                 child: Column(
                   children: <Widget>[
@@ -174,7 +173,8 @@ class _GroupPageState extends State<GroupPage> {
                     ),
                   ],
                 ),
-              ),
+              )
+            : Container(),
       ),
     );
   }

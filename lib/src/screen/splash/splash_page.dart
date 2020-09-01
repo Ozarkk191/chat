@@ -11,11 +11,13 @@ import 'package:chat/src/screen/login/login_page.dart';
 import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -40,7 +42,7 @@ class _SplashPageState extends State<SplashPage> {
     if (_initialUri != null) {
       log(_initialUri.toString());
     }
-    initPlatformState();
+    _checkApplication();
     _messaging.getToken().then((token) {
       tokenCheck = token;
     });
@@ -50,6 +52,25 @@ class _SplashPageState extends State<SplashPage> {
   void dispose() {
     if (_sub != null) _sub.cancel();
     super.dispose();
+  }
+
+  _checkApplication() async {
+    bool isInstalled = await DeviceApps.isAppInstalled('com.secret.chat2020');
+    if (isInstalled) {
+      initPlatformState();
+    } else {
+      _launchURL();
+    }
+  }
+
+  _launchURL() async {
+    const url =
+        'https://play.google.com/store/apps/details?id=com.secret.chat2020';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   _checkInternet({String link}) async {
