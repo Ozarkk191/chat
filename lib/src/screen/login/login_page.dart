@@ -20,6 +20,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   GoogleSignIn googleSignIn = GoogleSignIn();
+  // GoogleSignInAccount _currentUser;
   FacebookLogin facebookLogin = FacebookLogin();
   final _databaseReference = Firestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging();
@@ -31,27 +32,40 @@ class _LoginPageState extends State<LoginPage> {
   var toDay = new DateTime.now();
   String dateTime = "";
 
-  Future<String> _signInWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount googleSignInAccount =
+          await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
 
-    final AuthResult authResult = await _auth.signInWithCredential(credential);
-    final FirebaseUser user = authResult.user;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
+      final AuthResult authResult =
+          await _auth.signInWithCredential(credential);
+      final FirebaseUser user = authResult.user;
 
-    final FirebaseUser currentUser = await _auth.currentUser();
-    assert(user.uid == currentUser.uid);
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
 
-    saveDataUser(user);
-    return 'signInWithGoogle succeeded: $user';
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+
+      saveDataUser(user);
+      return 'signInWithGoogle succeeded: $user';
+    } catch (error) {
+      print(error);
+    }
   }
 
   _loginWithFacebook() async {
