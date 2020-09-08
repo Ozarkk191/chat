@@ -29,8 +29,8 @@ class _SplashPageState extends State<SplashPage> {
   String tokenCheck = "";
   String _initialLink;
   Uri _initialUri;
-  String _latestLink = 'Unknown';
-  Uri _latestUri;
+  String latestLink = 'Unknown';
+  Uri latestUri;
 
   StreamSubscription _sub;
 
@@ -181,17 +181,17 @@ class _SplashPageState extends State<SplashPage> {
     _sub = getLinksStream().listen((String link) {
       if (!mounted) return;
       setState(() {
-        _latestLink = link ?? 'Unknown';
-        _latestUri = null;
+        latestLink = link ?? 'Unknown';
+        latestUri = null;
         try {
-          if (link != null) _latestUri = Uri.parse(link);
+          if (link != null) latestUri = Uri.parse(link);
         } on FormatException {}
       });
     }, onError: (Object err) {
       if (!mounted) return;
       setState(() {
-        _latestLink = 'Failed to get latest link: $err.';
-        _latestUri = null;
+        latestLink = 'Failed to get latest link: $err.';
+        latestUri = null;
       });
     });
 
@@ -224,8 +224,8 @@ class _SplashPageState extends State<SplashPage> {
     if (!mounted) return;
 
     setState(() {
-      _latestLink = _initialLink;
-      _latestUri = _initialUri;
+      latestLink = _initialLink;
+      latestUri = _initialUri;
     });
   }
 
@@ -234,14 +234,14 @@ class _SplashPageState extends State<SplashPage> {
     _sub = getUriLinksStream().listen((Uri uri) {
       if (!mounted) return;
       setState(() {
-        _latestUri = uri;
-        _latestLink = uri?.toString() ?? 'Unknown';
+        latestUri = uri;
+        latestLink = uri?.toString() ?? 'Unknown';
       });
     }, onError: (Object err) {
       if (!mounted) return;
       setState(() {
-        _latestUri = null;
-        _latestLink = 'Failed to get latest link: $err.';
+        latestUri = null;
+        latestLink = 'Failed to get latest link: $err.';
       });
     });
 
@@ -273,8 +273,8 @@ class _SplashPageState extends State<SplashPage> {
     if (!mounted) return;
 
     setState(() {
-      _latestUri = _initialUri;
-      _latestLink = _initialLink;
+      latestUri = _initialUri;
+      latestLink = _initialLink;
     });
   }
 
