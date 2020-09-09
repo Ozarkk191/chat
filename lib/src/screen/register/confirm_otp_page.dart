@@ -1,9 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/app_strings/type_status.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
 import 'package:chat/src/base_compoments/button/gradient_button.dart';
+import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
+import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:chat/src/screen/register/data_collect_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +19,11 @@ import 'package:pin_code_text_field/pin_code_text_field.dart';
 class ConfirmOTPPage extends StatefulWidget {
   final String phoneNumber;
   final String otp;
+  final String link;
   final UserModel user;
 
   const ConfirmOTPPage(
-      {Key key, @required this.phoneNumber, this.otp, this.user})
+      {Key key, @required this.phoneNumber, this.otp, this.user, this.link})
       : super(key: key);
   @override
   _ConfirmOTPPageState createState() => _ConfirmOTPPageState();
@@ -53,7 +60,92 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
         .document(user.uid)
         .setData(user.toJson())
         .then((_) {
-      Navigator.of(context).pushReplacementNamed('/navuserhome');
+      if (widget.link != null) {
+        _goToGroup(widget.link);
+      } else {
+        Navigator.of(context).pushReplacementNamed('/navuserhome');
+      }
+    });
+  }
+
+  void _goToGroup(String link) async {
+    if (link != null) {
+      List<String> _groupID = List<String>();
+      Firestore _databaseReference = Firestore.instance;
+      await _databaseReference
+          .collection("Rooms")
+          .document("chats")
+          .collection("Group")
+          .getDocuments()
+          .then((QuerySnapshot snapshot) {
+        snapshot.documents.forEach((value) {
+          _groupID.add(value.documentID);
+        });
+      }).then((value) {
+        var id = _groupID.where((element) => element == link).toList();
+        log(id.length.toString());
+        if (id.length == 0) {
+          if (AppModel.user.roles == TypeStatus.USER.toString()) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => UserNavBottom()));
+          } else {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => TestNav()));
+          }
+        } else {
+          _getGroup(link);
+        }
+        setState(() {});
+      });
+    }
+  }
+
+  _getGroup(String groupID) async {
+    List<dynamic> _memberList = List<String>();
+    Firestore _databaseReference = Firestore.instance;
+    await _databaseReference
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
+        .document(groupID)
+        .get()
+        .then((value) {
+      var group = GroupModel.fromJson(value.data);
+      _memberList = group.memberUIDList;
+
+      var member =
+          _memberList.where((element) => element == AppModel.user.uid).toList();
+      if (member.length == 0) {
+        _memberList.add(AppModel.user.uid);
+        _databaseReference
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(groupID)
+            .updateData({"memberUIDList": _memberList}).then((value) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatGroupPage(
+                groupName: group.nameGroup,
+                groupID: group.groupID,
+                id: group.id,
+              ),
+            ),
+          );
+        });
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatGroupPage(
+              groupName: group.nameGroup,
+              groupID: group.groupID,
+              id: group.id,
+            ),
+          ),
+        );
+      }
     });
   }
 

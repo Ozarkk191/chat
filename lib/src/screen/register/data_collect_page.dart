@@ -15,9 +15,10 @@ import 'package:loading_overlay/loading_overlay.dart';
 
 class DataCollectPage extends StatefulWidget {
   final String phoneNumber;
+  final String link;
   final FirebaseUser user;
 
-  const DataCollectPage({Key key, this.phoneNumber, this.user})
+  const DataCollectPage({Key key, this.phoneNumber, this.user, this.link})
       : super(key: key);
   @override
   _DataCollectPageState createState() => _DataCollectPageState();
@@ -326,6 +327,7 @@ class _DataCollectPageState extends State<DataCollectPage> {
             builder: (context) => ConfirmOTPPage(
               phoneNumber: _phone.text,
               user: user,
+              link: widget.link,
               otp: response['otp'].toString(),
             ),
           ),

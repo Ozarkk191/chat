@@ -108,18 +108,26 @@ class _SplashPageState extends State<SplashPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => LoginPage(),
+                builder: (context) => LoginPage(
+                  link: link,
+                ),
               ),
             );
           });
         }
       });
     } else {
+      if (link != null) {
+        var str = link.split("uid=");
+        link = str[1];
+      }
       Timer(Duration(seconds: 3), () {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => LoginPage(),
+            builder: (context) => LoginPage(
+              link: link,
+            ),
           ),
         );
       });
@@ -175,7 +183,6 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
-  /// An implementation using a [String] link
   Future<void> initPlatformStateForStringUniLinks() async {
     // Attach a listener to the links stream
     _sub = getLinksStream().listen((String link) {
@@ -203,8 +210,6 @@ class _SplashPageState extends State<SplashPage> {
       print('got err: $err');
     });
 
-    // Get the latest link
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       _initialLink = await getInitialLink();
       _checkInternet(link: _initialLink);
@@ -218,9 +223,6 @@ class _SplashPageState extends State<SplashPage> {
       _initialUri = null;
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
@@ -245,15 +247,12 @@ class _SplashPageState extends State<SplashPage> {
       });
     });
 
-    // Attach a second listener to the stream
     getUriLinksStream().listen((Uri uri) {
       print('got uri: ${uri?.path} ${uri?.queryParametersAll}');
     }, onError: (Object err) {
       print('got err: $err');
     });
 
-    // Get the latest Uri
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       _initialUri = await getInitialUri();
       print('initial uri: ${_initialUri?.path}'
@@ -267,9 +266,6 @@ class _SplashPageState extends State<SplashPage> {
       _initialLink = 'Bad parse the initial link as Uri.';
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
@@ -343,7 +339,6 @@ class _SplashPageState extends State<SplashPage> {
       List<String> _groupID = List<String>();
       var str = link.split("uid=");
       link = str[1];
-      log(link);
       Firestore _databaseReference = Firestore.instance;
       await _databaseReference
           .collection("Rooms")
