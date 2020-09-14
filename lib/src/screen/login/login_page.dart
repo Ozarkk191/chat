@@ -110,12 +110,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // void _logout() async {
-  //   FirebaseAuth.instance.signOut();
-  //   await FacebookLogin().logOut();
-  //   await GoogleSignIn().signOut();
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -189,7 +183,6 @@ class _LoginPageState extends State<LoginPage> {
           .document(user.uid)
           .get()
           .then((value) {
-        // var userModel = UserModel.fromJson(value.data);
         AppModel.user = UserModel.fromJson(value.data);
         if (AppModel.user.banned) {
           _dialogShow(title: "แจ้งเตือน", content: "คุณถูกแบนออกจากระบบ");

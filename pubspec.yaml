@@ -27,8 +27,8 @@ dependencies:
   
   bubbled_navigation_bar: ^0.0.3
   bottom_navy_bar: ^5.5.0
-  badges: ^1.1.1
-  firebase_database: ^3.1.3
+  # badges: ^1.1.1
+  # firebase_database: ^3.1.3
   firebase_core: ^0.4.5
   firebase_auth: ^0.16.1
   firebase_storage: ^3.1.6
