@@ -32,7 +32,7 @@ dependencies:
   firebase_core: ^0.4.5
   firebase_auth: ^0.16.1
   firebase_storage: ^3.1.6
-  cloud_firestore: ^0.13.7
+  cloud_firestore: ^0.13.6
   flutter_facebook_login: ^3.0.0
   google_sign_in: ^4.5.3
   cached_network_image: ^2.0.0
