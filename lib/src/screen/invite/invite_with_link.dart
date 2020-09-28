@@ -1,7 +1,10 @@
-import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:share/share.dart';
 import 'package:toast/toast.dart';
 
@@ -14,11 +17,20 @@ class InviteWithLink extends StatefulWidget {
 }
 
 class _InviteWithLinkState extends State<InviteWithLink> {
+  File _imageFile;
+  ScreenshotController screenshotController = ScreenshotController();
   String _link = "https://secretchat.store/group?uid=";
   @override
   void initState() {
     _link = "$_link${widget.groupID}";
     super.initState();
+  }
+
+  _saveToGallery(String path) async {
+    final result =
+        await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
+
+    print(result);
   }
 
   @override
@@ -36,31 +48,34 @@ class _InviteWithLinkState extends State<InviteWithLink> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                boxQRandLink(
-                  'assets/images/ic_qr_code.png',
-                  'QR Code',
-                  () {
-                    _qrCodeBottomSheet(context, _link);
-                  },
-                ),
-                boxQRandLink(
-                  'assets/images/ic_link.png',
-                  ' Link',
-                  () {
-                    _linkBottomSheet(context, _link);
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            SearchField(),
-          ],
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 20),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  boxQRandLink(
+                    'assets/images/ic_qr_code.png',
+                    'QR Code',
+                    () {
+                      _qrCodeBottomSheet(context, _link);
+                    },
+                  ),
+                  boxQRandLink(
+                    'assets/images/ic_link.png',
+                    ' Link',
+                    () {
+                      _linkBottomSheet(context, _link);
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              // SearchField(),
+            ],
+          ),
         ),
       ),
     );
@@ -92,208 +107,238 @@ class _InviteWithLinkState extends State<InviteWithLink> {
       ),
     );
   }
-}
 
-void _qrCodeBottomSheet(context, String link) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext bc) {
-      return Container(
-        height: 250,
-        color: Colors.transparent,
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: new BorderRadius.only(
-                topLeft: const Radius.circular(20.0),
-                topRight: const Radius.circular(20.0),
-              )),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                width: 150,
-                height: 150,
-                child: QrImage(
-                  data: "$link",
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  gapless: false,
-                  embeddedImage: AssetImage('assets/images/logo.png'),
-                  embeddedImageStyle: QrEmbeddedImageStyle(
-                    size: Size(40, 50),
-                  ),
-                  errorStateBuilder: (cxt, err) {
-                    return Container(
-                      child: Center(
-                        child: Text(
-                          "Uh oh! Something went wrong...",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    );
-                  },
+  void _qrCodeBottomSheet(context, String link) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          height: 300,
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: new BorderRadius.only(
+                  topLeft: const Radius.circular(20.0),
+                  topRight: const Radius.circular(20.0),
+                )),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                SizedBox(
+                  height: 10,
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                'ชวนเพื่อนใช้แอพฯ ได้ด้วยการสแกนคิวอาร์โค้ด',
-                style: TextStyle(fontSize: 8),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                // padding: EdgeInsets.fromLTRB(0, 0.5, 0, 0.5),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                ),
-                height: 40,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        color: Colors.white,
-                        child: Center(
-                          child: Text('บันทึกลงเครื่อง'),
-                        ),
+                Screenshot(
+                  controller: screenshotController,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    color: Colors.white,
+                    child: QrImage(
+                      data: "$link",
+                      version: QrVersions.auto,
+                      size: 200.0,
+                      gapless: false,
+                      embeddedImage: AssetImage('assets/images/logo.png'),
+                      embeddedImageStyle: QrEmbeddedImageStyle(
+                        size: Size(40, 50),
                       ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'แชร์',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
-
-void _linkBottomSheet(context, String link) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext bc) {
-      return Container(
-        height: 200,
-        color: Colors.transparent,
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: new BorderRadius.only(
-              topLeft: const Radius.circular(20.0),
-              topRight: const Radius.circular(20.0),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 160,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Link',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width / 1.2,
-                      height: 40,
-                      padding: EdgeInsets.all(1),
-                      color: Colors.black,
-                      child: Container(
-                        color: Colors.white,
-                        child: Center(
-                          child: Text("$link"),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      'ชวนเพื่อนใช้แอพฯ ได้ด้วยการแชร์ลิงค์',
-                      style: TextStyle(fontSize: 8),
-                    ),
-                    SizedBox(
-                      height: 40,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                alignment: Alignment.bottomCenter,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.black,
-                height: 40,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: link));
-                          Toast.show("คัดลอกลิงค์เรียบร้อย", context,
-                              duration: Toast.LENGTH_SHORT,
-                              gravity: Toast.BOTTOM);
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2,
-                          color: Colors.black,
+                      errorStateBuilder: (cxt, err) {
+                        return Container(
                           child: Center(
                             child: Text(
-                              'คัดลอกลิงค์',
-                              style: TextStyle(color: Colors.white),
+                              "Uh oh! Something went wrong...",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  'ชวนเพื่อนใช้แอพฯ ได้ด้วยการสแกนคิวอาร์โค้ด',
+                  style: TextStyle(fontSize: 8),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  // padding: EdgeInsets.fromLTRB(0, 0.5, 0, 0.5),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                  ),
+                  height: 40,
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            screenshotController.capture().then((File image) {
+                              setState(() {
+                                _imageFile = image;
+                                log("${_imageFile.path}");
+                                _saveToGallery(_imageFile.path);
+                              });
+                            }).catchError((onError) {
+                              print(onError);
+                            });
+                          },
+                          child: Container(
+                            color: Colors.white,
+                            child: Center(
+                              child: Text('บันทึกลงเครื่อง'),
                             ),
                           ),
                         ),
                       ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                          final RenderBox box = context.findRenderObject();
-                          Share.share("$link",
-                              subject: "subject",
-                              sharePositionOrigin:
-                                  box.localToGlobal(Offset.zero) & box.size);
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2,
-                          color: Colors.white,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            screenshotController.capture().then((File image) {
+                              setState(() {
+                                _imageFile = image;
+                                Share.shareFiles(['${_imageFile.path}'],
+                                    text: 'QrCode');
+                              });
+                            }).catchError((onError) {
+                              print(onError);
+                            });
+                          },
                           child: Center(
-                            child: Text('แชร์'),
+                            child: Text(
+                              'แชร์',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  }
+
+  void _linkBottomSheet(context, String link) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          height: 200,
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: new BorderRadius.only(
+                topLeft: const Radius.circular(20.0),
+                topRight: const Radius.circular(20.0),
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 160,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Link',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width / 1.2,
+                        height: 40,
+                        padding: EdgeInsets.all(1),
+                        color: Colors.black,
+                        child: Container(
+                          color: Colors.white,
+                          child: Center(
+                            child: Text("$link"),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        'ชวนเพื่อนใช้แอพฯ ได้ด้วยการแชร์ลิงค์',
+                        style: TextStyle(fontSize: 8),
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.black,
+                  height: 40,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: link));
+                            Toast.show("คัดลอกลิงค์เรียบร้อย", context,
+                                duration: Toast.LENGTH_SHORT,
+                                gravity: Toast.BOTTOM);
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2,
+                            color: Colors.black,
+                            child: Center(
+                              child: Text(
+                                'คัดลอกลิงค์',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            final RenderBox box = context.findRenderObject();
+                            Share.share("$link",
+                                subject: "subject",
+                                sharePositionOrigin:
+                                    box.localToGlobal(Offset.zero) & box.size);
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2,
+                            color: Colors.white,
+                            child: Center(
+                              child: Text('แชร์'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

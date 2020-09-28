@@ -7,6 +7,8 @@ import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
+import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -124,7 +126,25 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             : Text(userModel != null ? "${userModel.firstName}" : ""),
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context);
+            if (AppModel.user.roles == TypeStatus.USER.toString()) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserNavBottom(
+                    currentIndex: 2,
+                  ),
+                ),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TestNav(
+                    currentIndex: 2,
+                  ),
+                ),
+              );
+            }
           },
           child: Icon(Icons.arrow_back_ios),
         ),

@@ -185,7 +185,7 @@ class _UserHomePageState extends State<UserHomePage> {
         appBar: AppBar(
           title: Text('Home'),
           centerTitle: true,
-          backgroundColor: Color(0xff242424),
+          backgroundColor: Colors.black,
           leading: Container(),
           actions: <Widget>[
             InkWell(

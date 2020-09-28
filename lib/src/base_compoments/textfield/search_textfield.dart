@@ -47,6 +47,7 @@ class SearchField extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: InkWell(
               onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => ScanQRcodePage()));
               },

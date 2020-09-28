@@ -1,15 +1,14 @@
-import 'dart:developer';
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
-import 'package:chat/models/group_model.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +16,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class UserNavBottom extends StatefulWidget {
-  final titles = ['Home', 'Group', 'Chat'];
+  // final titles = ['Home', 'Group', 'Chat'];
 
-  final icons = [
-    AssetImage('assets/images/ic_home_nav.png'),
-    AssetImage('assets/images/ic_group.png'),
-    AssetImage('assets/images/ic_chat.png'),
-  ];
+  // final icons = [
+  //   AssetImage('assets/images/ic_home_nav.png'),
+  //   AssetImage('assets/images/ic_group.png'),
+  //   AssetImage('assets/images/ic_chat.png'),
+  // ];
   final int currentIndex;
 
   UserNavBottom({Key key, this.currentIndex = 0}) : super(key: key);
@@ -37,7 +36,7 @@ enum UniLinksType { string, uri }
 class _UserNavBottomState extends State<UserNavBottom>
     with WidgetsBindingObserver {
   int _currentIndex = 0;
-  final _databaseReference = Firestore.instance;
+  // final _databaseReference = Firestore.instance;
   PageController _pageController;
   MenuPositionController _menuPositionController;
   bool userPageDragging = false;
@@ -100,7 +99,7 @@ class _UserNavBottomState extends State<UserNavBottom>
     _pageController.addListener(_handlePageChange);
 
     initFirebaseMessaging();
-    _getGroupData();
+    // _getGroupData();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -201,80 +200,6 @@ class _UserNavBottomState extends State<UserNavBottom>
         .setData(AppModel.user.toJson());
   }
 
-  _getGroupData() async {
-    AppList.lastGroupTextList.clear();
-    AppList.lastGroupTimeList.clear();
-    AppList.myGroupList.clear();
-    await _databaseReference
-        .collection("Rooms")
-        .document("chats")
-        .collection("Group")
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((value) {
-        var group = GroupModel.fromJson(value.data);
-        var uid = group.memberUIDList
-            .where((element) => element == AppModel.user.uid);
-        if (uid.length != 0) {
-          AppList.myGroupList.add(group);
-          setState(() {});
-        }
-      });
-    }).then((value) {
-      _getLastText();
-    });
-  }
-
-  _getLastText() async {
-    String lastText = "";
-    String lastTime = "";
-
-    if (AppList.myGroupList.length != 0) {
-      for (var i = 0; i < AppList.myGroupList.length; i++) {
-        log("1 :: message.text");
-        await _databaseReference
-            .collection("Rooms")
-            .document("chats")
-            .collection("Group")
-            .document(AppList.myGroupList[i].groupID)
-            .collection("messages")
-            .getDocuments()
-            .then((QuerySnapshot snapshot) {
-          snapshot.documents.forEach((value) {
-            var message = ChatMessage.fromJson(value.data);
-
-            if (message != null) {
-              if (message.text.isEmpty) {
-                if (message.user.uid == AppModel.user.uid) {
-                  lastText = "คุณได้ส่งรูปภาพ";
-                } else {
-                  lastText = "คุณได้รับรูปภาพ";
-                }
-              } else {
-                lastText = message.text;
-              }
-
-              lastTime = DateTime.fromMillisecondsSinceEpoch(
-                      message.createdAt.millisecondsSinceEpoch)
-                  .toString();
-              var str = lastTime.split(" ");
-              var str2 = str[1].split(".");
-              str = str2[0].split(":");
-              lastTime = "${str[0]}:${str[1]} น.";
-            } else {
-              lastText = "";
-              lastTime = "00:00 น.";
-            }
-          });
-        });
-        AppList.lastGroupTextList.add(lastText);
-        AppList.lastGroupTimeList.add(lastTime);
-        log(AppList.lastGroupTextList.toString());
-        setState(() {});
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -286,7 +211,7 @@ class _UserNavBottomState extends State<UserNavBottom>
             return;
           },
           child: PageView(
-            physics: const NeverScrollableScrollPhysics(),
+            // physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: <Widget>[
               UserHomePage(),
@@ -298,49 +223,79 @@ class _UserNavBottomState extends State<UserNavBottom>
             },
           ),
         ),
-        bottomNavigationBar: BottomNavyBar(
-          backgroundColor: Color(0xff202020),
+        bottomNavigationBar: NavigationBar(
+          theme: NavigationBarTheme(
+            barBackgroundColor: Colors.black,
+            selectedItemBorderColor: Color(0xffaaaaaa),
+            selectedItemBackgroundColor: Color(0xffffffff),
+            selectedItemIconColor: Colors.black,
+            selectedItemLabelColor: Colors.white,
+          ),
           selectedIndex: _currentIndex,
-          onItemSelected: (index) {
-            setState(() => _currentIndex = index);
-            _pageController.jumpToPage(index);
+          onSelectTab: (index) {
+            setState(() {
+              _currentIndex = index;
+              _pageController.jumpToPage(index);
+            });
           },
-          items: <BottomNavyBarItem>[
-            BottomNavyBarItem(
-              title: Text('Home'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset('assets/images/ic_home_nav.png',
-                  color: Colors.white),
+          items: [
+            NavigationBarItem(
+              iconData: 'assets/images/ic_home_nav.png',
+              label: 'Home',
             ),
-            BottomNavyBarItem(
-              title: Text('Group'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset(
-                'assets/images/ic_group.png',
-                color: Colors.white,
-              ),
+            NavigationBarItem(
+              iconData: 'assets/images/ic_group.png',
+              label: 'Group',
             ),
-            BottomNavyBarItem(
-              title: Text('Chat'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset(
-                'assets/images/ic_chat.png',
-                color: Colors.white,
-              ),
+            NavigationBarItem(
+              iconData: 'assets/images/ic_chat.png',
+              label: 'Chat',
             ),
           ],
         ),
+        // bottomNavigationBar: BottomNavyBar(
+        //   backgroundColor: Color(0xff202020),
+        //   selectedIndex: _currentIndex,
+        //   onItemSelected: (index) {
+        //     setState(() => _currentIndex = index);
+        //     _pageController.jumpToPage(index);
+        //   },
+        // items: <BottomNavyBarItem>[
+        //   BottomNavyBarItem(
+        //     title: Text('Home'),
+        //     textAlign: TextAlign.center,
+        //     activeColor: Colors.white,
+        //     icon: Image.asset('assets/images/ic_home_nav.png',
+        //         color: Colors.white),
+        //   ),
+        //   BottomNavyBarItem(
+        //     title: Text('Group'),
+        //     textAlign: TextAlign.center,
+        //     activeColor: Colors.white,
+        //     icon: Image.asset(
+        //       'assets/images/ic_group.png',
+        //       color: Colors.white,
+        //     ),
+        //   ),
+        //   BottomNavyBarItem(
+        //     title: Text('Chat'),
+        //     textAlign: TextAlign.center,
+        //     activeColor: Colors.white,
+        //     icon: Image.asset(
+        //       'assets/images/ic_chat.png',
+        //       color: Colors.white,
+        //     ),
+        //   ),
+        // ],
+        // ),
       ),
     );
   }
 
-  Padding getIcon(int index, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
-      child: ImageIcon(widget.icons[index], size: 35, color: color),
-    );
-  }
+  // Padding getIcon(int index, Color color) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 3),
+  //     child: ImageIcon(widget.icons[index], size: 35, color: color),
+  //   );
+  // }
 }

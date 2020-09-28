@@ -87,7 +87,6 @@ class _EditPageState extends State<EditPage> {
         ),
       );
       StorageTaskSnapshot download = await uploadTask.onComplete;
-
       AppModel.user.avatarUrl = await download.ref.getDownloadURL();
     }
     if (_cover != null) {
@@ -195,8 +194,11 @@ class _EditPageState extends State<EditPage> {
   void initState() {
     _firstName.text = AppModel.user.firstName;
     _lastName.text = AppModel.user.lastName;
-    _birthday.text = AppModel.user.birthDate;
-    if (AppModel.user.gender == "ไม่ระบุ") {
+    _birthday.text = AppModel.user.birthDate ?? "ไม่ระบุ";
+    if (_birthday.text == "null") {
+      _birthday.text = "ไม่ระบุ";
+    }
+    if (AppModel.user.gender == "ไม่ระบุ" || AppModel.user.gender == null) {
       _other = true;
       _gender = "ไม่ระบุ";
     } else if (AppModel.user.gender == "ชาย") {

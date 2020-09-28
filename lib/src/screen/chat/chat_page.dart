@@ -1,6 +1,7 @@
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/chat_model.dart';
+
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
@@ -20,6 +21,8 @@ class _ChatPageState extends State<ChatPage> {
   List<String> _uidList = List<String>();
   List<ChatModel> _chatList = List<ChatModel>();
   List<UserModel> _userList = List<UserModel>();
+  var items = List<ChatModel>();
+  // List<ShowListItem> _listItem = List<ShowListItem>();
 
   _getAllUser() async {
     await _databaseReference
@@ -122,9 +125,32 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       _chatList.add(chat);
+      items.add(chat);
       _chatList.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+      items.sort((a, b) => b.checkTime.compareTo(a.checkTime));
       setState(() {});
     });
+  }
+
+  void _filterSearchResults(String query) {
+    if (query.isNotEmpty) {
+      List<ChatModel> dummyListData = List<ChatModel>();
+      _chatList.forEach((item) {
+        if (item.user.displayName.contains(query)) {
+          dummyListData.add(item);
+        }
+      });
+      setState(() {
+        items.clear();
+        items.addAll(dummyListData);
+      });
+      return;
+    } else {
+      setState(() {
+        items.clear();
+        items.addAll(_chatList);
+      });
+    }
   }
 
   @override
@@ -136,78 +162,72 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff292929),
+      backgroundColor: Color(0xff202020),
       appBar: AppBar(
         leading: Container(),
-        backgroundColor: Color(0xff202020),
+        backgroundColor: Colors.black,
         title: AppModel.user.roles == "${TypeStatus.USER}"
             ? Text('แชทกับแอดมิน')
             : Text('แชทกับลูกค้า'),
         centerTitle: true,
       ),
-      body: _chatList.length != 0
-          ? SingleChildScrollView(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 20),
-                    SearchField(),
-                    SizedBox(height: 10),
-                    _chatList.length != 0
-                        ? Container(
-                            margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemBuilder: (BuildContext context, int index) {
-                                return InkWell(
-                                  onTap: () {
-                                    // AppString.uidRoomChat = AppList.uidList[index];
-                                    AppString.uidAdmin =
-                                        _chatList[index].user.uid;
-                                    List<String> uidsList = [
-                                      AppString.uidAdmin,
-                                      AppModel.user.uid
-                                    ];
-                                    uidsList.sort();
-                                    String test =
-                                        "${uidsList[0]}_${uidsList[1]}";
-                                    AppString.uidRoomChat = test;
+      body: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 20),
+              SearchField(
+                onChanged: (val) {
+                  setState(() {
+                    _filterSearchResults(val);
+                  });
+                },
+              ),
+              SizedBox(height: 10),
+              Container(
+                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  // physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return InkWell(
+                      onTap: () {
+                        // AppString.uidRoomChat = AppList.uidList[index];
+                        AppString.uidAdmin = _chatList[index].user.uid;
+                        List<String> uidsList = [
+                          AppString.uidAdmin,
+                          AppModel.user.uid
+                        ];
+                        uidsList.sort();
+                        String test = "${uidsList[0]}_${uidsList[1]}";
+                        AppString.uidRoomChat = test;
 
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatRoomPage(
-                                          uid: AppString.uidAdmin,
-                                          keyRoom: AppString.uidRoomChat,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ListChatItem(
-                                    profileUrl: _chatList[index].user.avatarUrl,
-                                    lastText: _chatList[index].lastText,
-                                    name: _chatList[index].user.displayName,
-                                    time: _chatList[index].lastTime,
-                                  ),
-                                );
-                              },
-                              itemCount: _userList.length,
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatRoomPage(
+                              uid: AppString.uidAdmin,
+                              keyRoom: AppString.uidRoomChat,
                             ),
-                          )
-                        : Container(),
-                  ],
+                          ),
+                        );
+                      },
+                      child: ListChatItem(
+                        profileUrl: items[index].user.avatarUrl,
+                        lastText: items[index].lastText,
+                        name: items[index].user.displayName,
+                        time: items[index].lastTime,
+                      ),
+                    );
+                  },
+                  itemCount: items.length,
                 ),
-              ),
-            )
-          : Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
