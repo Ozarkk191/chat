@@ -27,8 +27,7 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   String _profileUrl =
       "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130";
-  String _coverUrl =
-      "https://c4.wallpaperflare.com/wallpaper/160/664/862/bashar-essassani-symbols-triangle-wallpaper-preview.jpg";
+  String _coverUrl = "https://ck.lnwfile.com/zhqh7e.jpg";
   List<UserModel> _memberList = List<UserModel>();
   TextEditingController _nameGroup = new TextEditingController();
   String _statusGroup = "public";

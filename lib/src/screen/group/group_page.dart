@@ -128,7 +128,7 @@ class _GroupPageState extends State<GroupPage> {
     if (query.isNotEmpty) {
       List<ShowListItem> dummyListData = List<ShowListItem>();
       _listItem.forEach((item) {
-        if (item.group.nameGroup.contains(query)) {
+        if (item.group.nameGroup.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });

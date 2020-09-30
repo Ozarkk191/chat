@@ -1,7 +1,9 @@
-import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/group_model.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
+import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
@@ -285,7 +287,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
             return;
           },
           child: PageView(
-            physics: const NeverScrollableScrollPhysics(),
+            // physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             onPageChanged: (index) {
               setState(() => _currentIndex = index);
@@ -297,38 +299,33 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
             ],
           ),
         ),
-        bottomNavigationBar: BottomNavyBar(
-          backgroundColor: Color(0xff202020),
+        bottomNavigationBar: NavigationBar(
+          theme: NavigationBarTheme(
+            barBackgroundColor: Colors.black,
+            selectedItemBorderColor: Color(0xffaaaaaa),
+            selectedItemBackgroundColor: Color(0xffffffff),
+            selectedItemIconColor: Colors.black,
+            selectedItemLabelColor: Colors.white,
+          ),
           selectedIndex: _currentIndex,
-          onItemSelected: (index) {
-            setState(() => _currentIndex = index);
-            _pageController.jumpToPage(index);
+          onSelectTab: (index) {
+            setState(() {
+              _currentIndex = index;
+              _pageController.jumpToPage(index);
+            });
           },
-          items: <BottomNavyBarItem>[
-            BottomNavyBarItem(
-              title: Text('Home'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset('assets/images/ic_home_nav.png',
-                  color: Colors.white),
+          items: [
+            NavigationBarItem(
+              iconData: 'assets/images/ic_home_nav.png',
+              label: 'Home',
             ),
-            BottomNavyBarItem(
-              title: Text('Group'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset(
-                'assets/images/ic_group.png',
-                color: Colors.white,
-              ),
+            NavigationBarItem(
+              iconData: 'assets/images/ic_group.png',
+              label: 'Group',
             ),
-            BottomNavyBarItem(
-              title: Text('Chat'),
-              textAlign: TextAlign.center,
-              activeColor: Colors.white,
-              icon: Image.asset(
-                'assets/images/ic_chat.png',
-                color: Colors.white,
-              ),
+            NavigationBarItem(
+              iconData: 'assets/images/ic_chat.png',
+              label: 'Chat',
             ),
           ],
         ),

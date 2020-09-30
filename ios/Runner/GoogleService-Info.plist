@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>907090104212-aek8n5dpt37ti7udb0rfhua6qghb2s4h.apps.googleusercontent.com</string>
+	<string>907090104212-5m5q6m17nuut975n64vnlr10luvd76o3.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.907090104212-aek8n5dpt37ti7udb0rfhua6qghb2s4h</string>
+	<string>com.googleusercontent.apps.907090104212-5m5q6m17nuut975n64vnlr10luvd76o3</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>907090104212-nt76d895rh8q2phbgph35gqsv6tv4fdp.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.secret.chat2020</string>
+	<string>com.secretchat.2020</string>
 	<key>PROJECT_ID</key>
 	<string>chat-ae407</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:907090104212:ios:a77e58071474e467240981</string>
+	<string>1:907090104212:ios:8e88aaf138204047240981</string>
 	<key>DATABASE_URL</key>
 	<string>https://chat-ae407.firebaseio.com</string>
 </dict>

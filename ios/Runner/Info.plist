@@ -33,9 +33,25 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.907090104212-aek8n5dpt37ti7udb0rfhua6qghb2s4h</string>
+				<string>com.googleusercontent.apps.907090104212-5m5q6m17nuut975n64vnlr10luvd76o3</string>
 			</array>
 		</dict>
+		<dict>
+      	
+      <key>CFBundleURLTypes</key>
+      <array>
+        <dict>
+          <key>CFBundleTypeRole</key>
+          <string>Editor</string>
+          <key>CFBundleURLName</key>
+          <string>com.secretchat.2020</string>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>secretchat</string>
+          </array>
+        </dict>
+      </array>
+</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>

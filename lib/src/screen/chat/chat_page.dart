@@ -136,7 +136,7 @@ class _ChatPageState extends State<ChatPage> {
     if (query.isNotEmpty) {
       List<ChatModel> dummyListData = List<ChatModel>();
       _chatList.forEach((item) {
-        if (item.user.displayName.contains(query)) {
+        if (item.user.displayName.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });
@@ -189,7 +189,7 @@ class _ChatPageState extends State<ChatPage> {
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: ListView.builder(
                   shrinkWrap: true,
-                  // physics: const NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
