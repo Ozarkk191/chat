@@ -21,7 +21,7 @@ class _GroupPageState extends State<GroupPage> {
   final _databaseReference = Firestore.instance;
   List<GroupModel> _groupList = List<GroupModel>();
   List<ShowListItem> _listItem = List<ShowListItem>();
-  var items = List<ShowListItem>();
+  // var items = List<ShowListItem>();
 
   _getGroupData() async {
     var group;
@@ -115,8 +115,9 @@ class _GroupPageState extends State<GroupPage> {
 
           _listItem.add(chat);
           _listItem.sort((a, b) => b.checkTime.compareTo(a.checkTime));
-          items.add(chat);
-          items.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+          AppList.listItemGroup.add(chat);
+          AppList.listItemGroup
+              .sort((a, b) => b.checkTime.compareTo(a.checkTime));
 
           setState(() {});
         });
@@ -133,21 +134,26 @@ class _GroupPageState extends State<GroupPage> {
         }
       });
       setState(() {
-        items.clear();
-        items.addAll(dummyListData);
+        AppList.listItemGroup.clear();
+        AppList.listItemGroup.addAll(dummyListData);
       });
       return;
     } else {
       setState(() {
-        items.clear();
-        items.addAll(_listItem);
+        AppList.listItemGroup.clear();
+        AppList.listItemGroup.addAll(_listItem);
       });
     }
   }
 
   @override
   void initState() {
-    _getGroupData();
+    if (AppBool.groupChange) {
+      AppList.listItemGroup.clear();
+      AppBool.groupChange = false;
+      _getGroupData();
+    }
+
     super.initState();
   }
 
@@ -202,29 +208,33 @@ class _GroupPageState extends State<GroupPage> {
                 itemBuilder: (BuildContext context, int index) {
                   return InkWell(
                     onTap: () {
-                      AppString.uidRoomChat = items[index].group.groupID;
-                      AppModel.group = items[index].group;
-                      AppString.nameGroup = items[index].group.nameGroup;
+                      AppString.uidRoomChat =
+                          AppList.listItemGroup[index].group.groupID;
+                      AppModel.group = AppList.listItemGroup[index].group;
+                      AppString.nameGroup =
+                          AppList.listItemGroup[index].group.nameGroup;
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatGroupPage(
-                            groupName: items[index].group.nameGroup,
-                            groupID: items[index].group.groupID,
-                            id: items[index].group.id,
+                            groupName:
+                                AppList.listItemGroup[index].group.nameGroup,
+                            groupID: AppList.listItemGroup[index].group.groupID,
+                            id: AppList.listItemGroup[index].group.id,
                           ),
                         ),
                       );
                     },
                     child: ListChatItem(
-                      profileUrl: items[index].group.avatarGroup,
-                      lastText: items[index].lastText,
-                      name: items[index].group.nameGroup,
-                      time: items[index].lastTime,
+                      profileUrl:
+                          AppList.listItemGroup[index].group.avatarGroup,
+                      lastText: AppList.listItemGroup[index].lastText,
+                      name: AppList.listItemGroup[index].group.nameGroup,
+                      time: AppList.listItemGroup[index].lastTime,
                     ),
                   );
                 },
-                itemCount: items.length,
+                itemCount: AppList.listItemGroup.length,
               ),
             ),
           ],

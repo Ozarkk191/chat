@@ -22,8 +22,6 @@ import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:chat/src/screen/unbanned/unbanned_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dash_chat/dash_chat.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 
@@ -34,27 +32,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Firestore _databaseReference = Firestore.instance;
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  // FirebaseAuth _auth = FirebaseAuth.instance;
   GroupModel _group;
   int waittingLength = 0;
-  List<WaittingModel> _waittingList = List<WaittingModel>();
-  List<UserModel> _userBannedList = List<UserModel>();
+  // List<WaittingModel> _waittingList = List<WaittingModel>();
+  // List<UserModel> _userBannedList = List<UserModel>();
 
-  user() async {
-    FirebaseUser user = await _auth.currentUser();
-    if (user != null) {
-      AppModel.user.uid = user.uid;
-      await _databaseReference
-          .collection('Users')
-          .document(user.uid)
-          .get()
-          .then((value) {
-        AppModel.user = UserModel.fromJson(value.data);
-      }).then((value) {
-        setState(() {});
-      });
-    }
-  }
+  // user() async {
+  //   FirebaseUser user = await _auth.currentUser();
+  //   if (user != null) {
+  //     AppModel.user.uid = user.uid;
+  //     await _databaseReference
+  //         .collection('Users')
+  //         .document(user.uid)
+  //         .get()
+  //         .then((value) {
+  //       AppModel.user = UserModel.fromJson(value.data);
+  //     }).then((value) {
+  //       setState(() {});
+  //     });
+  //   }
+  // }
 
   _getAllAdmin() async {
     AppList.adminList.clear();
@@ -70,7 +68,7 @@ class _HomePageState extends State<HomePage> {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
         if (allUser.banned) {
-          _userBannedList.add(allUser);
+          AppList.userBannedList.add(allUser);
         }
         if (allUser.roles != "${TypeStatus.USER}") {
           var oldTime = DateTime.parse(allUser.lastTimeUpdate);
@@ -106,15 +104,13 @@ class _HomePageState extends State<HomePage> {
         var uid = _group.memberUIDList
             .where((element) => element == AppModel.user.uid);
         if (uid.length != 0) {
-          // _getLastText(value.documentID);
-
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(_group);
         }
       });
     }).then((value) {
-      _getLastText();
-      setState(() {});
+      // _getLastText();
+      // setState(() {});
     });
   }
 
@@ -159,68 +155,22 @@ class _HomePageState extends State<HomePage> {
     }).then((value) {
       if (uidList.length != 0) {
         var data = WaittingModel(idGroup: id, uidList: uidList);
-        _waittingList.add(data);
+        AppList.waittingList.add(data);
       }
       setState(() {});
     });
   }
 
-  _getLastText() async {
-    String lastText = "";
-    String lastTime = "";
-    if (AppList.groupKey.length != 0) {
-      for (var i = 0; i < AppList.groupKey.length; i++) {
-        await _databaseReference
-            .collection("Rooms")
-            .document("chats")
-            .collection("Group")
-            .document(AppList.groupKey[i])
-            .collection("messages")
-            .getDocuments()
-            .then((QuerySnapshot snapshot) {
-          snapshot.documents.forEach((value) {
-            var message = ChatMessage.fromJson(value.data);
-            // log("1 :: ${message.text}");
-            if (message != null) {
-              if (message.text.isEmpty) {
-                if (message.user.uid == AppModel.user.uid) {
-                  lastText = "คุณได้ส่งรูปภาพ";
-                } else {
-                  lastText = "คุณได้รับรูปภาพ";
-                }
-              } else {
-                lastText = message.text;
-              }
-
-              lastTime = DateTime.fromMillisecondsSinceEpoch(
-                      message.createdAt.millisecondsSinceEpoch)
-                  .toString();
-              var str = lastTime.split(" ");
-              var str2 = str[1].split(".");
-              str = str2[0].split(":");
-              lastTime = "${str[0]}:${str[1]} น.";
-            } else {
-              lastText = "";
-              lastTime = "00:00 น.";
-            }
-          });
-        });
-
-        // String timeRead = _getRead(id).toString();
-        AppList.lastTextList.add(lastText);
-        AppList.lastTimeList.add(lastTime);
-        setState(() {});
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    user();
-    _getGroup();
-    _getAllUser();
-    _getAllAdmin();
+    // user();
+    if (AppBool.homeAdminChange) {
+      AppBool.homeAdminChange = false;
+      _getGroup();
+      _getAllUser();
+      _getAllAdmin();
+    }
   }
 
   @override
@@ -358,7 +308,6 @@ class _HomePageState extends State<HomePage> {
                                                   status: "admin");
                                             }
                                           },
-                                    callbackItem3: () {},
                                   );
                                 },
                                 child: ListAdminItem(
@@ -378,20 +327,21 @@ class _HomePageState extends State<HomePage> {
                             itemCount: AppList.adminList.length,
                           ),
                         ),
-                        _waittingList.length != 0
+                        AppList.waittingList.length != 0
                             ? TextAndLine(title: 'คำร้องขอเข้ากลุ่ม')
                             : Container(),
                         SizedBox(
                           height: 5,
                         ),
-                        _waittingList.length != 0
+                        AppList.waittingList.length != 0
                             ? InkWell(
                                 onTap: () {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => WaittingPage(
-                                                waittingList: _waittingList,
+                                                waittingList:
+                                                    AppList.waittingList,
                                               )));
                                 },
                                 child: Row(
@@ -434,11 +384,8 @@ class _HomePageState extends State<HomePage> {
                                           GroupDialogHelper.adminDialog(
                                             context: context,
                                             titleLeft: 'Group',
-                                            titleRight: 'Delete',
                                             pathIconLeft:
                                                 'assets/images/ic_group.png',
-                                            pathIconRight:
-                                                'assets/images/ic_trash.png',
                                             groupName: AppList
                                                 .groupList[index].nameGroup,
                                             profileUrl: AppList
@@ -448,7 +395,8 @@ class _HomePageState extends State<HomePage> {
                                             member: AppList.groupList[index]
                                                 .memberUIDList.length
                                                 .toString(),
-                                            statusGroup: _group.statusGroup,
+                                            statusGroup: AppList
+                                                .groupList[index].statusGroup,
                                             callbackItem1: () {
                                               Navigator.pop(context);
                                               Navigator.push(
@@ -467,7 +415,6 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               );
                                             },
-                                            callbackItem2: () {},
                                           );
                                         },
                                         child: ListGroupItem(
@@ -501,7 +448,7 @@ class _HomePageState extends State<HomePage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => UnBanned(
-                                        userBannedList: _userBannedList,
+                                        userBannedList: AppList.userBannedList,
                                       ),
                                     ),
                                   );
@@ -567,7 +514,6 @@ class _HomePageState extends State<HomePage> {
                                             status: "user");
                                       }
                                     },
-                                    callbackItem3: () {},
                                   );
                                 },
                                 child: ListUserItem(
@@ -636,8 +582,12 @@ class _HomePageState extends State<HomePage> {
           ),
           InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => EditProfilPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfilPage(),
+                ),
+              );
             },
             child: Container(
               width: 40,
@@ -746,10 +696,10 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop(false);
     if (status == "user") {
       AppList.userList[index].banned = true;
-      _userBannedList.add(AppList.userList[index]);
+      AppList.userBannedList.add(AppList.userList[index]);
     } else {
       AppList.adminList[index].banned = true;
-      _userBannedList.add(AppList.adminList[index]);
+      AppList.userBannedList.add(AppList.adminList[index]);
     }
     _databaseReference
         .collection("Users")
@@ -764,10 +714,10 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pop(false);
     if (status == "user") {
       AppList.userList[index].banned = false;
-      _userBannedList.add(AppList.userList[index]);
+      AppList.userBannedList.add(AppList.userList[index]);
     } else {
       AppList.adminList[index].banned = false;
-      _userBannedList.add(AppList.adminList[index]);
+      AppList.userBannedList.add(AppList.adminList[index]);
     }
     _databaseReference
         .collection("Users")

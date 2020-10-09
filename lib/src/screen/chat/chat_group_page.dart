@@ -16,10 +16,13 @@ import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:chat/src/screen/post/post_news_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toast/toast.dart';
 
 class ChatGroupPage extends StatefulWidget {
   final String groupName;
@@ -42,6 +45,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   Firestore _databaseReference = Firestore.instance;
   List<UserModel> _memberList = List<UserModel>();
   List<String> _tokenList = List<String>();
+  List<Asset> images = List<Asset>();
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -149,6 +153,87 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     prefs.setString(AppString.uidRoomChat, value);
   }
 
+  Future<void> loadAssets() async {
+    List<Asset> resultList = List<Asset>();
+    String error = 'เกิดข้อผิดพลาด';
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true,
+        selectedAssets: images,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#202020",
+          actionBarTitle: "Secret Chat",
+          allViewTitle: "All Photos",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#000000",
+        ),
+      );
+
+      if (resultList != null) {
+        FormData imageFormData = FormData.fromMap({
+          "files": images.map((image) async {
+            return await MultipartFile.fromFile('assets/${image.name}',
+                filename: image.name);
+          }).toList(),
+        });
+        // file = File(resultList[0].identifier);
+        // Asset asset = resultList[0];
+        log("${resultList[0]}");
+        //   var now = new DateTime.now();
+        //   var now2 = now.toString().replaceAll(" ", "_");
+
+        //   final StorageReference storageRef =
+        //       FirebaseStorage.instance.ref().child(now2);
+
+        //   // StorageUploadTask uploadTask = storageRef.putFile(
+        //   //   File(),
+        //   //   StorageMetadata(
+        //   //     contentType: 'image/jpg',
+        //   //   ),
+        //   // );
+        //   StorageTaskSnapshot download = await uploadTask.onComplete;
+
+        //   String url = await download.ref.getDownloadURL();
+
+        //   ChatMessage message = ChatMessage(text: "", user: user, image: url);
+
+        //   for (var i = 0; i < _tokenList.length; i++) {
+        //     _sendNotification(message.text, _tokenList[i]);
+        //   }
+        //   var documentReference = Firestore.instance
+        //       .collection('Rooms')
+        //       .document('chats')
+        //       .collection('Group')
+        //       .document(widget.groupID)
+        //       .collection('messages')
+        //       .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+        //   Firestore.instance.runTransaction((transaction) async {
+        //     await transaction.set(
+        //       documentReference,
+        //       message.toJson(),
+        //     );
+        //   });
+      }
+    } on Exception catch (e) {
+      error = e.toString();
+      Toast.show(error, context,
+          duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      images = resultList;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,6 +272,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         leading: InkWell(
           onTap: () {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
+              AppBool.groupChange = true;
+              AppBool.homeUserChange = true;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -196,6 +283,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 ),
               );
             } else {
+              AppBool.groupChange = true;
+              AppBool.homeAdminChange = true;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -209,113 +298,119 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
           child: Icon(Icons.arrow_back_ios),
         ),
       ),
-      body: StreamBuilder(
-          stream: Firestore.instance
-              .collection('Rooms')
-              .document('chats')
-              .collection('Group')
-              .document(widget.groupID)
-              .collection('messages')
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
+      body: SafeArea(
+        child: StreamBuilder(
+            stream: Firestore.instance
+                .collection('Rooms')
+                .document('chats')
+                .collection('Group')
+                .document(widget.groupID)
+                .collection('messages')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor,
+                    ),
                   ),
-                ),
-              );
-            } else {
-              List<DocumentSnapshot> items = snapshot.data.documents;
-              var messages =
-                  items.map((i) => ChatMessage.fromJson(i.data)).toList();
-              _saveRead(messages[messages.length - 1].createdAt.toString());
-              return DashChat(
-                key: _chatViewKey,
-                inverted: false,
-                onSend: onSend,
-                user: user,
-                inputDecoration: InputDecoration.collapsed(hintText: "ข้อความ"),
-                dateFormat: DateFormat('yyyy-MMM-dd'),
-                timeFormat: DateFormat('HH:mm'),
-                messages: messages,
-                showUserAvatar: false,
-                showAvatarForEveryMessage: false,
-                scrollToBottom: true,
-                readOnly:
-                    AppModel.user.roles == '${TypeStatus.USER}' ? true : false,
-                inputMaxLines: 5,
-                messageContainerPadding: EdgeInsets.only(left: 5.0, right: 5.0),
-                alwaysShowSend: true,
-                inputTextStyle: TextStyle(fontSize: 16.0),
-                inputContainerStyle: BoxDecoration(
-                  border: Border.all(width: 0.0),
-                  color: Colors.white,
-                ),
-                onLoadEarlier: () {
-                  // print("laoding...");
-                },
-                shouldShowLoadEarlier: false,
-                showTraillingBeforeSend: true,
-                trailing: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.photo),
-                    onPressed: () async {
-                      final result = await picker.getImage(
-                        source: ImageSource.gallery,
-                        imageQuality: 80,
-                        maxHeight: 400,
-                        maxWidth: 400,
-                      );
-
-                      if (result != null) {
-                        var now = new DateTime.now();
-                        var now2 = now.toString().replaceAll(" ", "_");
-
-                        final StorageReference storageRef =
-                            FirebaseStorage.instance.ref().child(now2);
-
-                        StorageUploadTask uploadTask = storageRef.putFile(
-                          File(result.path),
-                          StorageMetadata(
-                            contentType: 'image/jpg',
-                          ),
+                );
+              } else {
+                List<DocumentSnapshot> items = snapshot.data.documents;
+                var messages =
+                    items.map((i) => ChatMessage.fromJson(i.data)).toList();
+                _saveRead(messages[messages.length - 1].createdAt.toString());
+                return DashChat(
+                  key: _chatViewKey,
+                  inverted: false,
+                  onSend: onSend,
+                  user: user,
+                  inputDecoration:
+                      InputDecoration.collapsed(hintText: "ข้อความ"),
+                  dateFormat: DateFormat('yyyy-MMM-dd'),
+                  timeFormat: DateFormat('HH:mm'),
+                  messages: messages,
+                  showUserAvatar: false,
+                  showAvatarForEveryMessage: false,
+                  scrollToBottom: true,
+                  readOnly: AppModel.user.roles == '${TypeStatus.USER}'
+                      ? true
+                      : false,
+                  inputMaxLines: 5,
+                  messageContainerPadding:
+                      EdgeInsets.only(left: 5.0, right: 5.0),
+                  alwaysShowSend: true,
+                  inputTextStyle: TextStyle(fontSize: 16.0),
+                  inputContainerStyle: BoxDecoration(
+                    border: Border.all(width: 0.0),
+                    color: Colors.white,
+                  ),
+                  onLoadEarlier: () {
+                    // print("laoding...");
+                  },
+                  shouldShowLoadEarlier: false,
+                  showTraillingBeforeSend: true,
+                  trailing: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.photo),
+                      onPressed: () async {
+                        final result = await picker.getImage(
+                          source: ImageSource.gallery,
+                          imageQuality: 80,
+                          maxHeight: 400,
+                          maxWidth: 400,
                         );
-                        StorageTaskSnapshot download =
-                            await uploadTask.onComplete;
 
-                        String url = await download.ref.getDownloadURL();
+                        if (result != null) {
+                          var now = new DateTime.now();
+                          var now2 = now.toString().replaceAll(" ", "_");
 
-                        ChatMessage message =
-                            ChatMessage(text: "", user: user, image: url);
+                          final StorageReference storageRef =
+                              FirebaseStorage.instance.ref().child(now2);
 
-                        for (var i = 0; i < _tokenList.length; i++) {
-                          _sendNotification(message.text, _tokenList[i]);
-                        }
-                        var documentReference = Firestore.instance
-                            .collection('Rooms')
-                            .document('chats')
-                            .collection('Group')
-                            .document(widget.groupID)
-                            .collection('messages')
-                            .document(DateTime.now()
-                                .millisecondsSinceEpoch
-                                .toString());
-
-                        Firestore.instance.runTransaction((transaction) async {
-                          await transaction.set(
-                            documentReference,
-                            message.toJson(),
+                          StorageUploadTask uploadTask = storageRef.putFile(
+                            File(result.path),
+                            StorageMetadata(
+                              contentType: 'image/jpg',
+                            ),
                           );
-                        });
-                      }
-                    },
-                  )
-                ],
-              );
-            }
-          }),
+                          StorageTaskSnapshot download =
+                              await uploadTask.onComplete;
+
+                          String url = await download.ref.getDownloadURL();
+
+                          ChatMessage message =
+                              ChatMessage(text: "", user: user, image: url);
+
+                          for (var i = 0; i < _tokenList.length; i++) {
+                            _sendNotification(message.text, _tokenList[i]);
+                          }
+                          var documentReference = Firestore.instance
+                              .collection('Rooms')
+                              .document('chats')
+                              .collection('Group')
+                              .document(widget.groupID)
+                              .collection('messages')
+                              .document(DateTime.now()
+                                  .millisecondsSinceEpoch
+                                  .toString());
+
+                          Firestore.instance
+                              .runTransaction((transaction) async {
+                            await transaction.set(
+                              documentReference,
+                              message.toJson(),
+                            );
+                          });
+                        }
+                      },
+                    )
+                  ],
+                );
+              }
+            }),
+      ),
     );
   }
 

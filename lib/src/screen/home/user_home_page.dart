@@ -2,7 +2,6 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/helpers/group_dialog_helper.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/news_model.dart';
-import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/list_group_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
@@ -13,7 +12,6 @@ import 'package:chat/src/screen/settingpage/edit_profire/edit_profile_page.dart'
 import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserHomePage extends StatefulWidget {
@@ -22,7 +20,7 @@ class UserHomePage extends StatefulWidget {
 }
 
 class _UserHomePageState extends State<UserHomePage> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  // FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _databaseReference = Firestore.instance;
   List<NewsModel> _newsList = List<NewsModel>();
   // List<bool> _newsActiveList = List<bool>();
@@ -31,19 +29,19 @@ class _UserHomePageState extends State<UserHomePage> {
   bool uidMember = false;
   List<String> waittingList = List<String>();
 
-  user() async {
-    FirebaseUser user = await _auth.currentUser();
-    if (user != null) {
-      AppModel.user.uid = user.uid;
-      await _databaseReference
-          .collection('Users')
-          .document(user.uid)
-          .get()
-          .then((value) {
-        AppModel.user = UserModel.fromJson(value.data);
-      });
-    }
-  }
+  // user() async {
+  //   FirebaseUser user = await _auth.currentUser();
+  //   if (user != null) {
+  //     AppModel.user.uid = user.uid;
+  //     await _databaseReference
+  //         .collection('Users')
+  //         .document(user.uid)
+  //         .get()
+  //         .then((value) {
+  //       AppModel.user = UserModel.fromJson(value.data);
+  //     });
+  //   }
+  // }
 
   _getGroup() async {
     AppList.groupList.clear();
@@ -173,9 +171,12 @@ class _UserHomePageState extends State<UserHomePage> {
   @override
   void initState() {
     super.initState();
-    user();
+    // user();
     // getAllUser();
-    _getGroup();
+    if (AppBool.homeUserChange) {
+      AppBool.homeUserChange = false;
+      _getGroup();
+    }
   }
 
   @override
@@ -240,9 +241,7 @@ class _UserHomePageState extends State<UserHomePage> {
                                   GroupDialogHelper.adminDialog(
                                     context: context,
                                     titleLeft: 'Group',
-                                    titleRight: 'Delete',
                                     pathIconLeft: 'assets/images/ic_group.png',
-                                    pathIconRight: 'assets/images/ic_trash.png',
                                     groupName:
                                         AppList.groupList[index].nameGroup,
                                     profileUrl:
@@ -267,7 +266,6 @@ class _UserHomePageState extends State<UserHomePage> {
                                         ),
                                       );
                                     },
-                                    callbackItem2: () {},
                                   );
                                 },
                                 child: ListGroupUserItem(

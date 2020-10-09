@@ -565,9 +565,10 @@ class _EditPageState extends State<EditPage> {
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(1),
                 gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0), Colors.black]),
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withOpacity(0), Colors.black],
+                ),
               ),
             ),
           ),

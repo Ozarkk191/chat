@@ -146,9 +146,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(1),
                 gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0), Colors.black]),
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withOpacity(0), Colors.black],
+                ),
               ),
             ),
           ),
@@ -185,50 +186,11 @@ class _EditProfilPageState extends State<EditProfilPage> {
                             const Icon(Icons.error),
                       ),
                     ),
-                    // Align(
-                    //   alignment: Alignment.bottomCenter,
-                    //   child: Container(
-                    //     height: 30,
-                    //     width: 100,
-                    //     color: Colors.black.withOpacity(0.7),
-                    //     child: Center(
-                    //       child: Text(
-                    //         'Edit image',
-                    //         style: TextStyle(
-                    //           color: Colors.white,
-                    //           fontSize: 10,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // )
                   ],
                 ),
               ),
             ),
           ),
-          // Align(
-          //   alignment: Alignment.bottomRight,
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.end,
-          //     children: <Widget>[
-          //       Container(
-          //         child: Text(
-          //           'Edit image',
-          //           style: TextStyle(
-          //             color: Colors.white,
-          //             fontSize: 10,
-          //           ),
-          //         ),
-          //       ),
-          //       Container(
-          //         width: 40,
-          //         height: 40,
-          //         child: Image.asset('assets/images/ic_edit.png'),
-          //       ),
-          //     ],
-          //   ),
-          // )
         ],
       ),
     );

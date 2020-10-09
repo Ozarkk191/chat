@@ -15,11 +15,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>io.flutter.embedded_views_preview</key>
-<true/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -37,21 +35,20 @@
 			</array>
 		</dict>
 		<dict>
-      	
-      <key>CFBundleURLTypes</key>
-      <array>
-        <dict>
-          <key>CFBundleTypeRole</key>
-          <string>Editor</string>
-          <key>CFBundleURLName</key>
-          <string>com.secretchat.2020</string>
-          <key>CFBundleURLSchemes</key>
-          <array>
-            <string>secretchat</string>
-          </array>
-        </dict>
-      </array>
-</dict>
+			<key>CFBundleURLTypes</key>
+			<array>
+				<dict>
+					<key>CFBundleTypeRole</key>
+					<string>Editor</string>
+					<key>CFBundleURLName</key>
+					<string>com.secretchat.2020</string>
+					<key>CFBundleURLSchemes</key>
+					<array>
+						<string>secretchat</string>
+					</array>
+				</dict>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
@@ -91,5 +88,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

@@ -1,5 +1,8 @@
+import 'package:chat/models/chat_model.dart';
 import 'package:chat/models/group_model.dart';
+import 'package:chat/models/show_list_item.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/models/waitting_model.dart';
 
 class MenuSettings {
   static const String createGroup = 'สร้างกลุ่ม';
@@ -25,6 +28,13 @@ class AppString {
   static String uidAdmin;
   static String keyChatRooms;
   static String nameGroup;
+}
+
+class AppBool {
+  static bool homeUserChange = true;
+  static bool homeAdminChange = true;
+  static bool groupChange = true;
+  static bool chatChange = true;
 }
 
 class AppModel {
@@ -53,4 +63,12 @@ class AppList {
   static List<UserModel> user = [];
   static List<UserModel> admin = [];
   static List<UserModel> superAdmin = [];
+
+  static List<WaittingModel> waittingList = List<WaittingModel>();
+  static List<UserModel> userBannedList = List<UserModel>();
+
+  static List<GroupModel> inGroupList = List<GroupModel>();
+  static List<ShowListItem> listItemGroup = List<ShowListItem>();
+  static List<ChatModel> listItemUser = List<ChatModel>();
+  // static List<ChatModel> chatList = List<ChatModel>();
 }

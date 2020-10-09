@@ -2,22 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class AdminDialog extends StatelessWidget {
-  final String title1, title2, title3;
-  final String pathIcon1, pathIcon2, pathIcon3;
+  final String title1, title2;
+  final String pathIcon1, pathIcon2;
   final String coverUrl, profileUrl, username, status;
-  final Function callbackItem1, callbackItem2, callbackItem3;
+  final Function callbackItem1, callbackItem2;
 
   const AdminDialog(
       {Key key,
       @required this.title1,
       @required this.title2,
-      @required this.title3,
       @required this.pathIcon1,
       @required this.pathIcon2,
-      @required this.pathIcon3,
       @required this.callbackItem1,
       @required this.callbackItem2,
-      @required this.callbackItem3,
       @required this.coverUrl,
       @required this.profileUrl,
       @required this.username,
@@ -92,7 +89,6 @@ class AdminDialog extends StatelessWidget {
                 children: <Widget>[
                   actionButton('$title1', pathIcon1, callbackItem1),
                   actionButton('$title2', pathIcon2, callbackItem2),
-                  actionButton('$title3', pathIcon3, callbackItem3),
                 ],
               ),
             ),

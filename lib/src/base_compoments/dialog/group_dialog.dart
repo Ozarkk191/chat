@@ -3,19 +3,16 @@ import 'package:chat/src/base_compoments/cover/cover_dialog.dart';
 import 'package:flutter/material.dart';
 
 class GroupDialog extends StatelessWidget {
-  final String title1, title2, statusGroup;
-  final String pathIcon1, pathIcon2;
+  final String title1, statusGroup;
+  final String pathIcon1;
   final String coverUrl, profileUrl, groupName, numberUser;
-  final Function callbackItem1, callbackItem2;
+  final Function callbackItem1;
 
   const GroupDialog(
       {Key key,
       @required this.title1,
-      @required this.title2,
       @required this.pathIcon1,
-      @required this.pathIcon2,
       @required this.callbackItem1,
-      @required this.callbackItem2,
       @required this.coverUrl,
       @required this.profileUrl,
       @required this.groupName,
@@ -110,7 +107,6 @@ class GroupDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   actionButton('$title1', pathIcon1, callbackItem1),
-                  actionButton('$title2', pathIcon2, callbackItem2),
                 ],
               ),
             ),

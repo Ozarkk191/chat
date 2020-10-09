@@ -5,26 +5,20 @@ class GroupDialogHelper {
   static adminDialog({
     BuildContext context,
     String titleLeft,
-    String titleRight,
     String pathIconLeft,
-    String pathIconRight,
     String profileUrl,
     String groupName,
     String member,
     String coverUrl,
     String statusGroup,
     Function callbackItem1,
-    Function callbackItem2,
   }) =>
       showDialog(
         context: context,
         builder: (context) => GroupDialog(
           title1: titleLeft,
-          title2: titleRight,
           pathIcon1: pathIconLeft,
-          pathIcon2: pathIconRight,
           callbackItem1: callbackItem1,
-          callbackItem2: callbackItem2,
           coverUrl: coverUrl,
           profileUrl: profileUrl,
           groupName: groupName,

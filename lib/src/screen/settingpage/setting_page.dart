@@ -80,6 +80,35 @@ class SettingPage extends StatelessWidget {
     }).then((_) {
       AuthService().signOut();
       Navigator.of(context).pushReplacementNamed('/login');
+      clearAll();
     });
+  }
+
+  void clearAll() {
+    AppList.lastTextList.clear();
+    AppList.lastTimeList.clear();
+    AppList.lastGroupTextList.clear();
+    AppList.lastGroupTimeList.clear();
+    AppList.userList.clear();
+    AppList.allAdminList.clear();
+    AppList.allUserList.clear();
+    AppList.allUidList.clear();
+    AppList.adminList.clear();
+    AppList.uidList.clear();
+    AppList.adminUidList.clear();
+    AppList.myGroupList.clear();
+    AppList.groupList.clear();
+    AppList.groupAllList.clear();
+    AppList.groupKey.clear();
+    AppList.indexList.clear();
+    AppList.user.clear();
+    AppList.admin.clear();
+    AppList.superAdmin.clear();
+    AppModel.user = null;
+    AppModel.group = null;
+    AppBool.homeUserChange = true;
+    AppBool.homeAdminChange = true;
+    AppBool.groupChange = true;
+    AppBool.chatChange = true;
   }
 }

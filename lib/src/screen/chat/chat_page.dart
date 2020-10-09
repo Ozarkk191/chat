@@ -21,7 +21,7 @@ class _ChatPageState extends State<ChatPage> {
   List<String> _uidList = List<String>();
   List<ChatModel> _chatList = List<ChatModel>();
   List<UserModel> _userList = List<UserModel>();
-  var items = List<ChatModel>();
+  // var items = List<ChatModel>();
   // List<ShowListItem> _listItem = List<ShowListItem>();
 
   _getAllUser() async {
@@ -125,9 +125,9 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       _chatList.add(chat);
-      items.add(chat);
+      AppList.listItemUser.add(chat);
       _chatList.sort((a, b) => b.checkTime.compareTo(a.checkTime));
-      items.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+      AppList.listItemUser.sort((a, b) => b.checkTime.compareTo(a.checkTime));
       setState(() {});
     });
   }
@@ -141,21 +141,26 @@ class _ChatPageState extends State<ChatPage> {
         }
       });
       setState(() {
-        items.clear();
-        items.addAll(dummyListData);
+        AppList.listItemUser.clear();
+        AppList.listItemUser.addAll(dummyListData);
       });
       return;
     } else {
       setState(() {
-        items.clear();
-        items.addAll(_chatList);
+        AppList.listItemUser.clear();
+        AppList.listItemUser.addAll(_chatList);
       });
     }
   }
 
   @override
   void initState() {
-    _getAllUser();
+    if (AppBool.chatChange) {
+      AppBool.chatChange = false;
+      AppList.listItemUser.clear();
+      _getAllUser();
+    }
+
     super.initState();
   }
 
@@ -194,7 +199,8 @@ class _ChatPageState extends State<ChatPage> {
                     return InkWell(
                       onTap: () {
                         // AppString.uidRoomChat = AppList.uidList[index];
-                        AppString.uidAdmin = _chatList[index].user.uid;
+                        AppString.uidAdmin =
+                            AppList.listItemUser[index].user.uid;
                         List<String> uidsList = [
                           AppString.uidAdmin,
                           AppModel.user.uid
@@ -214,14 +220,14 @@ class _ChatPageState extends State<ChatPage> {
                         );
                       },
                       child: ListChatItem(
-                        profileUrl: items[index].user.avatarUrl,
-                        lastText: items[index].lastText,
-                        name: items[index].user.displayName,
-                        time: items[index].lastTime,
+                        profileUrl: AppList.listItemUser[index].user.avatarUrl,
+                        lastText: AppList.listItemUser[index].lastText,
+                        name: AppList.listItemUser[index].user.displayName,
+                        time: AppList.listItemUser[index].lastTime,
                       ),
                     );
                   },
-                  itemCount: items.length,
+                  itemCount: AppList.listItemUser.length,
                 ),
               )
             ],

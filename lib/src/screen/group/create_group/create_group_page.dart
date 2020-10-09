@@ -400,10 +400,11 @@ class _CreateGroupState extends State<CreateGroup> {
               height: 50,
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(1),
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0), Colors.black]),
+                // gradient: LinearGradient(
+                //   begin: Alignment.topCenter,
+                //   end: Alignment.bottomCenter,
+                //   // List: [Colors.black.withOpacity(0), Colors.black]
+                // ),
               ),
               child: InkWell(
                 onTap: () {
