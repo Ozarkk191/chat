@@ -8,6 +8,7 @@ import 'package:chat/models/group_model.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
+import 'package:chat/src/screen/confirm_image/confirm_image.dart';
 import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
 import 'package:chat/src/screen/invite/invite_with_link.dart';
 import 'package:chat/src/screen/member/all_member_page.dart';
@@ -16,13 +17,11 @@ import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:chat/src/screen/post/post_news_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
-import 'package:dio/dio.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toast/toast.dart';
 
 class ChatGroupPage extends StatefulWidget {
   final String groupName;
@@ -46,6 +45,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   List<UserModel> _memberList = List<UserModel>();
   List<String> _tokenList = List<String>();
   List<Asset> images = List<Asset>();
+  List<File> files = List<File>();
+  File _file;
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -135,7 +136,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .collection('Group')
         .document(widget.groupID)
         .collection('messages')
-        .document(DateTime.now().millisecondsSinceEpoch.toString());
+        .document(message.createdAt.millisecondsSinceEpoch.toString());
 
     Firestore.instance.runTransaction((transaction) async {
       await transaction.set(
@@ -153,85 +154,40 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     prefs.setString(AppString.uidRoomChat, value);
   }
 
-  Future<void> loadAssets() async {
-    List<Asset> resultList = List<Asset>();
-    String error = 'เกิดข้อผิดพลาด';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 1,
-        enableCamera: true,
-        selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-        materialOptions: MaterialOptions(
-          actionBarColor: "#202020",
-          actionBarTitle: "Secret Chat",
-          allViewTitle: "All Photos",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-
-      if (resultList != null) {
-        FormData imageFormData = FormData.fromMap({
-          "files": images.map((image) async {
-            return await MultipartFile.fromFile('assets/${image.name}',
-                filename: image.name);
-          }).toList(),
-        });
-        // file = File(resultList[0].identifier);
-        // Asset asset = resultList[0];
-        log("${resultList[0]}");
-        //   var now = new DateTime.now();
-        //   var now2 = now.toString().replaceAll(" ", "_");
-
-        //   final StorageReference storageRef =
-        //       FirebaseStorage.instance.ref().child(now2);
-
-        //   // StorageUploadTask uploadTask = storageRef.putFile(
-        //   //   File(),
-        //   //   StorageMetadata(
-        //   //     contentType: 'image/jpg',
-        //   //   ),
-        //   // );
-        //   StorageTaskSnapshot download = await uploadTask.onComplete;
-
-        //   String url = await download.ref.getDownloadURL();
-
-        //   ChatMessage message = ChatMessage(text: "", user: user, image: url);
-
-        //   for (var i = 0; i < _tokenList.length; i++) {
-        //     _sendNotification(message.text, _tokenList[i]);
-        //   }
-        //   var documentReference = Firestore.instance
-        //       .collection('Rooms')
-        //       .document('chats')
-        //       .collection('Group')
-        //       .document(widget.groupID)
-        //       .collection('messages')
-        //       .document(DateTime.now().millisecondsSinceEpoch.toString());
-
-        //   Firestore.instance.runTransaction((transaction) async {
-        //     await transaction.set(
-        //       documentReference,
-        //       message.toJson(),
-        //     );
-        //   });
-      }
-    } on Exception catch (e) {
-      error = e.toString();
-      Toast.show(error, context,
-          duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+  void _upLoadPic(String url) async {
+    ChatMessage message = ChatMessage(text: "", user: user, image: url);
+    for (var i = 0; i < _tokenList.length; i++) {
+      _sendNotification(message.text, _tokenList[i]);
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+    var documentReference = Firestore.instance
+        .collection('Rooms')
+        .document('chats')
+        .collection('Group')
+        .document(widget.groupID)
+        .collection('messages')
+        .document(message.createdAt.millisecondsSinceEpoch.toString());
 
-    setState(() {
-      images = resultList;
+    Firestore.instance.runTransaction((transaction) async {
+      await transaction.set(
+        documentReference,
+        message.toJson(),
+      );
     });
+  }
+
+  void _goToSecondScreen() async {
+    var result = await Navigator.push(
+      context,
+      new MaterialPageRoute(
+        builder: (BuildContext context) => ConfirmImage(),
+        fullscreenDialog: true,
+      ),
+    );
+    if (result != null) {
+      log("$result");
+      _upLoadPic("$result");
+    }
   }
 
   @override
@@ -276,8 +232,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               AppBool.homeUserChange = true;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => UserNavBottom(
+                PageTransition(
+                  type: PageTransitionType.fade,
+                  child: UserNavBottom(
                     currentIndex: 1,
                   ),
                 ),
@@ -287,8 +244,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               AppBool.homeAdminChange = true;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => TestNav(
+                PageTransition(
+                  type: PageTransitionType.fade,
+                  child: TestNav(
                     currentIndex: 1,
                   ),
                 ),
@@ -353,58 +311,58 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                   showTraillingBeforeSend: true,
                   trailing: <Widget>[
                     IconButton(
-                      icon: Icon(Icons.photo),
-                      onPressed: () async {
-                        final result = await picker.getImage(
-                          source: ImageSource.gallery,
-                          imageQuality: 80,
-                          maxHeight: 400,
-                          maxWidth: 400,
-                        );
+                      icon: Icon(Icons.photo), onPressed: _goToSecondScreen,
+                      // () async {
+                      //   final result = await picker.getImage(
+                      //     source: ImageSource.gallery,
+                      //     imageQuality: 80,
+                      //     maxHeight: 400,
+                      //     maxWidth: 400,
+                      //   );
 
-                        if (result != null) {
-                          var now = new DateTime.now();
-                          var now2 = now.toString().replaceAll(" ", "_");
+                      //   if (result != null) {
+                      //     var now = new DateTime.now();
+                      //     var now2 = now.toString().replaceAll(" ", "_");
 
-                          final StorageReference storageRef =
-                              FirebaseStorage.instance.ref().child(now2);
+                      //     final StorageReference storageRef =
+                      //         FirebaseStorage.instance.ref().child(now2);
 
-                          StorageUploadTask uploadTask = storageRef.putFile(
-                            File(result.path),
-                            StorageMetadata(
-                              contentType: 'image/jpg',
-                            ),
-                          );
-                          StorageTaskSnapshot download =
-                              await uploadTask.onComplete;
+                      //     StorageUploadTask uploadTask = storageRef.putFile(
+                      //       File(result.path),
+                      //       StorageMetadata(
+                      //         contentType: 'image/jpg',
+                      //       ),
+                      //     );
+                      //     StorageTaskSnapshot download =
+                      //         await uploadTask.onComplete;
 
-                          String url = await download.ref.getDownloadURL();
+                      //     String url = await download.ref.getDownloadURL();
 
-                          ChatMessage message =
-                              ChatMessage(text: "", user: user, image: url);
+                      //     ChatMessage message =
+                      //         ChatMessage(text: "", user: user, image: url);
 
-                          for (var i = 0; i < _tokenList.length; i++) {
-                            _sendNotification(message.text, _tokenList[i]);
-                          }
-                          var documentReference = Firestore.instance
-                              .collection('Rooms')
-                              .document('chats')
-                              .collection('Group')
-                              .document(widget.groupID)
-                              .collection('messages')
-                              .document(DateTime.now()
-                                  .millisecondsSinceEpoch
-                                  .toString());
+                      //     for (var i = 0; i < _tokenList.length; i++) {
+                      //       _sendNotification(message.text, _tokenList[i]);
+                      //     }
+                      //     var documentReference = Firestore.instance
+                      //         .collection('Rooms')
+                      //         .document('chats')
+                      //         .collection('Group')
+                      //         .document(widget.groupID)
+                      //         .collection('messages')
+                      //         .document(DateTime.now()
+                      //             .millisecondsSinceEpoch
+                      //             .toString());
 
-                          Firestore.instance
-                              .runTransaction((transaction) async {
-                            await transaction.set(
-                              documentReference,
-                              message.toJson(),
-                            );
-                          });
-                        }
-                      },
+                      //     Firestore.instance
+                      //         .runTransaction((transaction) async {
+                      //       await transaction.set(
+                      //         documentReference,
+                      //         message.toJson(),
+                      //       );
+                      //     });
+                      //   }
+                      // },
                     )
                   ],
                 );

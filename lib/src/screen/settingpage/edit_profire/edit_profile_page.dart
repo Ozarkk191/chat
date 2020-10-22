@@ -6,6 +6,7 @@ import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:chat/src/screen/settingpage/edit_profire/edit_page.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 class EditProfilPage extends StatefulWidget {
   @override
@@ -23,11 +24,15 @@ class _EditProfilPageState extends State<EditProfilPage> {
         leading: InkWell(
           onTap: () {
             if (AppModel.user.roles == "${TypeStatus.USER}") {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => UserNavBottom()));
+              Navigator.pushReplacement(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: UserNavBottom()));
             } else {
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => TestNav()));
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: TestNav()));
             }
           },
           child: Icon(Icons.arrow_back_ios),
@@ -63,8 +68,12 @@ class _EditProfilPageState extends State<EditProfilPage> {
               GradientButton(
                   title: 'แก้ไขข้อมูลส่วนตัว',
                   callBack: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => EditPage()));
+                    Navigator.pushReplacement(
+                        context,
+                        PageTransition(
+                            type: PageTransitionType.fade, child: EditPage()));
+                    // Navigator.pushReplacement(context,
+                    //     MaterialPageRoute(builder: (context) => EditPage()));
                   }),
             ],
           ),

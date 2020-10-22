@@ -13,6 +13,7 @@ import 'package:chat/src/screen/settingpage/setting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 
 class UserHomePage extends StatefulWidget {
   @override
@@ -191,8 +192,12 @@ class _UserHomePageState extends State<UserHomePage> {
           actions: <Widget>[
             InkWell(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SettingPage()));
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.fade, child: SettingPage()));
+                // Navigator.push(context,
+                //     MaterialPageRoute(builder: (context) => SettingPage()));
                 // Navigator.of(context).pushReplacementNamed('/setting');
               },
               child: Image.asset('assets/images/ic_setting.png'),
@@ -377,8 +382,12 @@ class _UserHomePageState extends State<UserHomePage> {
           ),
           InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => EditProfilPage()));
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: EditProfilPage()));
+              // Navigator.push(context,
+              //     MaterialPageRoute(builder: (context) => EditProfilPage()));
             },
             child: Container(
               width: 40,

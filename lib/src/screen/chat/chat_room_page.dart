@@ -7,14 +7,17 @@ import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
+import 'package:chat/src/screen/confirm_image/confirm_image.dart';
 import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:page_transition/page_transition.dart';
+// import 'package:toast/toast.dart';
 
 class ChatRoomPage extends StatefulWidget {
   final String uid;
@@ -32,6 +35,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final picker = ImagePicker();
   UserModel userModel;
   String _token;
+  List<Asset> images = List<Asset>();
+  List<File> files = List<File>();
+  // File _file;
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -67,7 +73,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   void _sendNotification(String text, String token) async {
-    log(token);
     var parameter = SendNotiParameters(
       title: AppModel.user.displayName,
       body: text == "" ? "คุณได้รับรูปภาพ" : "คุณได้รับข้อความ",
@@ -97,6 +102,23 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     });
   }
 
+  // void onRemove(String keyMSG) {
+  //   var documentReference = Firestore.instance
+  //       .collection('Rooms')
+  //       .document('chats')
+  //       .collection('ChatRoom')
+  //       .document(widget.keyRoom)
+  //       .collection('messages')
+  //       .document(keyMSG);
+
+  //   Firestore.instance.runTransaction((transaction) async {
+  //     await transaction.delete(
+  //       documentReference,
+  //     );
+  //   });
+  //   Navigator.pop(context);
+  // }
+
   void onSend(ChatMessage message) {
     var documentReference = Firestore.instance
         .collection('Rooms')
@@ -104,7 +126,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         .collection('ChatRoom')
         .document(widget.keyRoom)
         .collection('messages')
-        .document(DateTime.now().millisecondsSinceEpoch.toString());
+        .document(message.createdAt.millisecondsSinceEpoch.toString());
 
     Firestore.instance.runTransaction((transaction) async {
       await transaction.set(
@@ -114,6 +136,76 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     });
     _sendNotification(message.text, _token);
   }
+
+  // Future<File> getImageFileFromAsset(String path) async {
+  //   final file = File(path);
+  //   return file;
+  // }
+
+  void _upLoadPic(String url) async {
+    ChatMessage message = ChatMessage(text: "", user: user, image: url);
+    _sendNotification(message.text, _token);
+
+    var documentReference = Firestore.instance
+        .collection('Rooms')
+        .document('chats')
+        .collection('ChatRoom')
+        .document(widget.keyRoom)
+        .collection('messages')
+        .document(message.createdAt.millisecondsSinceEpoch.toString());
+
+    Firestore.instance.runTransaction((transaction) async {
+      await transaction.set(
+        documentReference,
+        message.toJson(),
+      );
+    });
+  }
+
+  void _goToSecondScreen() async {
+    var result = await Navigator.push(
+      context,
+      new MaterialPageRoute(
+        builder: (BuildContext context) => ConfirmImage(),
+        fullscreenDialog: true,
+      ),
+    );
+    if (result != null) {
+      _upLoadPic("$result");
+    }
+  }
+
+  // Future<bool> _dialogShow({String title, String content, String keyMSG}) {
+  //   return showDialog(
+  //         context: context,
+  //         builder: (context) => new AlertDialog(
+  //           title: new Text('$title'),
+  //           content: new Text('$content'),
+  //           actions: <Widget>[
+  //             new GestureDetector(
+  //               onTap: () {
+  //                 onRemove(keyMSG);
+  //                 // Navigator.of(context).pop(false);
+  //               },
+  //               child: Container(
+  //                 padding: EdgeInsets.all(10),
+  //                 child: Text("ใช่"),
+  //               ),
+  //             ),
+  //             new GestureDetector(
+  //               onTap: () {
+  //                 Navigator.of(context).pop(false);
+  //               },
+  //               child: Container(
+  //                 padding: EdgeInsets.all(10),
+  //                 child: Text("ไม่"),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ) ??
+  //       false;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -128,10 +220,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           onTap: () {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
               AppBool.chatChange = true;
+              AppBool.homeUserChange = true;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => UserNavBottom(
+                PageTransition(
+                  type: PageTransitionType.fade,
+                  child: UserNavBottom(
                     currentIndex: 2,
                   ),
                 ),
@@ -140,8 +234,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               AppBool.chatChange = true;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => TestNav(
+                PageTransition(
+                  type: PageTransitionType.fade,
+                  child: TestNav(
                     currentIndex: 2,
                   ),
                 ),
@@ -185,13 +280,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   messages: messages,
                   showUserAvatar: false,
                   showAvatarForEveryMessage: false,
-                  scrollToBottom: false,
-                  // onPressAvatar: (ChatUser user) {
-                  //   print("OnPressAvatar: ${user.name}");
-                  // },
-                  // onLongPressAvatar: (ChatUser user) {
-                  //   print("OnLongPressAvatar: ${user.name}");
-                  // },
+                  scrollToBottom: true,
+                  onLongPressMessage: (ChatMessage chatMessage) {
+                    // _dialogShow(
+                    //     title: "แจ้งเตือน",
+                    //     content: "คุณต้องการลบข้อความใช่หรือไม่");
+                    // Toast.show(
+                    //     chatMessage.createdAt.millisecondsSinceEpoch.toString(),
+                    //     context,
+                    //     duration: Toast.LENGTH_SHORT,
+                    //     gravity: Toast.BOTTOM);
+                  },
                   inputMaxLines: 5,
                   messageContainerPadding:
                       EdgeInsets.only(left: 5.0, right: 5.0),
@@ -209,56 +308,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                   trailing: <Widget>[
                     IconButton(
                       icon: Icon(Icons.photo),
-                      onPressed: () async {
-                        final result = await picker.getImage(
-                          source: ImageSource.gallery,
-                          imageQuality: 80,
-                          maxHeight: 400,
-                          maxWidth: 400,
-                        );
-
-                        if (result != null) {
-                          log("${result.path}");
-                          var now = new DateTime.now();
-                          var now2 = now.toString().replaceAll(" ", "_");
-
-                          final StorageReference storageRef =
-                              FirebaseStorage.instance.ref().child(now2);
-
-                          StorageUploadTask uploadTask = storageRef.putFile(
-                            File(result.path),
-                            StorageMetadata(
-                              contentType: 'image/jpg',
-                            ),
-                          );
-                          StorageTaskSnapshot download =
-                              await uploadTask.onComplete;
-
-                          String url = await download.ref.getDownloadURL();
-
-                          ChatMessage message =
-                              ChatMessage(text: "", user: user, image: url);
-                          _sendNotification(message.text, _token);
-
-                          var documentReference = Firestore.instance
-                              .collection('Rooms')
-                              .document('chats')
-                              .collection('ChatRoom')
-                              .document(widget.keyRoom)
-                              .collection('messages')
-                              .document(DateTime.now()
-                                  .millisecondsSinceEpoch
-                                  .toString());
-
-                          Firestore.instance
-                              .runTransaction((transaction) async {
-                            await transaction.set(
-                              documentReference,
-                              message.toJson(),
-                            );
-                          });
-                        }
-                      },
+                      onPressed: _goToSecondScreen,
+                      //loadAssets,
                     )
                   ],
                 );

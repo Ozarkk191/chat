@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -23,6 +24,7 @@ import 'package:chat/src/screen/unbanned/unbanned_page.dart';
 import 'package:chat/src/screen/waitting/waitting_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:toast/toast.dart';
 
 class HomePage extends StatefulWidget {
@@ -84,6 +86,8 @@ class _HomePageState extends State<HomePage> {
 
         setState(() {});
       });
+    }).then((value) {
+      log("${AppList.adminList[0].isActive}");
     });
   }
 
@@ -235,9 +239,14 @@ class _HomePageState extends State<HomePage> {
                                 callback: () {
                                   Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              AddAdminPage()));
+                                      PageTransition(
+                                          type: PageTransitionType.fade,
+                                          child: AddAdminPage()));
+                                  // Navigator.pushReplacement(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (context) =>
+                                  //             AddAdminPage()));
                                 },
                               ),
                         Container(
@@ -583,11 +592,15 @@ class _HomePageState extends State<HomePage> {
           InkWell(
             onTap: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditProfilPage(),
-                ),
-              );
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: EditProfilPage()));
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => EditProfilPage(),
+              //   ),
+              // );
             },
             child: Container(
               width: 40,

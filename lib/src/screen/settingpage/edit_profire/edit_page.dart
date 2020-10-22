@@ -14,6 +14,7 @@ import 'package:flutter_rounded_date_picker/rounded_picker.dart';
 // import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:page_transition/page_transition.dart';
 
 class EditPage extends StatefulWidget {
   @override
@@ -124,7 +125,9 @@ class _EditPageState extends State<EditPage> {
         _loading = false;
       });
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => EditProfilPage()));
+          context,
+          PageTransition(
+              type: PageTransitionType.fade, child: EditProfilPage()));
     });
   }
 
@@ -230,8 +233,12 @@ class _EditPageState extends State<EditPage> {
           backgroundColor: Color(0xff242424),
           leading: InkWell(
             onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => EditProfilPage()));
+              Navigator.pushReplacement(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade, child: EditProfilPage()));
+              // Navigator.pushReplacement(context,
+              //     MaterialPageRoute(builder: (context) => EditProfilPage()));
             },
             child: Icon(Icons.arrow_back_ios),
           ),
