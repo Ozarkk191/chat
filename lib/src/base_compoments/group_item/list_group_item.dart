@@ -21,8 +21,8 @@ class ListGroupItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
-      height: 160,
+      width: 150,
+      height: 180,
       child: Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
         color: Color(0xff616161),
@@ -71,7 +71,7 @@ class ListGroupItem extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       '$nameGroup',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontSize: 12),
                     ),
                     Row(
                       children: <Widget>[

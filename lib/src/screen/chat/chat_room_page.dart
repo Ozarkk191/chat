@@ -175,38 +175,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     }
   }
 
-  // Future<bool> _dialogShow({String title, String content, String keyMSG}) {
-  //   return showDialog(
-  //         context: context,
-  //         builder: (context) => new AlertDialog(
-  //           title: new Text('$title'),
-  //           content: new Text('$content'),
-  //           actions: <Widget>[
-  //             new GestureDetector(
-  //               onTap: () {
-  //                 onRemove(keyMSG);
-  //                 // Navigator.of(context).pop(false);
-  //               },
-  //               child: Container(
-  //                 padding: EdgeInsets.all(10),
-  //                 child: Text("ใช่"),
-  //               ),
-  //             ),
-  //             new GestureDetector(
-  //               onTap: () {
-  //                 Navigator.of(context).pop(false);
-  //               },
-  //               child: Container(
-  //                 padding: EdgeInsets.all(10),
-  //                 child: Text("ไม่"),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ) ??
-  //       false;
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

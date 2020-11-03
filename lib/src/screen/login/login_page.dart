@@ -176,8 +176,9 @@ class _LoginPageState extends State<LoginPage> {
                 }
               })
             });
-    var member = _memberList.where((element) => element == user.uid);
+    var member = _memberList.where((element) => element == user.uid).toList();
     if (member.length != 0) {
+      log("${member[0]}");
       await _databaseReference
           .collection('Users')
           .document(user.uid)
@@ -196,15 +197,27 @@ class _LoginPageState extends State<LoginPage> {
             "notiToken": _token,
             "isActive": true
           });
-          log("id :: ${widget.link}");
+
           if (widget.link != null) {
             _goToGroup(widget.link);
           } else {
-            if (AppModel.user.roles == '${TypeStatus.USER}') {
-              Navigator.of(context).pushReplacementNamed('/navuserhome');
-            } else {
-              Navigator.of(context).pushReplacementNamed('/navhome');
-            }
+            _databaseReference
+                .collection('Users')
+                .document(user.uid)
+                .get()
+                .then((value) {
+              AppModel.user = UserModel.fromJson(value.data);
+              log("${AppModel.user.phoneNumber}");
+              if (AppModel.user.phoneNumber == "null") {
+                _savePhoneNumber(user: user);
+              } else {
+                if (AppModel.user.roles == '${TypeStatus.USER}') {
+                  Navigator.of(context).pushReplacementNamed('/navuserhome');
+                } else {
+                  Navigator.of(context).pushReplacementNamed('/navhome');
+                }
+              }
+            });
           }
         }
       });

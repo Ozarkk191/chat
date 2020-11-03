@@ -40,12 +40,9 @@ class _AllMemberPageState extends State<AllMemberPage> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: widget.memberList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return Dismissible(
-                            key: ObjectKey(widget.memberList[index]),
-                            child: RowProfileWithName(
-                              profileUrl: widget.memberList[index].avatarUrl,
-                              displayName: widget.memberList[index].displayName,
-                            ),
+                          return RowProfileWithName(
+                            profileUrl: widget.memberList[index].avatarUrl,
+                            displayName: widget.memberList[index].displayName,
                           );
                         },
                       ),
