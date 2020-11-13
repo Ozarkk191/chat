@@ -57,6 +57,7 @@ class _AddAdminPageState extends State<AddAdminPage> {
       appBar: AppBar(
         leading: InkWell(
           onTap: () {
+            AppBool.homeAdminChange = true;
             Navigator.pushReplacement(
                 context, MaterialPageRoute(builder: (context) => TestNav()));
           },

@@ -1,3 +1,4 @@
+import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
@@ -91,6 +92,7 @@ class _EditStatusPageState extends State<EditStatusPage> {
       appBar: AppBar(
         leading: InkWell(
           onTap: () {
+            AppBool.homeAdminChange = true;
             Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => AddAdminPage()));
           },

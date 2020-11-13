@@ -23,6 +23,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
         backgroundColor: Color(0xff242424),
         leading: InkWell(
           onTap: () {
+            AppBool.groupChange = true;
+            AppBool.chatChange = true;
             if (AppModel.user.roles == "${TypeStatus.USER}") {
               Navigator.pushReplacement(
                   context,

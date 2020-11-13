@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -14,7 +13,6 @@ import 'package:chat/src/base_compoments/group_item/list_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/text/text_and_line_edit.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
-import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/search/search_page.dart';
 import 'package:chat/src/screen/settingpage/add_admin_page/add_admin_page.dart';
@@ -86,9 +84,7 @@ class _HomePageState extends State<HomePage> {
 
         setState(() {});
       });
-    }).then((value) {
-      log("${AppList.adminList[0].isActive}");
-    });
+    }).then((value) {});
   }
 
   _getGroup() async {
@@ -105,8 +101,8 @@ class _HomePageState extends State<HomePage> {
         _group = GroupModel.fromJson(value.data);
         AppList.groupAllList.add(_group);
         _getWaitting(value.documentID);
-        var uid = _group.memberUIDList
-            .where((element) => element == AppModel.user.uid);
+        var uid =
+            _group.adminList.where((element) => element == AppModel.user.uid);
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(_group);
@@ -408,21 +404,22 @@ class _HomePageState extends State<HomePage> {
                                                 .groupList[index].statusGroup,
                                             callbackItem1: () {
                                               Navigator.pop(context);
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ChatGroupPage(
-                                                    groupName: AppList
-                                                        .groupList[index]
-                                                        .nameGroup,
-                                                    groupID:
-                                                        AppList.groupKey[index],
-                                                    id: AppList
-                                                        .groupList[index].id,
-                                                  ),
-                                                ),
-                                              );
+                                              // Navigator.push(
+                                              //   context,
+                                              // MaterialPageRoute(
+                                              //   builder: (context) =>
+                                              //       ChatGroupPage(
+                                              //     groupName: AppList
+                                              //         .groupList[index]
+                                              //         .nameGroup,
+                                              //     groupID:
+                                              //         AppList.groupKey[index],
+                                              //     id: AppList
+                                              //         .groupList[index].id,
+                                              //   ),
+                                              // ),
+                                              //
+                                              // );
                                             },
                                           );
                                         },

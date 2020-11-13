@@ -8,7 +8,6 @@ import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/add_user_group_button.dart';
 import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dart';
 import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
-import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
@@ -27,7 +26,8 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   String _profileUrl =
       "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130";
-  String _coverUrl = "https://ck.lnwfile.com/zhqh7e.jpg";
+  String _coverUrl =
+      "https://s3-ap-southeast-1.amazonaws.com/media.storylog/storycontent/5f25816951a8c606725949ce/15962940851326482829.jpg";
   List<UserModel> _memberList = List<UserModel>();
   TextEditingController _nameGroup = new TextEditingController();
   String _statusGroup = "public";
@@ -102,13 +102,16 @@ class _CreateGroupState extends State<CreateGroup> {
     }
 
     List<String> uidlist = List<String>();
+    List<String> adminlist = List<String>();
     for (int i = 0; i < _memberList.length; i++) {
       uidlist.add(_memberList[i].uid);
     }
 
-    for (int i = 0; i < AppList.allAdminList.length; i++) {
-      uidlist.add(AppList.allAdminList[i].uid);
-    }
+    adminlist.add(AppModel.user.uid);
+
+    // for (int i = 0; i < AppList.allAdminList.length; i++) {
+    //   uidlist.add(AppList.allAdminList[i].uid);
+    // }
 
     // uidlist.add(AppString.uid);
     var id = randomBetween(100000, 200000).toString();
@@ -116,6 +119,7 @@ class _CreateGroupState extends State<CreateGroup> {
         nameGroup: _nameGroup.text,
         avatarGroup: _profileUrl,
         memberUIDList: uidlist,
+        adminList: adminlist,
         statusGroup: _statusGroup,
         coverUrl: _coverUrl,
         idCustom: "ใส่ ID กลุ่ม",
@@ -130,45 +134,91 @@ class _CreateGroupState extends State<CreateGroup> {
         .setData(group.toJson())
         .then((_) {
       final ChatUser user = ChatUser(
-        name: AppModel.user.firstName,
-        uid: AppModel.user.uid,
-        avatar: AppModel.user.avatarUrl,
+        name: _nameGroup.text,
+        uid: now2,
+        avatar: _profileUrl,
       );
+
       ChatMessage message = ChatMessage(
-          text:
-              "${AppModel.user.firstName} ได้สร้างกลุ่ม ${_nameGroup.text} ขึ้น",
-          user: user,
-          image: null);
+          text: "${_nameGroup.text} ยินดีต้อนรับ", user: user, image: null);
+      for (var i = 0; i <= uidlist.length; i++) {
+        var documentReference = Firestore.instance
+            .collection('Rooms')
+            .document('chats')
+            .collection('Group')
+            .document(now2)
+            .collection("${uidlist[i]}")
+            .document(DateTime.now().millisecondsSinceEpoch.toString());
+        Firestore.instance.runTransaction((transaction) async {
+          await transaction.set(
+            documentReference,
+            message.toJson(),
+          );
+        }).then((_) {
+          // Navigator.pushReplacement(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => ChatGroupPage(
+          //               groupName: _nameGroup.text,
+          //               groupID: now2,
+          //               id: id,
+          //             )));
+          AppList.indexList.clear();
 
-      var documentReference = Firestore.instance
-          .collection('Rooms')
-          .document('chats')
-          .collection('Group')
-          .document(AppString.uidRoomChat)
-          .collection('messages')
-          .document(DateTime.now().millisecondsSinceEpoch.toString());
-
-      Firestore.instance.runTransaction((transaction) async {
-        await transaction.set(
-          documentReference,
-          message.toJson(),
-        );
-      }).then((_) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ChatGroupPage(
-                      groupName: _nameGroup.text,
-                      groupID: now2,
-                      id: id,
-                    )));
-        AppList.indexList.clear();
-
-        setState(() {
-          isLoading = false;
+          setState(() {
+            isLoading = false;
+          });
         });
-      });
+      }
     });
+
+    // _documentReference
+    //     .collection('Rooms')
+    //     .document("chats")
+    //     .collection('Group')
+    //     .document(now2)
+    //     .setData(group.toJson())
+    //     .then((_) {
+    // final ChatUser user = ChatUser(
+    //   name: AppModel.user.firstName,
+    //   uid: AppModel.user.uid,
+    //   avatar: AppModel.user.avatarUrl,
+    // );
+    // ChatMessage message = ChatMessage(
+    //     text:
+    //         "${AppModel.user.firstName} ได้สร้างกลุ่ม ${_nameGroup.text} ขึ้น",
+    //     user: user,
+    //     image: null);
+
+    //   var documentReference = Firestore.instance
+    //       .collection('Rooms')
+    //       .document('chats')
+    //       .collection('Group')
+    //       .document(AppString.uidRoomChat)
+    //       .collection('messages')
+    //       .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+    //   Firestore.instance.runTransaction((transaction) async {
+    //     await transaction.set(
+    //       documentReference,
+    //       message.toJson(),
+    //     );
+    //   }).then((_) {
+    //     Navigator.pushReplacement(
+    //         context,
+    //         MaterialPageRoute(
+    //             builder: (context) => ChatGroupPage(
+    //                   groupName: _nameGroup.text,
+    //                   groupID: now2,
+    //                   id: id,
+    //                 )));
+    //     AppList.indexList.clear();
+
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //   });
+    // });
     // AppModel.group.nameGroup = _nameGroup.text;
   }
 

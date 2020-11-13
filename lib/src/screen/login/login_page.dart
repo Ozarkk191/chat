@@ -324,7 +324,8 @@ class _LoginPageState extends State<LoginPage> {
       updatedAt: "null",
       avatarUrl: "null",
       groupKey: grouplist,
-      coverUrl: "null",
+      coverUrl:
+          "https://firebasestorage.googleapis.com/v0/b/chat-ae407.appspot.com/o/2020-07-13_15%3A55%3A08.422616?alt=media&token=99b504a0-6eba-42f0-875d-7afed05c2130",
       uid: "null",
       lastTimeUpdate: "null",
       banned: false,

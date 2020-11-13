@@ -46,7 +46,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   List<String> _tokenList = List<String>();
   List<Asset> images = List<Asset>();
   List<File> files = List<File>();
-  File _file;
+  // File _file;
 
   final ChatUser user = ChatUser(
     name: AppModel.user.firstName,
@@ -135,7 +135,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .document('chats')
         .collection('Group')
         .document(widget.groupID)
-        .collection('messages')
+        .collection(widget.id)
         .document(message.createdAt.millisecondsSinceEpoch.toString());
 
     Firestore.instance.runTransaction((transaction) async {
@@ -165,7 +165,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .document('chats')
         .collection('Group')
         .document(widget.groupID)
-        .collection('messages')
+        .collection(widget.id)
         .document(message.createdAt.millisecondsSinceEpoch.toString());
 
     Firestore.instance.runTransaction((transaction) async {
@@ -224,7 +224,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               }),
         ],
         backgroundColor: Color(0xff202020),
-        title: Text("${widget.groupName} (id : ${widget.id})"),
+        title: Text("${widget.groupName}"),
         leading: InkWell(
           onTap: () {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
@@ -263,7 +263,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 .document('chats')
                 .collection('Group')
                 .document(widget.groupID)
-                .collection('messages')
+                .collection(widget.id)
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -279,91 +279,93 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                 var messages =
                     items.map((i) => ChatMessage.fromJson(i.data)).toList();
                 _saveRead(messages[messages.length - 1].createdAt.toString());
-                return DashChat(
-                  key: _chatViewKey,
-                  inverted: false,
-                  onSend: onSend,
-                  user: user,
-                  inputDecoration:
-                      InputDecoration.collapsed(hintText: "ข้อความ"),
-                  dateFormat: DateFormat('yyyy-MMM-dd'),
-                  timeFormat: DateFormat('HH:mm'),
-                  messages: messages,
-                  showUserAvatar: false,
-                  showAvatarForEveryMessage: false,
-                  scrollToBottom: true,
-                  readOnly: AppModel.user.roles == '${TypeStatus.USER}'
-                      ? true
-                      : false,
-                  inputMaxLines: 5,
-                  messageContainerPadding:
-                      EdgeInsets.only(left: 5.0, right: 5.0),
-                  alwaysShowSend: true,
-                  inputTextStyle: TextStyle(fontSize: 16.0),
-                  inputContainerStyle: BoxDecoration(
-                    border: Border.all(width: 0.0),
-                    color: Colors.white,
-                  ),
-                  onLoadEarlier: () {
-                    // print("laoding...");
-                  },
-                  shouldShowLoadEarlier: false,
-                  showTraillingBeforeSend: true,
-                  trailing: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.photo), onPressed: _goToSecondScreen,
-                      // () async {
-                      //   final result = await picker.getImage(
-                      //     source: ImageSource.gallery,
-                      //     imageQuality: 80,
-                      //     maxHeight: 400,
-                      //     maxWidth: 400,
-                      //   );
+                return Stack(
+                  children: [
+                    DashChat(
+                      key: _chatViewKey,
+                      inverted: false,
+                      onSend: onSend,
+                      user: user,
+                      inputDecoration:
+                          InputDecoration.collapsed(hintText: "ข้อความ"),
+                      dateFormat: DateFormat('yyyy-MMM-dd'),
+                      timeFormat: DateFormat('HH:mm'),
+                      messages: messages,
+                      showUserAvatar: false,
+                      showAvatarForEveryMessage: false,
+                      scrollToBottom: true,
+                      readOnly: false,
+                      inputMaxLines: 5,
+                      messageContainerPadding:
+                          EdgeInsets.only(left: 5.0, right: 5.0),
+                      alwaysShowSend: true,
+                      inputTextStyle: TextStyle(fontSize: 16.0),
+                      inputContainerStyle: BoxDecoration(
+                        border: Border.all(width: 0.0),
+                        color: Colors.white,
+                      ),
+                      onLoadEarlier: () {
+                        // print("laoding...");
+                      },
+                      shouldShowLoadEarlier: false,
+                      showTraillingBeforeSend: true,
+                      trailing: <Widget>[
+                        IconButton(
+                          icon: Icon(Icons.photo), onPressed: _goToSecondScreen,
+                          // () async {
+                          //   final result = await picker.getImage(
+                          //     source: ImageSource.gallery,
+                          //     imageQuality: 80,
+                          //     maxHeight: 400,
+                          //     maxWidth: 400,
+                          //   );
 
-                      //   if (result != null) {
-                      //     var now = new DateTime.now();
-                      //     var now2 = now.toString().replaceAll(" ", "_");
+                          //   if (result != null) {
+                          //     var now = new DateTime.now();
+                          //     var now2 = now.toString().replaceAll(" ", "_");
 
-                      //     final StorageReference storageRef =
-                      //         FirebaseStorage.instance.ref().child(now2);
+                          //     final StorageReference storageRef =
+                          //         FirebaseStorage.instance.ref().child(now2);
 
-                      //     StorageUploadTask uploadTask = storageRef.putFile(
-                      //       File(result.path),
-                      //       StorageMetadata(
-                      //         contentType: 'image/jpg',
-                      //       ),
-                      //     );
-                      //     StorageTaskSnapshot download =
-                      //         await uploadTask.onComplete;
+                          //     StorageUploadTask uploadTask = storageRef.putFile(
+                          //       File(result.path),
+                          //       StorageMetadata(
+                          //         contentType: 'image/jpg',
+                          //       ),
+                          //     );
+                          //     StorageTaskSnapshot download =
+                          //         await uploadTask.onComplete;
 
-                      //     String url = await download.ref.getDownloadURL();
+                          //     String url = await download.ref.getDownloadURL();
 
-                      //     ChatMessage message =
-                      //         ChatMessage(text: "", user: user, image: url);
+                          //     ChatMessage message =
+                          //         ChatMessage(text: "", user: user, image: url);
 
-                      //     for (var i = 0; i < _tokenList.length; i++) {
-                      //       _sendNotification(message.text, _tokenList[i]);
-                      //     }
-                      //     var documentReference = Firestore.instance
-                      //         .collection('Rooms')
-                      //         .document('chats')
-                      //         .collection('Group')
-                      //         .document(widget.groupID)
-                      //         .collection('messages')
-                      //         .document(DateTime.now()
-                      //             .millisecondsSinceEpoch
-                      //             .toString());
+                          //     for (var i = 0; i < _tokenList.length; i++) {
+                          //       _sendNotification(message.text, _tokenList[i]);
+                          //     }
+                          //     var documentReference = Firestore.instance
+                          //         .collection('Rooms')
+                          //         .document('chats')
+                          //         .collection('Group')
+                          //         .document(widget.groupID)
+                          //         .collection('messages')
+                          //         .document(DateTime.now()
+                          //             .millisecondsSinceEpoch
+                          //             .toString());
 
-                      //     Firestore.instance
-                      //         .runTransaction((transaction) async {
-                      //       await transaction.set(
-                      //         documentReference,
-                      //         message.toJson(),
-                      //       );
-                      //     });
-                      //   }
-                      // },
-                    )
+                          //     Firestore.instance
+                          //         .runTransaction((transaction) async {
+                          //       await transaction.set(
+                          //         documentReference,
+                          //         message.toJson(),
+                          //       );
+                          //     });
+                          //   }
+                          // },
+                        )
+                      ],
+                    ),
                   ],
                 );
               }
@@ -379,6 +381,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         MaterialPageRoute(
           builder: (context) => InviteWithLink(
             groupID: widget.groupID,
+            id: widget.id,
           ),
         ),
       );

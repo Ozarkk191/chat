@@ -1,5 +1,6 @@
 class GroupModel {
   List<dynamic> memberUIDList;
+  List<dynamic> adminList;
   String nameGroup;
   String avatarGroup;
   String statusGroup;
@@ -10,6 +11,7 @@ class GroupModel {
 
   GroupModel(
       {this.memberUIDList,
+      this.adminList,
       this.nameGroup,
       this.avatarGroup,
       this.statusGroup,
@@ -20,6 +22,7 @@ class GroupModel {
 
   GroupModel.fromJson(Map<String, dynamic> json)
       : memberUIDList = json['memberUIDList'],
+        adminList = json['adminList'],
         nameGroup = json['nameGroup'],
         avatarGroup = json['avatarGroup'],
         statusGroup = json['statusGroup'],
@@ -31,6 +34,7 @@ class GroupModel {
   toJson() {
     return {
       "memberUIDList": memberUIDList,
+      "adminList": adminList,
       "nameGroup": nameGroup,
       "avatarGroup": avatarGroup,
       "statusGroup": statusGroup,

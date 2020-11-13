@@ -8,8 +8,13 @@ import 'package:toast/toast.dart';
 
 class InviteWithLink extends StatefulWidget {
   final String groupID;
+  final String id;
 
-  const InviteWithLink({Key key, @required this.groupID}) : super(key: key);
+  const InviteWithLink({
+    Key key,
+    @required this.groupID,
+    this.id,
+  }) : super(key: key);
   @override
   _InviteWithLinkState createState() => _InviteWithLinkState();
 }
@@ -97,6 +102,10 @@ class _InviteWithLinkState extends State<InviteWithLink> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
+                  Text(
+                    "${widget.id}",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                   Text(
                     "QR Code ของกลุ่ม",
                     style: TextStyle(color: Colors.white, fontSize: 20),

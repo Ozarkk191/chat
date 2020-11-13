@@ -4,8 +4,6 @@ import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
-import 'package:chat/src/screen/chat/chat_page.dart';
-import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/group/group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -65,15 +63,15 @@ class _UserNavBottomState extends State<UserNavBottom>
         payload = _messages['data']['data'].toString();
         var data = payload.split("&&");
         if (data[2] == "room") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatRoomPage(
-                keyRoom: data[0],
-                uid: data[1],
-              ),
-            ),
-          );
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => ChatRoomPage(
+          //       keyRoom: data[0],
+          //       uid: data[1],
+          //     ),
+          //   ),
+          // );
         } else if (data[2] == "group") {
           Navigator.pushReplacement(
             context,
@@ -216,7 +214,7 @@ class _UserNavBottomState extends State<UserNavBottom>
             children: <Widget>[
               UserHomePage(),
               GroupPage(),
-              ChatPage(),
+              // ChatPage(),
             ],
             onPageChanged: (index) {
               setState(() => _currentIndex = index);
@@ -247,10 +245,10 @@ class _UserNavBottomState extends State<UserNavBottom>
               iconData: 'assets/images/ic_group.png',
               label: 'Group',
             ),
-            NavigationBarItem(
-              iconData: 'assets/images/ic_chat.png',
-              label: 'Chat',
-            ),
+            // NavigationBarItem(
+            //   iconData: 'assets/images/ic_chat.png',
+            //   label: 'Chat',
+            // ),
           ],
         ),
         // bottomNavigationBar: BottomNavyBar(

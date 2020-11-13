@@ -266,7 +266,7 @@ class _UserHomePageState extends State<UserHomePage> {
                                             groupName: AppList
                                                 .groupList[index].nameGroup,
                                             groupID: AppList.groupKey[index],
-                                            id: AppList.groupList[index].id,
+                                            id: AppModel.user.uid,
                                           ),
                                         ),
                                       );

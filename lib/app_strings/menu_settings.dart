@@ -1,6 +1,5 @@
 import 'package:chat/models/chat_model.dart';
 import 'package:chat/models/group_model.dart';
-import 'package:chat/models/show_list_item.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/models/waitting_model.dart';
 
@@ -68,7 +67,9 @@ class AppList {
   static List<UserModel> userBannedList = List<UserModel>();
 
   static List<GroupModel> inGroupList = List<GroupModel>();
-  static List<ShowListItem> listItemGroup = List<ShowListItem>();
+  static List<dynamic> allGroupList = List<dynamic>();
+  static List<ChatModel> listItemGroup = List<ChatModel>();
   static List<ChatModel> listItemUser = List<ChatModel>();
+
   // static List<ChatModel> chatList = List<ChatModel>();
 }

@@ -83,7 +83,6 @@ class _ConfirmOTPPageState extends State<ConfirmOTPPage> {
         });
       }).then((value) {
         var id = _groupID.where((element) => element == link).toList();
-        log(id.length.toString());
         if (id.length == 0) {
           if (AppModel.user.roles == TypeStatus.USER.toString()) {
             Navigator.pushReplacement(context,
