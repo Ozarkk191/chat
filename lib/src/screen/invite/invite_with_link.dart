@@ -103,7 +103,7 @@ class _InviteWithLinkState extends State<InviteWithLink> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Text(
-                    "${widget.id}",
+                    "ID กลุ่ม : ${widget.id}",
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                   Text(

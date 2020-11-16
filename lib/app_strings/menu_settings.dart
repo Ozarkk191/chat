@@ -27,6 +27,7 @@ class AppString {
   static String uidAdmin;
   static String keyChatRooms;
   static String nameGroup;
+  static String groupNameChoose = "group";
 }
 
 class AppBool {
@@ -42,6 +43,7 @@ class AppModel {
 }
 
 class AppList {
+  static List<String> groupNameList = List<String>();
   static List<String> lastTextList = List<String>();
   static List<String> lastTimeList = List<String>();
   static List<String> lastGroupTextList = List<String>();
@@ -70,6 +72,7 @@ class AppList {
   static List<dynamic> allGroupList = List<dynamic>();
   static List<ChatModel> listItemGroup = List<ChatModel>();
   static List<ChatModel> listItemUser = List<ChatModel>();
+  static List<ChatModel> listItem = List<ChatModel>();
 
   // static List<ChatModel> chatList = List<ChatModel>();
 }

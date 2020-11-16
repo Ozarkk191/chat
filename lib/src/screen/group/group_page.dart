@@ -1,10 +1,11 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/chat_model.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
-import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/group/create_group/create_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,14 +20,11 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   final _databaseReference = Firestore.instance;
   List<GroupModel> _groupList = List<GroupModel>();
-  List<String> _groupNameList = List<String>();
-  List<ChatModel> _listItem = List<ChatModel>();
-  String _groupNameChoose = "group";
-
-  // var items = List<ShowListItem>();
 
   _getGroupData() async {
     GroupModel group;
+    AppList.groupNameList.clear();
+    AppString.groupNameChoose = "";
 
     await _databaseReference
         .collection("Rooms")
@@ -40,34 +38,21 @@ class _GroupPageState extends State<GroupPage> {
             group.adminList.where((element) => element == AppModel.user.uid);
         if (uid.length != 0) {
           _groupList.add(group);
-          _groupNameList.add(group.nameGroup);
-          _groupNameChoose = group.nameGroup;
-
-          // _getChat(group);
+          AppList.groupNameList.add(group.nameGroup);
           _getText(group: group, memberList: group.memberUIDList);
+          AppString.groupNameChoose = group.nameGroup;
 
           setState(() {});
         }
       });
-    }).then((value) {
-      // _getLastText(group.groupID, group.memberUIDList);
-      // log("----> || ${group.nameGroup}");
     });
   }
-
-  // void _getMenu(List<GroupModel> list) async {
-  //   if (list.length == 0) {
-  //     _groupNameChoose = "group";
-  //   }else{
-  //     for (var i = 0; i < count; i++) {
-
-  //     }
-  //   }
-  // }
 
   _getText({GroupModel group, List<dynamic> memberList}) async {
     ChatMessage message;
     UserModel user;
+    AppList.listItem.clear();
+    AppList.listItemGroup.clear();
     String lastTime = "";
     String lastText = "";
     String checktime = "";
@@ -142,19 +127,19 @@ class _GroupPageState extends State<GroupPage> {
         }
         if (AppModel.user.roles == "${TypeStatus.USER}") {
           if (AppModel.user.uid == chat.user.uid) {
-            _listItem.add(chat);
-            _listItem.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+            AppList.listItem.add(chat);
+            AppList.listItem.sort((a, b) => b.checkTime.compareTo(a.checkTime));
             AppList.listItemGroup.add(chat);
             AppList.listItemGroup
                 .sort((a, b) => b.checkTime.compareTo(a.checkTime));
           }
         } else {
-          _listItem.add(chat);
-          _listItem.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+          AppList.listItem.add(chat);
+          AppList.listItem.sort((a, b) => b.checkTime.compareTo(a.checkTime));
           AppList.listItemGroup.add(chat);
           AppList.listItemGroup
               .sort((a, b) => b.checkTime.compareTo(a.checkTime));
-          _filterSearchResults(group.nameGroup);
+          _filterSearchResults(AppString.groupNameChoose);
         }
 
         setState(() {});
@@ -165,20 +150,20 @@ class _GroupPageState extends State<GroupPage> {
   void _filterSearchResults(String query) {
     if (query.isNotEmpty) {
       List<ChatModel> dummyListData = List<ChatModel>();
-      _listItem.forEach((item) {
+      AppList.listItemGroup.forEach((item) {
         if (item.group.nameGroup.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });
       setState(() {
-        AppList.listItemGroup.clear();
-        AppList.listItemGroup.addAll(dummyListData);
+        AppList.listItem.clear();
+        AppList.listItem.addAll(dummyListData);
       });
       return;
     } else {
       setState(() {
-        AppList.listItemGroup.clear();
-        AppList.listItemGroup.addAll(_listItem);
+        AppList.listItem.clear();
+        AppList.listItem.addAll(AppList.listItemGroup);
       });
     }
   }
@@ -189,6 +174,9 @@ class _GroupPageState extends State<GroupPage> {
       AppList.listItemGroup.clear();
       AppBool.groupChange = false;
       _getGroupData();
+      //_filterSearchResults(AppString.groupNameChoose);
+    } else {
+      _filterSearchResults(AppString.groupNameChoose);
     }
 
     super.initState();
@@ -232,15 +220,10 @@ class _GroupPageState extends State<GroupPage> {
           child: Column(
             children: <Widget>[
               SizedBox(height: 20),
-              // SearchField(
-              //   onChanged: (val) {
-              //     _filterSearchResults(val);
-              //   },
-              // ),
               Container(
                 alignment: Alignment.centerRight,
                 child: PopupMenuButton<String>(
-                  initialValue: _groupNameChoose,
+                  initialValue: AppString.groupNameChoose,
                   child: Container(
                     width: 150,
                     height: 40,
@@ -253,7 +236,7 @@ class _GroupPageState extends State<GroupPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          _groupNameChoose,
+                          AppString.groupNameChoose,
                           style: TextStyle(color: Colors.black),
                         ),
                         Icon(
@@ -266,14 +249,14 @@ class _GroupPageState extends State<GroupPage> {
                   color: Color(0xffffffff),
                   onSelected: (value) {
                     setState(() {
-                      _groupNameChoose = value;
-                      _filterSearchResults(_groupNameChoose);
+                      AppString.groupNameChoose = value;
+                      _filterSearchResults(value);
                     });
 
                     // _selecteMenu(value, context);
                   },
                   itemBuilder: (BuildContext context) {
-                    return _groupNameList.map((String menu) {
+                    return AppList.groupNameList.map((String menu) {
                       return PopupMenuItem<String>(
                         value: menu,
                         child: Text(
@@ -295,43 +278,42 @@ class _GroupPageState extends State<GroupPage> {
                     return InkWell(
                       onTap: () {
                         AppString.uidRoomChat =
-                            AppList.listItemGroup[index].group.groupID;
-                        AppModel.group = AppList.listItemGroup[index].group;
+                            AppList.listItem[index].group.groupID;
+                        AppModel.group = AppList.listItem[index].group;
                         AppString.nameGroup =
-                            AppList.listItemGroup[index].group.nameGroup;
+                            AppList.listItem[index].group.nameGroup;
+
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ChatGroupPage(
                               groupName:
-                                  AppList.listItemGroup[index].group.nameGroup,
-                              groupID:
-                                  AppList.listItemGroup[index].group.groupID,
-                              id: AppList.listItemGroup[index].user.uid,
+                                  AppList.listItem[index].group.nameGroup,
+                              groupID: AppList.listItem[index].group.groupID,
+                              id: AppList.listItem[index].user.uid,
+                              group: AppList.listItem[index].group,
                             ),
                           ),
                         );
                       },
                       child: AppModel.user.roles == "${TypeStatus.USER}"
                           ? ListChatItem(
-                              profileUrl: AppList
-                                  .listItemGroup[index].group.avatarGroup,
-                              lastText: AppList.listItemGroup[index].lastText,
-                              name:
-                                  AppList.listItemGroup[index].group.nameGroup,
-                              time: AppList.listItemGroup[index].lastTime,
+                              profileUrl:
+                                  AppList.listItem[index].group.avatarGroup,
+                              lastText: AppList.listItem[index].lastText,
+                              name: AppList.listItem[index].group.nameGroup,
+                              time: AppList.listItem[index].lastTime,
                             )
                           : ListChatItem(
                               profileUrl:
-                                  AppList.listItemGroup[index].user.avatarUrl,
-                              lastText: AppList.listItemGroup[index].lastText,
-                              name:
-                                  AppList.listItemGroup[index].user.displayName,
-                              time: AppList.listItemGroup[index].lastTime,
+                                  AppList.listItem[index].user.avatarUrl,
+                              lastText: AppList.listItem[index].lastText,
+                              name: AppList.listItem[index].user.displayName,
+                              time: AppList.listItem[index].lastTime,
                             ),
                     );
                   },
-                  itemCount: AppList.listItemGroup.length,
+                  itemCount: AppList.listItem.length,
                 ),
               ),
             ],

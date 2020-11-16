@@ -19,7 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class TestNav extends StatefulWidget {
-  final titles = ['Home', 'Group', 'Chat'];
+  final titles = ['Home', 'Group', 'Broadcast'];
 
   final int currentIndex;
 
@@ -296,7 +296,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
             children: <Widget>[
               HomePage(),
               GroupPage(),
-              Broadcast(),
+              ChatPage(),
             ],
           ),
         ),
@@ -326,7 +326,7 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
             ),
             NavigationBarItem(
               iconData: 'assets/images/ic_chat.png',
-              label: 'Chat',
+              label: 'Broadcast',
             ),
           ],
         ),

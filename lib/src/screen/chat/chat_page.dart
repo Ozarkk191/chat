@@ -1,15 +1,11 @@
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
-import 'package:chat/models/chat_model.dart';
-
-import 'package:chat/models/user_model.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/broadcast/broadcast_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
-
-import 'chat_room_page.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -18,148 +14,65 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   Firestore _databaseReference = Firestore.instance;
-  List<String> _uidList = List<String>();
-  List<ChatModel> _chatList = List<ChatModel>();
-  List<UserModel> _userList = List<UserModel>();
+
+  List<GroupModel> _groupList = List<GroupModel>();
+  List<GroupModel> _itemList = List<GroupModel>();
   // var items = List<ChatModel>();
   // List<ShowListItem> _listItem = List<ShowListItem>();
 
-  _getAllUser() async {
+  void _getGroupID() async {
     await _databaseReference
-        .collection("Users")
+        .collection("Rooms")
+        .document("chats")
+        .collection("Group")
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
-        var allUser = UserModel.fromJson(value.data);
-        if (AppModel.user.roles != "${TypeStatus.USER}") {
-          if (allUser.roles == "${TypeStatus.USER}") {
-            _userList.add(allUser);
-            _uidList.add(value.documentID);
-            List<String> uidsList = [
-              value.documentID,
-              AppModel.user.uid,
-            ];
-            uidsList.sort();
-            String key = "${uidsList[0]}_${uidsList[1]}";
-            _getLastText(key, allUser);
-            // setState(() {});
-          }
-        } else {
-          if (allUser.roles != "${TypeStatus.USER}") {
-            _userList.add(allUser);
-            _uidList.add(value.documentID);
-            List<String> uidsList = [
-              value.documentID,
-              AppModel.user.uid,
-            ];
-            uidsList.sort();
-            String key = "${uidsList[0]}_${uidsList[1]}";
-            _getLastText(key, allUser);
-            // setState(() {});
-          }
-        }
+        _getGroup(value.documentID);
       });
     });
   }
 
-  _getLastText(String key, UserModel user) async {
-    String lastText = "";
-    String lastTime = "";
-    String checktime = "";
-
+  void _getGroup(String id) async {
     await _databaseReference
         .collection("Rooms")
         .document("chats")
-        .collection("ChatRoom")
-        .document(key)
-        .collection("messages")
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((value) {
-        var message = ChatMessage.fromJson(value.data);
-
-        if (message != null) {
-          if (message.text.isEmpty) {
-            lastText = "รูปภาพ";
-          } else {
-            lastText = message.text;
-          }
-
-          lastTime = DateTime.fromMillisecondsSinceEpoch(
-                  message.createdAt.millisecondsSinceEpoch)
-              .toString();
-          if (lastTime.isNotEmpty) {
-            checktime = lastTime.replaceAll(".", "");
-            checktime = checktime.replaceAll(" ", "");
-            checktime = checktime.replaceAll(":", "");
-            checktime = checktime.replaceAll("-", "");
-          } else {
-            checktime = "0";
-          }
-
-          var str = lastTime.split(" ");
-          var str2 = str[1].split(".");
-          str = str2[0].split(":");
-          lastTime = "${str[0]}:${str[1]} น.";
-        } else {
-          lastText = "";
-          lastTime = "00:00 น.";
-        }
-      });
-    }).then((value) {
-      var chat;
-      if (lastTime.isEmpty) {
-        chat = ChatModel(
-          checkTime: 0,
-          user: user,
-          lastText: lastText,
-          lastTime: lastTime,
-        );
-      } else {
-        chat = ChatModel(
-          checkTime: int.parse(checktime),
-          user: user,
-          lastText: lastText,
-          lastTime: lastTime,
-        );
-      }
-
-      _chatList.add(chat);
-      AppList.listItemUser.add(chat);
-      _chatList.sort((a, b) => b.checkTime.compareTo(a.checkTime));
-      AppList.listItemUser.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+        .collection("Group")
+        .document(id)
+        .get()
+        .then((value) {
+      GroupModel group = GroupModel.fromJson(value.data);
+      _groupList.add(group);
+      _itemList.add(group);
       setState(() {});
     });
   }
 
   void _filterSearchResults(String query) {
     if (query.isNotEmpty) {
-      List<ChatModel> dummyListData = List<ChatModel>();
-      _chatList.forEach((item) {
-        if (item.user.displayName.toLowerCase().contains(query.toLowerCase())) {
+      List<GroupModel> dummyListData = List<GroupModel>();
+      _groupList.forEach((item) {
+        if (item.nameGroup.toLowerCase().contains(query.toLowerCase())) {
           dummyListData.add(item);
         }
       });
       setState(() {
-        AppList.listItemUser.clear();
-        AppList.listItemUser.addAll(dummyListData);
+        _itemList.clear();
+        _itemList.addAll(dummyListData);
       });
       return;
     } else {
       setState(() {
-        AppList.listItemUser.clear();
-        AppList.listItemUser.addAll(_chatList);
+        _itemList.clear();
+        _itemList.addAll(_groupList);
       });
     }
   }
 
   @override
   void initState() {
-    if (AppBool.chatChange) {
-      AppBool.chatChange = false;
-      AppList.listItemUser.clear();
-      _getAllUser();
-    }
+    _itemList.clear();
+    _getGroupID();
 
     super.initState();
   }
@@ -198,36 +111,25 @@ class _ChatPageState extends State<ChatPage> {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
-                        // AppString.uidRoomChat = AppList.uidList[index];
-                        AppString.uidAdmin =
-                            AppList.listItemUser[index].user.uid;
-                        List<String> uidsList = [
-                          AppString.uidAdmin,
-                          AppModel.user.uid
-                        ];
-                        uidsList.sort();
-                        String test = "${uidsList[0]}_${uidsList[1]}";
-                        AppString.uidRoomChat = test;
-
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChatRoomPage(
-                              uid: AppString.uidAdmin,
-                              keyRoom: AppString.uidRoomChat,
+                            builder: (context) => Broadcast(
+                              group: _itemList[index],
+                              uidList: _itemList[index].memberUIDList,
                             ),
                           ),
                         );
                       },
                       child: ListChatItem(
-                        profileUrl: AppList.listItemUser[index].user.avatarUrl,
-                        lastText: AppList.listItemUser[index].lastText,
-                        name: AppList.listItemUser[index].user.displayName,
-                        time: AppList.listItemUser[index].lastTime,
+                        profileUrl: _itemList[index].avatarGroup,
+                        lastText: "คลิกเพื่อไปยังหน้าบอร์ดแคส",
+                        name: _itemList[index].nameGroup,
+                        time: "",
                       ),
                     );
                   },
-                  itemCount: AppList.listItemUser.length,
+                  itemCount: _itemList.length,
                 ),
               )
             ],
