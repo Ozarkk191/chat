@@ -4,7 +4,6 @@ import 'package:chat/models/group_model.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
-import 'package:chat/src/screen/broadcast/broadcast_page.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:chat/src/screen/chat/chat_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';

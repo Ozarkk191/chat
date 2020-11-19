@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/chat_model.dart';
@@ -20,6 +18,13 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   final _databaseReference = Firestore.instance;
   List<GroupModel> _groupList = List<GroupModel>();
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   _getGroupData() async {
     GroupModel group;
@@ -42,7 +47,9 @@ class _GroupPageState extends State<GroupPage> {
           _getText(group: group, memberList: group.memberUIDList);
           AppString.groupNameChoose = group.nameGroup;
 
-          setState(() {});
+          if (this.mounted) {
+            setState(() {});
+          }
         }
       });
     });
@@ -142,7 +149,9 @@ class _GroupPageState extends State<GroupPage> {
           _filterSearchResults(AppString.groupNameChoose);
         }
 
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       });
     }
   }
@@ -155,16 +164,20 @@ class _GroupPageState extends State<GroupPage> {
           dummyListData.add(item);
         }
       });
-      setState(() {
-        AppList.listItem.clear();
-        AppList.listItem.addAll(dummyListData);
-      });
+      if (this.mounted) {
+        setState(() {
+          AppList.listItem.clear();
+          AppList.listItem.addAll(dummyListData);
+        });
+      }
       return;
     } else {
-      setState(() {
-        AppList.listItem.clear();
-        AppList.listItem.addAll(AppList.listItemGroup);
-      });
+      if (this.mounted) {
+        setState(() {
+          AppList.listItem.clear();
+          AppList.listItem.addAll(AppList.listItemGroup);
+        });
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import 'package:chat/src/screen/login/login_page.dart';
 import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:chat/src/screen/navigator/user_nav_bottom.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -364,6 +365,14 @@ class _SplashPageState extends State<SplashPage> {
       var member =
           _memberList.where((element) => element == AppModel.user.uid).toList();
       if (member.length == 0) {
+        final ChatUser user = ChatUser(
+          name: group.nameGroup,
+          uid: group.groupID,
+          avatar: group.avatarGroup,
+        );
+        ChatMessage message = ChatMessage(
+            text: "${group.nameGroup} ยินดีต้อนรับ", user: user, image: null);
+
         _memberList.add(AppModel.user.uid);
         _databaseReference
             .collection("Rooms")
@@ -371,16 +380,27 @@ class _SplashPageState extends State<SplashPage> {
             .collection("Group")
             .document(groupID)
             .updateData({"memberUIDList": _memberList}).then((value) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatGroupPage(
-                groupName: group.nameGroup,
-                groupID: group.groupID,
-                id: group.id,
+          _databaseReference
+              .collection('Rooms')
+              .document('chats')
+              .collection('Group')
+              .document(group.groupID)
+              .collection(AppModel.user.uid)
+              .document(DateTime.now().millisecondsSinceEpoch.toString())
+              .setData(message.toJson())
+              .then((value) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatGroupPage(
+                  groupName: group.nameGroup,
+                  groupID: group.groupID,
+                  id: AppModel.user.uid,
+                  group: group,
+                ),
               ),
-            ),
-          );
+            );
+          });
         });
       } else {
         Navigator.pushReplacement(
@@ -389,7 +409,8 @@ class _SplashPageState extends State<SplashPage> {
             builder: (context) => ChatGroupPage(
               groupName: group.nameGroup,
               groupID: group.groupID,
-              id: group.id,
+              id: AppModel.user.uid,
+              group: group,
             ),
           ),
         );

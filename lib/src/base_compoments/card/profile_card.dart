@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class ProfileCard extends StatelessWidget {
   final double width;
   final double height;
+  final double elevation;
   final String profileUrl;
 
   const ProfileCard({
@@ -11,13 +12,14 @@ class ProfileCard extends StatelessWidget {
     this.width = 100,
     this.height = 100,
     @required this.profileUrl,
+    this.elevation = 8,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
-      elevation: 8,
+      elevation: elevation,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(100),

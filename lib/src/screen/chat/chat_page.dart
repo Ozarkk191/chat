@@ -20,6 +20,13 @@ class _ChatPageState extends State<ChatPage> {
   // var items = List<ChatModel>();
   // List<ShowListItem> _listItem = List<ShowListItem>();
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   void _getGroupID() async {
     await _databaseReference
         .collection("Rooms")
@@ -44,7 +51,9 @@ class _ChatPageState extends State<ChatPage> {
       GroupModel group = GroupModel.fromJson(value.data);
       _groupList.add(group);
       _itemList.add(group);
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -56,16 +65,20 @@ class _ChatPageState extends State<ChatPage> {
           dummyListData.add(item);
         }
       });
-      setState(() {
-        _itemList.clear();
-        _itemList.addAll(dummyListData);
-      });
+      if (this.mounted) {
+        setState(() {
+          _itemList.clear();
+          _itemList.addAll(dummyListData);
+        });
+      }
       return;
     } else {
-      setState(() {
-        _itemList.clear();
-        _itemList.addAll(_groupList);
-      });
+      if (this.mounted) {
+        setState(() {
+          _itemList.clear();
+          _itemList.addAll(_groupList);
+        });
+      }
     }
   }
 
@@ -111,7 +124,7 @@ class _ChatPageState extends State<ChatPage> {
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => Broadcast(

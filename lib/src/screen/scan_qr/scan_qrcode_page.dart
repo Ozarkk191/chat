@@ -2,6 +2,7 @@ import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -106,23 +107,42 @@ class _ScanQRcodePageState extends State<ScanQRcodePage> {
       var member =
           _memberList.where((element) => element == AppModel.user.uid).toList();
       if (member.length == 0) {
+        final ChatUser user = ChatUser(
+          name: group.nameGroup,
+          uid: group.groupID,
+          avatar: group.avatarGroup,
+        );
+        ChatMessage message = ChatMessage(
+            text: "${group.nameGroup} ยินดีต้อนรับ", user: user, image: null);
         _memberList.add(AppModel.user.uid);
+
         _databaseReference
             .collection("Rooms")
             .document("chats")
             .collection("Group")
             .document(groupID)
             .updateData({"memberUIDList": _memberList}).then((value) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatGroupPage(
-                groupName: group.nameGroup,
-                groupID: group.groupID,
-                id: group.id,
+          _databaseReference
+              .collection('Rooms')
+              .document('chats')
+              .collection('Group')
+              .document(group.groupID)
+              .collection(AppModel.user.uid)
+              .document(DateTime.now().millisecondsSinceEpoch.toString())
+              .setData(message.toJson())
+              .then((value) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatGroupPage(
+                  groupName: group.nameGroup,
+                  groupID: group.groupID,
+                  id: AppModel.user.uid,
+                  group: group,
+                ),
               ),
-            ),
-          );
+            );
+          });
         });
       } else {
         Navigator.pushReplacement(
@@ -131,7 +151,8 @@ class _ScanQRcodePageState extends State<ScanQRcodePage> {
             builder: (context) => ChatGroupPage(
               groupName: group.nameGroup,
               groupID: group.groupID,
-              id: group.id,
+              id: AppModel.user.uid,
+              group: group,
             ),
           ),
         );

@@ -21,28 +21,12 @@ class UserHomePage extends StatefulWidget {
 }
 
 class _UserHomePageState extends State<UserHomePage> {
-  // FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _databaseReference = Firestore.instance;
   List<NewsModel> _newsList = List<NewsModel>();
-  // List<bool> _newsActiveList = List<bool>();
   NewsModel news;
 
   bool uidMember = false;
   List<String> waittingList = List<String>();
-
-  // user() async {
-  //   FirebaseUser user = await _auth.currentUser();
-  //   if (user != null) {
-  //     AppModel.user.uid = user.uid;
-  //     await _databaseReference
-  //         .collection('Users')
-  //         .document(user.uid)
-  //         .get()
-  //         .then((value) {
-  //       AppModel.user = UserModel.fromJson(value.data);
-  //     });
-  //   }
-  // }
 
   _getGroup() async {
     AppList.groupList.clear();
@@ -94,7 +78,9 @@ class _UserHomePageState extends State<UserHomePage> {
         news.isActive = uidMember;
         _newsList.add(news);
         _newsList.sort((a, b) => a.timeCheck.compareTo(b.timeCheck));
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       });
     });
   }
@@ -114,7 +100,9 @@ class _UserHomePageState extends State<UserHomePage> {
     }).then((_) {
       if (uid.length != 0) {
         uidMember = true;
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       }
     });
   }
@@ -157,23 +145,23 @@ class _UserHomePageState extends State<UserHomePage> {
       }).then((value) {
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
-        // log(AppList.lastTimeList[0]);
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       });
     }
   }
 
-  // Future<String> _getRead(String key) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String read = prefs.getString(key);
-  //   return read ?? "";
-  // }
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    // user();
-    // getAllUser();
     if (AppBool.homeUserChange) {
       AppBool.homeUserChange = false;
       _getGroup();
@@ -267,6 +255,7 @@ class _UserHomePageState extends State<UserHomePage> {
                                                 .groupList[index].nameGroup,
                                             groupID: AppList.groupKey[index],
                                             id: AppModel.user.uid,
+                                            group: AppList.groupList[index],
                                           ),
                                         ),
                                       );
@@ -295,58 +284,10 @@ class _UserHomePageState extends State<UserHomePage> {
                 SizedBox(
                   height: 5,
                 ),
-                // _newsList.length != 0
-                //     ? TextAndLine(title: 'ข่าวสาร')
-                //     : Container(),
-                // SizedBox(
-                //   height: 5,
-                // ),
-                // _newsList.length != 0 || waittingList.length != 0
-                //     ? ListView.builder(
-                //         shrinkWrap: true,
-                //         physics: const NeverScrollableScrollPhysics(),
-                //         itemCount: _newsList.length,
-                //         itemBuilder: (BuildContext context, int index) {
-                //           return PromotionCard(
-                //             imageUrlGroup: _newsList[index].imageGroup,
-                //             imageUrlPromotion: _newsList[index].imageUrl,
-                //             nameGroup: _newsList[index].nameGroup,
-                //             status: _newsList[index].timePost,
-                //             description: _newsList[index].title,
-                //             keyGroup: _newsList[index].groupUID,
-                //             waitting: "null",
-                //             isActive: _newsList[index].isActive,
-                //             callback: () {
-                //               _databaseReference
-                //                   .collection("Rooms")
-                //                   .document("chats")
-                //                   .collection("Group")
-                //                   .document(_newsList[index].groupUID)
-                //                   .collection("Waitting")
-                //                   .document(AppModel.user.uid)
-                //                   .setData({"uid": AppModel.user.uid});
-                //               _dialogShowBack(
-                //                   title: "แจ้งเตือน",
-                //                   content:
-                //                       "คุณได้ส่งคำขอร้องเข้ากลุ่มเรียบร้อยแล้ว\nกำลังรอแอดมินอนุมัติ");
-                //               setState(() {});
-                //             },
-                //           );
-                //         },
-                //       )
-                //     : Container(),
               ],
             ),
           ),
-        )
-        // : Container(
-        //     width: MediaQuery.of(context).size.width,
-        //     height: MediaQuery.of(context).size.height,
-        //     child: Center(
-        //       child: CircularProgressIndicator(),
-        //     ),
-        //   ),
-        );
+        ));
   }
 
   Container buildMyProfile(

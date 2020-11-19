@@ -5,11 +5,15 @@ import 'package:chat/models/group_model.dart';
 import 'package:chat/models/request_body_parameters.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/repositories/post_repository.dart';
+import 'package:chat/src/base_compoments/card/profile_card.dart';
+import 'package:chat/src/screen/group/setting_group/setting_group_page.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:page_transition/page_transition.dart';
 
 class Broadcast extends StatefulWidget {
   final List<dynamic> uidList;
@@ -26,6 +30,7 @@ class _BroadcastState extends State<Broadcast> {
   final picker = ImagePicker();
   Firestore _databaseReference = Firestore.instance;
   List<String> _tokenList = List<String>();
+  List<UserModel> _userList = List<UserModel>();
   ChatUser user;
   TextEditingController _controller = TextEditingController();
 
@@ -55,7 +60,9 @@ class _BroadcastState extends State<Broadcast> {
           .then((value) {
         UserModel user = UserModel.fromJson(value.data);
         _tokenList.add(user.notiToken);
-        log("${user.notiToken}");
+        _userList.add(user);
+        log(_userList.length.toString());
+        setState(() {});
       });
     }
   }
@@ -157,7 +164,15 @@ class _BroadcastState extends State<Broadcast> {
         backgroundColor: Colors.black,
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              PageTransition(
+                type: PageTransitionType.fade,
+                child: TestNav(
+                  currentIndex: 2,
+                ),
+              ),
+            );
           },
           child: Icon(Icons.arrow_back_ios),
         ),
@@ -188,6 +203,103 @@ class _BroadcastState extends State<Broadcast> {
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: 20),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              height: 120,
+              child: Card(
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      ProfileCard(
+                        profileUrl: widget.group.avatarGroup,
+                        width: 70,
+                        height: 70,
+                        elevation: 10,
+                      ),
+                      SizedBox(width: 5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  "ชื่อกลุ่ม : ${widget.group.nameGroup}",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              "Group ID : ${widget.group.id}",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SettingGroupPage(
+                                    memberList: _userList,
+                                    groupName: widget.group.nameGroup,
+                                    groupId: widget.group.groupID,
+                                    id: widget.group.id,
+                                    group: widget.group,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Icon(Icons.settings_outlined),
+                          ),
+                          Text(
+                            "ตั้งค่ากลุ่ม",
+                            style: TextStyle(fontSize: 8),
+                          ),
+                          SizedBox(height: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SettingGroupPage(
+                                    memberList: _userList,
+                                    groupName: widget.group.nameGroup,
+                                    groupId: widget.group.groupID,
+                                    id: widget.group.id,
+                                    group: widget.group,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Icon(Icons.person_add_alt_1_sharp),
+                          ),
+                          Text(
+                            "เพิ่มแอดมิน",
+                            style: TextStyle(fontSize: 8),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Container(
               child: Row(
                 children: [

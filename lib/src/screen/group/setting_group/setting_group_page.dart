@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/card/icon_circle_card.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dart';
 import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
-import 'package:chat/src/screen/chat/chat_group_page.dart';
+import 'package:chat/src/screen/broadcast/broadcast_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +20,16 @@ class SettingGroupPage extends StatefulWidget {
   final String groupName;
   final String groupId;
   final String id;
+  final GroupModel group;
 
-  const SettingGroupPage(
-      {Key key, this.memberList, this.groupName, this.groupId, this.id})
-      : super(key: key);
+  const SettingGroupPage({
+    Key key,
+    this.memberList,
+    this.groupName,
+    this.groupId,
+    this.id,
+    this.group,
+  }) : super(key: key);
   @override
   _SettingGroupPageState createState() => _SettingGroupPageState();
 }
@@ -40,7 +45,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
   File _imageCover;
   final picker = ImagePicker();
   bool isLoading = false;
-  GroupModel _group;
+  String _id;
 
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -64,9 +69,10 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
     setState(() {
       isLoading = true;
     });
-
+    var date = DateTime.now().millisecondsSinceEpoch;
     final StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(AppString.uidRoomChat);
+        FirebaseStorage.instance.ref().child(date.toString());
+
     if (_image != null) {
       StorageUploadTask uploadTask = storageRef.putFile(
         File(_image.path),
@@ -90,64 +96,53 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
       _coverUrl = await download.ref.getDownloadURL();
     }
     var _documentReference = Firestore.instance;
+    var group = GroupModel(
+      adminList: widget.group.adminList,
+      avatarGroup: _profileUrl,
+      coverUrl: _coverUrl,
+      groupID: widget.group.groupID,
+      id: _id,
+      idCustom: widget.group.idCustom,
+      memberUIDList: widget.group.memberUIDList,
+      nameGroup: _nameGroup.text,
+      statusGroup: _statusGroup,
+    );
     await _documentReference
         .collection('Rooms')
         .document("chats")
         .collection('Group')
-        .document(widget.groupId)
-        .updateData({
-      "nameGroup": _nameGroup.text,
-      "statusGroup": _statusGroup,
-      "avatarGroup": _profileUrl,
-      "coverUrl": _coverUrl,
-      "id": _idController.text
-    }).then((_) {
-      AppModel.group.nameGroup = _nameGroup.text;
-      AppModel.group.avatarGroup = _profileUrl;
-      AppModel.group.statusGroup = _statusGroup;
-      AppModel.group.id = _idController.text;
+        .document(widget.group.groupID)
+        .setData(group.toJson())
+        .then((_) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ChatGroupPage(
-            groupName: widget.groupName,
-            groupID: AppString.uidRoomChat,
-            id: _idController.text,
+          builder: (context) => Broadcast(
+            group: group,
+            uidList: widget.group.memberUIDList,
           ),
         ),
       );
-    });
-  }
-
-  _getGroupData() async {
-    final _databaseReference = Firestore.instance;
-
-    await _databaseReference
-        .collection('Rooms')
-        .document("chats")
-        .collection('Group')
-        .document(widget.groupId)
-        .get()
-        .then((value) {
-      _group = GroupModel.fromJson(value.data);
-      _coverUrl = _group.coverUrl;
-      _profileUrl = _group.avatarGroup;
-      _idController.text = _group.id;
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
   @override
   void initState() {
-    _profileUrl = AppModel.group.avatarGroup;
-    _nameGroup.text = AppModel.group.nameGroup;
-    _statusGroup = AppModel.group.statusGroup;
+    _profileUrl = widget.group.avatarGroup;
+    _nameGroup.text = widget.group.nameGroup;
+    _statusGroup = widget.group.statusGroup;
+    _coverUrl = widget.group.coverUrl;
+    _idController.text = widget.group.id;
+    _id = widget.group.id;
     if (_statusGroup == "public") {
       position = 0;
     } else {
       position = 1;
     }
-    _getGroupData();
+
     super.initState();
   }
 
@@ -172,10 +167,9 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatGroupPage(
-                      groupName: widget.groupName,
-                      groupID: widget.groupId,
-                      id: widget.id,
+                    builder: (context) => Broadcast(
+                      group: widget.group,
+                      uidList: widget.group.memberUIDList,
                     ),
                   ),
                 );
@@ -233,16 +227,22 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                           width: 150,
                           child: TextField(
                             textAlign: TextAlign.center,
-                            maxLength: 12,
+                            maxLength: 6,
+                            keyboardType: TextInputType.number,
                             buildCounter: (BuildContext context,
                                     {int currentLength,
                                     int maxLength,
                                     bool isFocused}) =>
                                 null,
                             style: TextStyle(color: Colors.white),
+                            onChanged: (val) {
+                              setState(() {
+                                _id = val;
+                              });
+                            },
                             controller: _idController,
                             decoration: InputDecoration(
-                              hintText: "id_group",
+                              hintText: "id group",
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.white),
                               ),
@@ -355,7 +355,7 @@ class _SettingGroupPageState extends State<SettingGroupPage> {
                           Container(
                             child: ToggleSwitch(
                               minWidth: 50,
-                              initialLabelIndex: 0,
+                              initialLabelIndex: position,
                               activeBgColor: Colors.redAccent,
                               activeTextColor: Colors.white,
                               inactiveBgColor: Colors.white,

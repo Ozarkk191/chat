@@ -4,7 +4,7 @@ import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
-import 'package:chat/src/screen/group/group_page.dart';
+import 'package:chat/src/screen/group/user_group_page.dart';
 import 'package:chat/src/screen/home/user_home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -213,7 +213,7 @@ class _UserNavBottomState extends State<UserNavBottom>
             controller: _pageController,
             children: <Widget>[
               UserHomePage(),
-              GroupPage(),
+              UserGruopPage(),
               // ChatPage(),
             ],
             onPageChanged: (index) {

@@ -11,7 +11,8 @@ class MenuSettings {
   static const String member = 'สมาชิกทั้งหมด';
   static const String settingGroup = 'ตั้งค่ากลุ่ม';
   static const String post = 'โพสต์ข่าว';
-  static const List<String> menuList = [invite, member];
+  static const String gallery = 'ดูรูปภาพ';
+  static const List<String> menuList = [invite, gallery];
   static const List<String> menuList2 = [invite, member, settingGroup, post];
 
   static const String muted = 'ปิดการแจ้งเตือน';
