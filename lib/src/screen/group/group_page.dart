@@ -224,7 +224,7 @@ class _GroupPageState extends State<GroupPage> {
                 ),
         ],
         backgroundColor: Colors.black,
-        title: Text('แชทกลุ่ม'),
+        title: Text('แชท'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
