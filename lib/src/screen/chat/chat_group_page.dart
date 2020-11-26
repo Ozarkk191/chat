@@ -51,11 +51,18 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   List<Asset> images = List<Asset>();
   List<File> files = List<File>();
   ChatUser admin;
+
   TextEditingController _searchController = TextEditingController();
 
   List<ChatMessage> messages = List<ChatMessage>();
   List<ChatMessage> _itemList = List<ChatMessage>();
   var m = List<ChatMessage>();
+
+  final ChatUser user = ChatUser(
+    name: AppModel.user.displayName,
+    uid: AppModel.user.uid,
+    avatar: AppModel.user.avatarUrl,
+  );
 
   var i = 0;
   var member;
@@ -92,30 +99,30 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     }
   }
 
-  void _filterSearchResults(String query) {
-    if (query.isNotEmpty) {
-      List<ChatMessage> dummyListData = List<ChatMessage>();
-      messages.forEach((item) {
-        if (item.text.toLowerCase().contains(query.toLowerCase())) {
-          dummyListData.add(item);
-        }
-      });
-      if (this.mounted) {
-        setState(() {
-          _itemList.clear();
-          _itemList.addAll(dummyListData);
-        });
-      }
-      return;
-    } else {
-      if (this.mounted) {
-        setState(() {
-          _itemList.clear();
-          _itemList.addAll(messages);
-        });
-      }
-    }
-  }
+  // void _filterSearchResults(String query) {
+  //   if (query.isNotEmpty) {
+  //     List<ChatMessage> dummyListData = List<ChatMessage>();
+  //     messages.forEach((item) {
+  //       if (item.text.toLowerCase().contains(query.toLowerCase())) {
+  //         dummyListData.add(item);
+  //       }
+  //     });
+  //     if (this.mounted) {
+  //       setState(() {
+  //         _itemList.clear();
+  //         _itemList.addAll(dummyListData);
+  //       });
+  //     }
+  //     return;
+  //   } else {
+  //     if (this.mounted) {
+  //       setState(() {
+  //         _itemList.clear();
+  //         _itemList.addAll(messages);
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
@@ -185,13 +192,21 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
     }
   }
 
-  void _saveRead(String value) async {
+  void _saveRead(int value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(AppString.uidRoomChat, value);
+    if (AppModel.user.roles == TypeStatus.USER.toString()) {
+      prefs.setInt("${widget.groupID}_${AppModel.user.uid}", value);
+    } else {
+      prefs.setInt(
+          "${widget.groupID}_${widget.id}_${AppModel.user.uid}", value);
+    }
   }
 
   void _upLoadPic(String url) async {
-    ChatMessage message = ChatMessage(text: "", user: admin, image: url);
+    ChatMessage message = ChatMessage(
+        text: "",
+        user: AppModel.user.roles == TypeStatus.USER.toString() ? user : admin,
+        image: url);
     for (var i = 0; i < _tokenList.length; i++) {
       _sendNotification(message.text, _tokenList[i]);
     }
@@ -232,47 +247,47 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
       backgroundColor: Color(0xff292929),
       appBar: AppBar(
         actions: <Widget>[
-          PopupMenuButton<String>(
-            color: Colors.transparent,
-            child: Icon(Icons.search),
-            onSelected: (value) {},
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                child: Container(
-                  width: 250,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(50),
-                      ),
-                      color: Colors.white),
-                  child: TextField(
-                    onChanged: (val) {
-                      _filterSearchResults(val);
-                    },
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      hintText: "ค้นหา",
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          Navigator.pop(context);
-                          FocusScope.of(context).requestFocus(FocusNode());
-                        },
-                        icon: Icon(Icons.clear),
-                      ),
-                      contentPadding: EdgeInsets.only(
-                          left: 15, bottom: 0, top: 11, right: 15),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // PopupMenuButton<String>(
+          //   color: Colors.transparent,
+          //   child: Icon(Icons.search),
+          //   onSelected: (value) {},
+          //   itemBuilder: (context) => [
+          //     PopupMenuItem(
+          //       child: Container(
+          //         width: 250,
+          //         decoration: BoxDecoration(
+          //             borderRadius: BorderRadius.all(
+          //               Radius.circular(50),
+          //             ),
+          //             color: Colors.white),
+          //         child: TextField(
+          //           onChanged: (val) {
+          //             _filterSearchResults(val);
+          //           },
+          //           controller: _searchController,
+          //           decoration: InputDecoration(
+          //             border: InputBorder.none,
+          //             focusedBorder: InputBorder.none,
+          //             enabledBorder: InputBorder.none,
+          //             errorBorder: InputBorder.none,
+          //             disabledBorder: InputBorder.none,
+          //             hintText: "ค้นหา",
+          //             suffixIcon: IconButton(
+          //               onPressed: () {
+          //                 _searchController.clear();
+          //                 Navigator.pop(context);
+          //                 FocusScope.of(context).requestFocus(FocusNode());
+          //               },
+          //               icon: Icon(Icons.clear),
+          //             ),
+          //             contentPadding: EdgeInsets.only(
+          //                 left: 15, bottom: 0, top: 11, right: 15),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           PopupMenuButton<String>(
             color: Color(0xff202020),
             onSelected: (value) {
@@ -297,7 +312,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
           onTap: () {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
               AppBool.groupChange = true;
+              AppBool.chatChange = true;
               AppBool.homeUserChange = true;
+              AppList.listItemUser.clear();
               Navigator.pushReplacement(
                 context,
                 PageTransition(
@@ -309,7 +326,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               );
             } else {
               AppBool.groupChange = true;
+              AppBool.chatChange = true;
               AppBool.homeAdminChange = true;
+              AppList.boradcastList.clear();
               Navigator.pushReplacement(
                 context,
                 PageTransition(
@@ -348,7 +367,10 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                     items.map((i) => ChatMessage.fromJson(i.data)).toList();
                 _itemList =
                     items.map((i) => ChatMessage.fromJson(i.data)).toList();
-                _saveRead(messages[messages.length - 1].createdAt.toString());
+
+                var length = messages.length;
+
+                _saveRead(length);
 
                 return Stack(
                   children: [
@@ -356,7 +378,9 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                       key: _chatViewKey,
                       inverted: false,
                       onSend: onSend,
-                      user: admin,
+                      user: AppModel.user.roles == TypeStatus.USER.toString()
+                          ? user
+                          : admin,
                       inputDecoration:
                           InputDecoration.collapsed(hintText: "ข้อความ"),
                       dateFormat: DateFormat('yyyy-MMM-dd'),
@@ -388,25 +412,11 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                           );
                         },
                         child: Container(
-                          color: Colors.transparent,
                           child: CachedNetworkImage(
                             imageUrl: chatMessage.image,
                           ),
-                          // Image.network(chatMessage.image),
                         ),
                       ),
-                      // onLongPressMessage: (ChatMessage chatMessage) {
-                      //   if (chatMessage.text == "") {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute(
-                      //         builder: (contaxt) => ShowImagePage(
-                      //           imageUrl: chatMessage.image,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   }
-                      // },
                       onLoadEarlier: () {
                         // print("laoding...");
                       },

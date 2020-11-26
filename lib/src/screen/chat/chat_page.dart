@@ -1,5 +1,4 @@
 import 'package:chat/app_strings/menu_settings.dart';
-import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_chat_time_item.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
@@ -16,9 +15,7 @@ class _ChatPageState extends State<ChatPage> {
   Firestore _databaseReference = Firestore.instance;
 
   List<GroupModel> _groupList = List<GroupModel>();
-  List<GroupModel> _itemList = List<GroupModel>();
-  // var items = List<ChatModel>();
-  // List<ShowListItem> _listItem = List<ShowListItem>();
+  // List<GroupModel> _itemList = List<GroupModel>();
 
   @override
   void setState(fn) {
@@ -35,25 +32,13 @@ class _ChatPageState extends State<ChatPage> {
         .getDocuments()
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
-        _getGroup(value.documentID);
+        GroupModel group = GroupModel.fromJson(value.data);
+        _groupList.add(group);
+        AppList.boradcastList.add(group);
+        if (this.mounted) {
+          setState(() {});
+        }
       });
-    });
-  }
-
-  void _getGroup(String id) async {
-    await _databaseReference
-        .collection("Rooms")
-        .document("chats")
-        .collection("Group")
-        .document(id)
-        .get()
-        .then((value) {
-      GroupModel group = GroupModel.fromJson(value.data);
-      _groupList.add(group);
-      _itemList.add(group);
-      if (this.mounted) {
-        setState(() {});
-      }
     });
   }
 
@@ -67,16 +52,16 @@ class _ChatPageState extends State<ChatPage> {
       });
       if (this.mounted) {
         setState(() {
-          _itemList.clear();
-          _itemList.addAll(dummyListData);
+          AppList.boradcastList.clear();
+          AppList.boradcastList.addAll(dummyListData);
         });
       }
       return;
     } else {
       if (this.mounted) {
         setState(() {
-          _itemList.clear();
-          _itemList.addAll(_groupList);
+          AppList.boradcastList.clear();
+          AppList.boradcastList.addAll(_groupList);
         });
       }
     }
@@ -84,9 +69,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void initState() {
-    _itemList.clear();
-    _getGroupID();
-
+    if (AppBool.chatChange) {
+      AppList.boradcastList.clear();
+      _getGroupID();
+      AppBool.chatChange = false;
+    }
     super.initState();
   }
 
@@ -97,9 +84,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         leading: Container(),
         backgroundColor: Colors.black,
-        title: AppModel.user.roles == "${TypeStatus.USER}"
-            ? Text('แชทกับแอดมิน')
-            : Text('แชทกับลูกค้า'),
+        title: Text('Broadcast'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -128,21 +113,23 @@ class _ChatPageState extends State<ChatPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Broadcast(
-                              group: _itemList[index],
-                              uidList: _itemList[index].memberUIDList,
+                              group: AppList.boradcastList[index],
+                              uidList:
+                                  AppList.boradcastList[index].memberUIDList,
                             ),
                           ),
                         );
                       },
                       child: ListChatItem(
-                        profileUrl: _itemList[index].avatarGroup,
+                        profileUrl: AppList.boradcastList[index].avatarGroup,
                         lastText: "คลิกเพื่อไปยังหน้าบอร์ดแคส",
-                        name: _itemList[index].nameGroup,
+                        name: AppList.boradcastList[index].nameGroup,
                         time: "",
+                        unRead: "0",
                       ),
                     );
                   },
-                  itemCount: _itemList.length,
+                  itemCount: AppList.boradcastList.length,
                 ),
               )
             ],

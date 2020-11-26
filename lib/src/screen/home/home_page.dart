@@ -13,6 +13,7 @@ import 'package:chat/src/base_compoments/group_item/list_user_item.dart';
 import 'package:chat/src/base_compoments/text/text_and_line.dart';
 import 'package:chat/src/base_compoments/text/text_and_line_edit.dart';
 import 'package:chat/src/base_compoments/textfield/search_textfield.dart';
+import 'package:chat/src/screen/broadcast/broadcast_page.dart';
 import 'package:chat/src/screen/chat/chat_room_page.dart';
 import 'package:chat/src/screen/search/search_page.dart';
 import 'package:chat/src/screen/settingpage/add_admin_page/add_admin_page.dart';
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
     }).then((value) {});
   }
 
-  _getGroup() async {
+  Future<List<GroupModel>> _getGroup() async {
     AppList.groupList.clear();
     AppList.groupKey.clear();
     AppList.groupAllList.clear();
@@ -106,20 +107,17 @@ class _HomePageState extends State<HomePage> {
         if (uid.length != 0) {
           AppList.groupKey.add(value.documentID);
           AppList.groupList.add(_group);
+          return AppList.groupList;
         }
       });
-    }).then((value) {
-      // _getLastText();
-      // setState(() {});
     });
+    return AppList.groupList;
   }
 
-  _getAllUser() async {
+  Future<List<UserModel>> _getAllUser() async {
     AppList.userList.clear();
     AppList.uidList.clear();
     AppList.allUserList.clear();
-    AppList.lastTextList.clear();
-    AppList.lastTimeList.clear();
     await _databaseReference
         .collection("Users")
         .getDocuments()
@@ -132,15 +130,16 @@ class _HomePageState extends State<HomePage> {
           if (allUser.roles == "${TypeStatus.USER}") {
             AppList.userList.add(allUser);
             AppList.uidList.add(value.documentID);
+            return AppList.userList;
           }
         }
       });
-    }).then((value) => setState(() {}));
+    });
+    return AppList.userList;
   }
 
   _getWaitting(String id) async {
     List<String> uidList = List<String>();
-
     await _databaseReference
         .collection("Rooms")
         .document("chats")
@@ -388,7 +387,7 @@ class _HomePageState extends State<HomePage> {
                                         onTap: () {
                                           GroupDialogHelper.adminDialog(
                                             context: context,
-                                            titleLeft: 'Group',
+                                            titleLeft: 'Broadcast',
                                             pathIconLeft:
                                                 'assets/images/ic_group.png',
                                             groupName: AppList
@@ -404,22 +403,19 @@ class _HomePageState extends State<HomePage> {
                                                 .groupList[index].statusGroup,
                                             callbackItem1: () {
                                               Navigator.pop(context);
-                                              // Navigator.push(
-                                              //   context,
-                                              // MaterialPageRoute(
-                                              //   builder: (context) =>
-                                              //       ChatGroupPage(
-                                              //     groupName: AppList
-                                              //         .groupList[index]
-                                              //         .nameGroup,
-                                              //     groupID:
-                                              //         AppList.groupKey[index],
-                                              //     id: AppList
-                                              //         .groupList[index].id,
-                                              //   ),
-                                              // ),
-                                              //
-                                              // );
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Broadcast(
+                                                    group: AppList
+                                                        .groupList[index],
+                                                    uidList: AppList
+                                                        .groupList[index]
+                                                        .memberUIDList,
+                                                  ),
+                                                ),
+                                              );
                                             },
                                           );
                                         },
@@ -464,76 +460,100 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(
                           height: 5,
                         ),
-                        Container(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              return InkWell(
-                                onTap: () {
-                                  DialogHelper.adminDialog(
-                                    context: context,
-                                    title2: !AppList.userList[index].banned
-                                        ? "แบน"
-                                        : "ปลดแบน",
-                                    profileUrl:
-                                        AppList.userList[index].avatarUrl,
-                                    username:
-                                        AppList.userList[index].displayName,
-                                    coverUrl: AppList.userList[index].coverUrl,
-                                    callbackItem1: () {
-                                      Navigator.pop(context);
-                                      List<String> uidsList = [
-                                        AppList.userList[index].uid,
-                                        AppModel.user.uid
-                                      ];
-                                      uidsList.sort();
-                                      String keyRoom =
-                                          "${uidsList[0]}_${uidsList[1]}";
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatRoomPage(
-                                            keyRoom: keyRoom,
-                                            uid: AppList.userList[index].uid,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    callbackItem2: () {
-                                      Navigator.pop(context);
-                                      if (AppList.userList[index].banned) {
-                                        _dialogShow(
-                                            title: "แจ้งเตือน",
-                                            content:
-                                                "คุณต้องการปลดแบน ${AppList.userList[index].displayName} หรือไม่",
-                                            index: index,
-                                            uid: AppList.userList[index].uid,
-                                            status: "user");
-                                      } else {
-                                        _dialogShow(
-                                            title: "แจ้งเตือน",
-                                            content:
-                                                "คุณต้องการแบน ${AppList.userList[index].displayName} ออกจากระบบหรือไม่",
-                                            index: index,
-                                            uid: AppList.userList[index].uid,
-                                            status: "user");
-                                      }
-                                    },
-                                  );
-                                },
-                                child: ListUserItem(
-                                  profileUrl: AppList.userList[index].avatarUrl,
-                                  userName: AppList.userList[index].banned
-                                      ? "${AppList.userList[index].displayName}(ถูกแบน)"
-                                      : AppList.userList[index].displayName,
-                                  banned: AppList.userList[index].banned,
-                                  callback: () {},
+                        FutureBuilder(
+                          future: _getAllUser(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData) {
+                              return Container(
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return InkWell(
+                                      onTap: () {
+                                        DialogHelper.adminDialog(
+                                          context: context,
+                                          title2:
+                                              !AppList.userList[index].banned
+                                                  ? "แบน"
+                                                  : "ปลดแบน",
+                                          profileUrl:
+                                              AppList.userList[index].avatarUrl,
+                                          username: AppList
+                                              .userList[index].displayName,
+                                          coverUrl:
+                                              AppList.userList[index].coverUrl,
+                                          callbackItem1: () {
+                                            Navigator.pop(context);
+                                            List<String> uidsList = [
+                                              AppList.userList[index].uid,
+                                              AppModel.user.uid
+                                            ];
+                                            uidsList.sort();
+                                            String keyRoom =
+                                                "${uidsList[0]}_${uidsList[1]}";
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ChatRoomPage(
+                                                  keyRoom: keyRoom,
+                                                  uid: AppList
+                                                      .userList[index].uid,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          callbackItem2: () {
+                                            Navigator.pop(context);
+                                            if (AppList
+                                                .userList[index].banned) {
+                                              _dialogShow(
+                                                  title: "แจ้งเตือน",
+                                                  content:
+                                                      "คุณต้องการปลดแบน ${AppList.userList[index].displayName} หรือไม่",
+                                                  index: index,
+                                                  uid: AppList
+                                                      .userList[index].uid,
+                                                  status: "user");
+                                            } else {
+                                              _dialogShow(
+                                                  title: "แจ้งเตือน",
+                                                  content:
+                                                      "คุณต้องการแบน ${AppList.userList[index].displayName} ออกจากระบบหรือไม่",
+                                                  index: index,
+                                                  uid: AppList
+                                                      .userList[index].uid,
+                                                  status: "user");
+                                            }
+                                          },
+                                        );
+                                      },
+                                      child: ListUserItem(
+                                        profileUrl:
+                                            AppList.userList[index].avatarUrl,
+                                        userName: AppList.userList[index].banned
+                                            ? "${AppList.userList[index].displayName}(ถูกแบน)"
+                                            : AppList
+                                                .userList[index].displayName,
+                                        banned: AppList.userList[index].banned,
+                                        callback: () {},
+                                      ),
+                                    );
+                                  },
+                                  itemCount: AppList.userList.length,
                                 ),
                               );
-                            },
-                            itemCount: AppList.userList.length,
-                          ),
+                            } else {
+                              return Container(
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),

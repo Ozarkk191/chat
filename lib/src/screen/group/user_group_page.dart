@@ -8,6 +8,7 @@ import 'package:chat/src/screen/chat/chat_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserGruopPage extends StatefulWidget {
   @override
@@ -17,7 +18,6 @@ class UserGruopPage extends StatefulWidget {
 class _UserGruopPageState extends State<UserGruopPage> {
   final _databaseReference = Firestore.instance;
   List<GroupModel> _groupList = List<GroupModel>();
-  List<ChatModel> _itemList = List<ChatModel>();
   List<ChatModel> _itemGroupList = List<ChatModel>();
 
   @override
@@ -51,6 +51,12 @@ class _UserGruopPageState extends State<UserGruopPage> {
     });
   }
 
+  Future<int> _getOldMessage(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int old = prefs.getInt(key) ?? 0;
+    return old;
+  }
+
   _getText({GroupModel group}) async {
     ChatMessage message;
     UserModel user;
@@ -59,6 +65,8 @@ class _UserGruopPageState extends State<UserGruopPage> {
     String lastTime = "";
     String lastText = "";
     String checktime = "";
+    List<ChatMessage> _messageList = List<ChatMessage>();
+    int number = await _getOldMessage("${group.groupID}_${AppModel.user.uid}");
 
     await _databaseReference
         .collection('Users')
@@ -77,6 +85,8 @@ class _UserGruopPageState extends State<UserGruopPage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         message = ChatMessage.fromJson(value.data);
+        _messageList.add(message);
+
         if (message != null) {
           if (message.text.isEmpty) {
             if (message.user.uid == AppModel.user.uid) {
@@ -111,6 +121,8 @@ class _UserGruopPageState extends State<UserGruopPage> {
       });
     }).then((value) {
       ChatModel chat;
+      int count = _messageList.length - number;
+
       if (lastTime.isEmpty) {
         chat = ChatModel(
           checkTime: 0,
@@ -118,6 +130,7 @@ class _UserGruopPageState extends State<UserGruopPage> {
           lastText: lastText,
           lastTime: lastTime,
           group: group,
+          unRead: 0,
         );
       } else {
         chat = ChatModel(
@@ -126,14 +139,15 @@ class _UserGruopPageState extends State<UserGruopPage> {
           lastText: lastText,
           lastTime: lastTime,
           group: group,
+          unRead: count,
         );
       }
 
       if (AppModel.user.uid == chat.user.uid) {
         _itemGroupList.add(chat);
         _itemGroupList.sort((a, b) => b.checkTime.compareTo(a.checkTime));
-        _itemList.add(chat);
-        _itemList.sort((a, b) => b.checkTime.compareTo(a.checkTime));
+        AppList.listItemUser.add(chat);
+        AppList.listItemUser.sort((a, b) => b.checkTime.compareTo(a.checkTime));
       }
 
       if (this.mounted) {
@@ -152,16 +166,16 @@ class _UserGruopPageState extends State<UserGruopPage> {
       });
       if (this.mounted) {
         setState(() {
-          _itemList.clear();
-          _itemList.addAll(dummyListData);
+          AppList.listItemUser.clear();
+          AppList.listItemUser.addAll(dummyListData);
         });
       }
       return;
     } else {
       if (this.mounted) {
         setState(() {
-          _itemList.clear();
-          _itemList.addAll(_itemGroupList);
+          AppList.listItemUser.clear();
+          AppList.listItemUser.addAll(_itemGroupList);
         });
       }
     }
@@ -169,7 +183,11 @@ class _UserGruopPageState extends State<UserGruopPage> {
 
   @override
   void initState() {
-    _getGroupData();
+    if (AppBool.chatChange) {
+      AppBool.chatChange = false;
+      AppList.listItemUser.clear();
+      _getGroupData();
+    }
     super.initState();
   }
 
@@ -208,22 +226,26 @@ class _UserGruopPageState extends State<UserGruopPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ChatGroupPage(
-                                groupName: _itemList[index].group.nameGroup,
-                                groupID: _itemList[index].group.groupID,
+                                groupName:
+                                    AppList.listItemUser[index].group.nameGroup,
+                                groupID:
+                                    AppList.listItemUser[index].group.groupID,
                                 id: AppModel.user.uid,
-                                group: _itemList[index].group,
+                                group: AppList.listItemUser[index].group,
                               ),
                             ),
                           );
                         },
                         child: ListChatItem(
-                          profileUrl: _itemList[index].group.avatarGroup,
-                          lastText: _itemList[index].lastText,
-                          name: _itemList[index].group.nameGroup,
-                          time: _itemList[index].lastTime,
+                          profileUrl:
+                              AppList.listItemUser[index].group.avatarGroup,
+                          lastText: AppList.listItemUser[index].lastText,
+                          name: AppList.listItemUser[index].group.nameGroup,
+                          time: AppList.listItemUser[index].lastTime,
+                          unRead: AppList.listItemUser[index].unRead.toString(),
                         ));
                   },
-                  itemCount: _itemList.length,
+                  itemCount: AppList.listItemUser.length,
                 ),
               ),
             ],

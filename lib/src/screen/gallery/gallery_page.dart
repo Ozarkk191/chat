@@ -14,16 +14,16 @@ class _GalleryPageState extends State<GalleryPage> {
   List<String> _imageList = List<String>();
   @override
   void initState() {
+    getImage();
     super.initState();
   }
 
-  Future<bool> getImage() async {
+  getImage() async {
     for (var i = 0; i < widget.message.length; i++) {
       if (widget.message[i].image != null) {
         _imageList.add(widget.message[i].image);
       }
     }
-    return true;
   }
 
   @override
@@ -41,11 +41,8 @@ class _GalleryPageState extends State<GalleryPage> {
           child: Icon(Icons.arrow_back_ios_outlined),
         ),
       ),
-      body: FutureBuilder(
-        future: getImage(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasData) {
-            return Container(
+      body: _imageList.length != 0
+          ? Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: Expanded(
@@ -81,14 +78,13 @@ class _GalleryPageState extends State<GalleryPage> {
                   ),
                 ),
               ),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+            )
+          : Center(
+              child: Text(
+                "ไม่มีรูปภาพ",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
     );
   }
 }

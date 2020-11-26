@@ -1,8 +1,10 @@
+import 'package:badges/badges.dart';
 import 'package:chat/src/base_compoments/card/profile_card.dart';
 import 'package:flutter/material.dart';
 
 class ListChatItem extends StatelessWidget {
   final String profileUrl, name, time, lastText;
+  final String unRead;
 
   const ListChatItem({
     Key key,
@@ -10,6 +12,7 @@ class ListChatItem extends StatelessWidget {
     @required this.name,
     @required this.time,
     @required this.lastText,
+    @required this.unRead,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -45,20 +48,22 @@ class ListChatItem extends StatelessWidget {
             width: 70,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
                   '$time',
                   style: TextStyle(color: Colors.grey),
                 ),
-                Container(),
-                // Badge(
-                //   badgeColor: Color(0xff00CB00),
-                //   shape: BadgeShape.circle,
-                //   borderRadius: 10,
-                //   toAnimate: false,
-                //   badgeContent: Text('1',
-                //       style: TextStyle(color: Colors.white, fontSize: 12)),
-                // ),
+                unRead != "0"
+                    ? Badge(
+                        badgeColor: Color(0xff00CB00),
+                        shape: BadgeShape.circle,
+                        toAnimate: false,
+                        badgeContent: Text(unRead,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 12)),
+                      )
+                    : Container(),
               ],
             ),
           ),

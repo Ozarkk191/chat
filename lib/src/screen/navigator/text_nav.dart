@@ -320,11 +320,11 @@ class _TestNavState extends State<TestNav> with WidgetsBindingObserver {
               label: 'Home',
             ),
             NavigationBarItem(
-              iconData: 'assets/images/ic_group.png',
-              label: 'Group',
+              iconData: 'assets/images/ic_chat.png',
+              label: 'Chat',
             ),
             NavigationBarItem(
-              iconData: 'assets/images/ic_chat.png',
+              iconData: 'assets/images/ic_group.png',
               label: 'Broadcast',
             ),
           ],

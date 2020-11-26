@@ -9,6 +9,7 @@ import 'package:chat/src/screen/group/create_group/create_group_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GroupPage extends StatefulWidget {
   @override
@@ -63,7 +64,11 @@ class _GroupPageState extends State<GroupPage> {
     String lastTime = "";
     String lastText = "";
     String checktime = "";
+    List<ChatMessage> _messageList = List<ChatMessage>();
     for (var i = 0; i <= memberList.length; i++) {
+      _messageList.clear();
+      int number = await _getOldMessage(
+          "${group.groupID}_${memberList[i]}_${AppModel.user.uid}");
       await _databaseReference
           .collection('Users')
           .document(memberList[i])
@@ -81,6 +86,7 @@ class _GroupPageState extends State<GroupPage> {
           .then((QuerySnapshot snapshot) {
         snapshot.documents.forEach((value) {
           message = ChatMessage.fromJson(value.data);
+          _messageList.add(message);
           if (message != null) {
             if (message.text.isEmpty) {
               if (message.user.uid == AppModel.user.uid) {
@@ -115,22 +121,23 @@ class _GroupPageState extends State<GroupPage> {
         });
       }).then((value) {
         ChatModel chat;
+        int count = _messageList.length - number;
         if (lastTime.isEmpty) {
           chat = ChatModel(
-            checkTime: 0,
-            user: user,
-            lastText: lastText,
-            lastTime: lastTime,
-            group: group,
-          );
+              checkTime: 0,
+              user: user,
+              lastText: lastText,
+              lastTime: lastTime,
+              group: group,
+              unRead: count);
         } else {
           chat = ChatModel(
-            checkTime: int.parse(checktime),
-            user: user,
-            lastText: lastText,
-            lastTime: lastTime,
-            group: group,
-          );
+              checkTime: int.parse(checktime),
+              user: user,
+              lastText: lastText,
+              lastTime: lastTime,
+              group: group,
+              unRead: count);
         }
         if (AppModel.user.roles == "${TypeStatus.USER}") {
           if (AppModel.user.uid == chat.user.uid) {
@@ -179,6 +186,12 @@ class _GroupPageState extends State<GroupPage> {
         });
       }
     }
+  }
+
+  Future<int> _getOldMessage(String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int old = prefs.getInt(key) ?? 0;
+    return old;
   }
 
   @override
@@ -309,21 +322,13 @@ class _GroupPageState extends State<GroupPage> {
                           ),
                         );
                       },
-                      child: AppModel.user.roles == "${TypeStatus.USER}"
-                          ? ListChatItem(
-                              profileUrl:
-                                  AppList.listItem[index].group.avatarGroup,
-                              lastText: AppList.listItem[index].lastText,
-                              name: AppList.listItem[index].group.nameGroup,
-                              time: AppList.listItem[index].lastTime,
-                            )
-                          : ListChatItem(
-                              profileUrl:
-                                  AppList.listItem[index].user.avatarUrl,
-                              lastText: AppList.listItem[index].lastText,
-                              name: AppList.listItem[index].user.displayName,
-                              time: AppList.listItem[index].lastTime,
-                            ),
+                      child: ListChatItem(
+                        profileUrl: AppList.listItem[index].user.avatarUrl,
+                        lastText: AppList.listItem[index].lastText,
+                        name: AppList.listItem[index].user.displayName,
+                        time: AppList.listItem[index].lastTime,
+                        unRead: AppList.listItem[index].unRead.toString(),
+                      ),
                     );
                   },
                   itemCount: AppList.listItem.length,

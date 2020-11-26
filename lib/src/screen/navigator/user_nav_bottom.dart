@@ -63,15 +63,6 @@ class _UserNavBottomState extends State<UserNavBottom>
         payload = _messages['data']['data'].toString();
         var data = payload.split("&&");
         if (data[2] == "room") {
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => ChatRoomPage(
-          //       keyRoom: data[0],
-          //       uid: data[1],
-          //     ),
-          //   ),
-          // );
         } else if (data[2] == "group") {
           Navigator.pushReplacement(
             context,
@@ -97,7 +88,6 @@ class _UserNavBottomState extends State<UserNavBottom>
     _pageController.addListener(_handlePageChange);
 
     initFirebaseMessaging();
-    // _getGroupData();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -109,7 +99,6 @@ class _UserNavBottomState extends State<UserNavBottom>
   void initFirebaseMessaging() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        // print("onMessage: ${message['data']}");
         _messages = message;
         setState(() {});
         sendNotification(
@@ -117,24 +106,17 @@ class _UserNavBottomState extends State<UserNavBottom>
           body: message['notification']['body'],
         );
       },
-      onLaunch: (Map<String, dynamic> message) async {
-        // print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        // print("onResume: $message");
-      },
+      onLaunch: (Map<String, dynamic> message) async {},
+      onResume: (Map<String, dynamic> message) async {},
     );
 
     firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
     firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      // print("Settings registered: $settings");
-    });
+        .listen((IosNotificationSettings settings) {});
 
     firebaseMessaging.getToken().then((String token) {
       assert(token != null);
-      // print("Token : $token");
     });
   }
 
@@ -209,12 +191,10 @@ class _UserNavBottomState extends State<UserNavBottom>
             return;
           },
           child: PageView(
-            // physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             children: <Widget>[
               UserHomePage(),
               UserGruopPage(),
-              // ChatPage(),
             ],
             onPageChanged: (index) {
               setState(() => _currentIndex = index);
@@ -242,58 +222,12 @@ class _UserNavBottomState extends State<UserNavBottom>
               label: 'Home',
             ),
             NavigationBarItem(
-              iconData: 'assets/images/ic_group.png',
-              label: 'Group',
+              iconData: 'assets/images/ic_chat.png',
+              label: 'Chat',
             ),
-            // NavigationBarItem(
-            //   iconData: 'assets/images/ic_chat.png',
-            //   label: 'Chat',
-            // ),
           ],
         ),
-        // bottomNavigationBar: BottomNavyBar(
-        //   backgroundColor: Color(0xff202020),
-        //   selectedIndex: _currentIndex,
-        //   onItemSelected: (index) {
-        //     setState(() => _currentIndex = index);
-        //     _pageController.jumpToPage(index);
-        //   },
-        // items: <BottomNavyBarItem>[
-        //   BottomNavyBarItem(
-        //     title: Text('Home'),
-        //     textAlign: TextAlign.center,
-        //     activeColor: Colors.white,
-        //     icon: Image.asset('assets/images/ic_home_nav.png',
-        //         color: Colors.white),
-        //   ),
-        //   BottomNavyBarItem(
-        //     title: Text('Group'),
-        //     textAlign: TextAlign.center,
-        //     activeColor: Colors.white,
-        //     icon: Image.asset(
-        //       'assets/images/ic_group.png',
-        //       color: Colors.white,
-        //     ),
-        //   ),
-        //   BottomNavyBarItem(
-        //     title: Text('Chat'),
-        //     textAlign: TextAlign.center,
-        //     activeColor: Colors.white,
-        //     icon: Image.asset(
-        //       'assets/images/ic_chat.png',
-        //       color: Colors.white,
-        //     ),
-        //   ),
-        // ],
-        // ),
       ),
     );
   }
-
-  // Padding getIcon(int index, Color color) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 3),
-  //     child: ImageIcon(widget.icons[index], size: 35, color: color),
-  //   );
-  // }
 }

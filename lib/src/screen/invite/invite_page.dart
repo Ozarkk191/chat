@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/src/base_compoments/group_item/list_user_invite_item.dart';
@@ -25,49 +25,28 @@ class _InvitePageState extends State<InvitePage> {
     for (int i = 0; i <= AppList.userList.length; i++) {
       _boolList.add(false);
     }
-    Timer(Duration(milliseconds: 500), () {
-      if (AppList.indexList.length != 0) {
-        for (int i = 0; i <= AppList.indexList.length; i++) {
-          _boolList[AppList.indexList[i]] = true;
-          setState(() {});
+    _getUserGroup();
+  }
+
+  void _getUserGroup() {
+    for (int i = 0; i <= AppList.userList.length; i++) {
+      _boolList.add(false);
+    }
+    if (widget.user.length != 0) {
+      for (var i = 0; i < widget.user.length; i++) {
+        for (var j = 0; j < AppList.userList.length; j++) {
+          if (AppList.userList[j].uid == widget.user[i].uid) {
+            _boolList[j] = true;
+            _addUserList.add(AppList.userList[j]);
+          }
         }
       }
-    });
+    }
   }
 
   void _addUser() {
-    AppList.indexList.clear();
-    for (int i = 0; i < _boolList.length; i++) {
-      if (_boolList[i]) {
-        UserModel data = AppList.userList[i];
-        data.uid = AppList.allUidList[i];
-        AppList.indexList.add(i);
-        _addUserList.add(data);
-      }
-    }
     Navigator.pop(context, _addUserList);
   }
-
-  // void _filterSearchResults(String query) {
-  //   if (query.isNotEmpty) {
-  //     List<UserModel> dummyListData = List<UserModel>();
-  //     AppList.userList.forEach((item) {
-  //       if (item.displayName.toLowerCase().contains(query.toLowerCase())) {
-  //         dummyListData.add(item);
-  //       }
-  //     });
-  //     setState(() {
-  //       _items.clear();
-  //       _items.addAll(dummyListData);
-  //     });
-  //     return;
-  //   } else {
-  //     setState(() {
-  //       _items.clear();
-  //       _items.addAll(_addUserList);
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +92,19 @@ class _InvitePageState extends State<InvitePage> {
                     profileUrl: AppList.userList[index].avatarUrl,
                     value: _boolList[index],
                     onChanged: (val) {
+                      if (val) {
+                        _addUserList.add(AppList.userList[index]);
+                      } else {
+                        _addUserList.remove(AppList.userList[index]);
+                      }
                       setState(() {
-                        // log("$index");
+                        if (_addUserList.length != 0) {
+                          for (var i = 0; i < _addUserList.length; i++) {
+                            log("${_addUserList[i].displayName}");
+                          }
+                        }
+
                         _boolList[index] = val;
-                        // if(_boolList[index]){
-                        //     _intdexList[index] .add(index);
-                        // }
                       });
                     },
                     userName: AppList.userList[index].displayName,

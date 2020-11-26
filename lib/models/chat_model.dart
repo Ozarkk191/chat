@@ -7,6 +7,7 @@ class ChatModel {
   final String lastTime;
   final int checkTime;
   final GroupModel group;
+  final int unRead;
 
   ChatModel({
     this.user,
@@ -14,5 +15,6 @@ class ChatModel {
     this.lastTime,
     this.checkTime,
     this.group,
+    this.unRead,
   });
 }

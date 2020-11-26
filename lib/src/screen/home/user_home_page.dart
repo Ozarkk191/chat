@@ -145,6 +145,7 @@ class _UserHomePageState extends State<UserHomePage> {
       }).then((value) {
         AppList.lastTextList.add(lastText);
         AppList.lastTimeList.add(lastTime);
+
         if (this.mounted) {
           setState(() {});
         }
@@ -228,57 +229,56 @@ class _UserHomePageState extends State<UserHomePage> {
                 AppList.groupList.length != 0
                     ? Container(
                         child: ListView.builder(
-                            itemBuilder: (BuildContext context, int index) {
-                              return InkWell(
-                                onTap: () {
-                                  GroupDialogHelper.adminDialog(
-                                    context: context,
-                                    titleLeft: 'Group',
-                                    pathIconLeft: 'assets/images/ic_group.png',
-                                    groupName:
-                                        AppList.groupList[index].nameGroup,
-                                    profileUrl:
-                                        AppList.groupList[index].avatarGroup,
-                                    coverUrl: AppList.groupList[index].coverUrl,
-                                    member: AppList
-                                        .groupList[index].memberUIDList.length
-                                        .toString(),
-                                    statusGroup:
-                                        AppList.groupList[index].statusGroup,
-                                    callbackItem1: () {
-                                      Navigator.pop(context);
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatGroupPage(
-                                            groupName: AppList
-                                                .groupList[index].nameGroup,
-                                            groupID: AppList.groupKey[index],
-                                            id: AppModel.user.uid,
-                                            group: AppList.groupList[index],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: ListGroupUserItem(
-                                  imgCoverUrl:
-                                      AppList.groupList[index].coverUrl,
-                                  imgGroupUrl:
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () {
+                                GroupDialogHelper.adminDialog(
+                                  context: context,
+                                  titleLeft: 'Chat',
+                                  pathIconLeft: 'assets/images/ic_chat.png',
+                                  groupName: AppList.groupList[index].nameGroup,
+                                  profileUrl:
                                       AppList.groupList[index].avatarGroup,
-                                  nameGroup: AppList.groupList[index].nameGroup,
-                                  numberUser: AppList
+                                  coverUrl: AppList.groupList[index].coverUrl,
+                                  member: AppList
                                       .groupList[index].memberUIDList.length
                                       .toString(),
-                                  status: AppList.groupList[index].statusGroup,
-                                ),
-                              );
-                            },
-                            itemCount: AppList.groupList.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical),
+                                  statusGroup:
+                                      AppList.groupList[index].statusGroup,
+                                  callbackItem1: () {
+                                    Navigator.pop(context);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatGroupPage(
+                                          groupName: AppList
+                                              .groupList[index].nameGroup,
+                                          groupID: AppList.groupKey[index],
+                                          id: AppModel.user.uid,
+                                          group: AppList.groupList[index],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: ListGroupUserItem(
+                                imgCoverUrl: AppList.groupList[index].coverUrl,
+                                imgGroupUrl:
+                                    AppList.groupList[index].avatarGroup,
+                                nameGroup: AppList.groupList[index].nameGroup,
+                                numberUser: AppList
+                                    .groupList[index].memberUIDList.length
+                                    .toString(),
+                                status: AppList.groupList[index].statusGroup,
+                              ),
+                            );
+                          },
+                          itemCount: AppList.groupList.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                        ),
                       )
                     : Container(),
                 SizedBox(

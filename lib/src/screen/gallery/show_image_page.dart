@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -22,7 +23,7 @@ class _ShowImagePageState extends State<ShowImagePage> {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: PhotoView(
-                imageProvider: NetworkImage(widget.imageUrl),
+                imageProvider: CachedNetworkImageProvider(widget.imageUrl),
               ),
             ),
             Align(

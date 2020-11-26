@@ -75,5 +75,5 @@ class AppList {
   static List<ChatModel> listItemUser = List<ChatModel>();
   static List<ChatModel> listItem = List<ChatModel>();
 
-  // static List<ChatModel> chatList = List<ChatModel>();
+  static List<GroupModel> boradcastList = List<GroupModel>();
 }
