@@ -235,7 +235,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               } else {
                 List<DocumentSnapshot> items = snapshot.data.documents;
                 var messages =
-                    items.map((i) => ChatMessage.fromJson(i.data)).toList();
+                    items.map((i) => ChatMessage.fromJson((i.data))).toList();
                 return DashChat(
                   key: _chatViewKey,
                   inverted: false,

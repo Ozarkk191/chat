@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/helpers/dialoghelper.dart';
@@ -124,6 +125,7 @@ class _HomePageState extends State<HomePage> {
         .then((QuerySnapshot snapshot) {
       snapshot.documents.forEach((value) {
         var allUser = UserModel.fromJson(value.data);
+        // log("-------  ${allUser.uid}");
         if (allUser.displayName != AppModel.user.displayName) {
           AppList.allUserList.add(allUser);
           AppList.allUidList.add(value.documentID);

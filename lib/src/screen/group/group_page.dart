@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/chat_model.dart';
@@ -19,6 +21,7 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   final _databaseReference = Firestore.instance;
   List<GroupModel> _groupList = List<GroupModel>();
+  bool _data = false;
 
   @override
   void setState(fn) {
@@ -29,8 +32,6 @@ class _GroupPageState extends State<GroupPage> {
 
   _getGroupData() async {
     GroupModel group;
-    AppList.groupNameList.clear();
-    AppString.groupNameChoose = "";
 
     await _databaseReference
         .collection("Rooms")
@@ -45,8 +46,11 @@ class _GroupPageState extends State<GroupPage> {
         if (uid.length != 0) {
           _groupList.add(group);
           AppList.groupNameList.add(group.nameGroup);
-          _getText(group: group, memberList: group.memberUIDList);
-          AppString.groupNameChoose = group.nameGroup;
+          _getText(
+              group: group,
+              memberList: group.memberUIDList,
+              nameGroup: group.nameGroup);
+          // AppString.groupNameChoose = group.nameGroup;
 
           if (this.mounted) {
             setState(() {});
@@ -56,7 +60,8 @@ class _GroupPageState extends State<GroupPage> {
     });
   }
 
-  _getText({GroupModel group, List<dynamic> memberList}) async {
+  _getText(
+      {GroupModel group, List<dynamic> memberList, String nameGroup}) async {
     ChatMessage message;
     UserModel user;
     AppList.listItem.clear();
@@ -124,20 +129,22 @@ class _GroupPageState extends State<GroupPage> {
         int count = _messageList.length - number;
         if (lastTime.isEmpty) {
           chat = ChatModel(
-              checkTime: 0,
-              user: user,
-              lastText: lastText,
-              lastTime: lastTime,
-              group: group,
-              unRead: count);
+            checkTime: 0,
+            user: user,
+            lastText: lastText,
+            lastTime: lastTime,
+            group: group,
+            unRead: count,
+          );
         } else {
           chat = ChatModel(
-              checkTime: int.parse(checktime),
-              user: user,
-              lastText: lastText,
-              lastTime: lastTime,
-              group: group,
-              unRead: count);
+            checkTime: int.parse(checktime),
+            user: user,
+            lastText: lastText,
+            lastTime: lastTime,
+            group: group,
+            unRead: count,
+          );
         }
         if (AppModel.user.roles == "${TypeStatus.USER}") {
           if (AppModel.user.uid == chat.user.uid) {
@@ -153,7 +160,12 @@ class _GroupPageState extends State<GroupPage> {
           AppList.listItemGroup.add(chat);
           AppList.listItemGroup
               .sort((a, b) => b.checkTime.compareTo(a.checkTime));
-          _filterSearchResults(AppString.groupNameChoose);
+          if (AppString.groupNameChoose == "") {
+            _filterSearchResults(nameGroup);
+            AppString.groupNameChoose = nameGroup;
+          } else {
+            _filterSearchResults(AppString.groupNameChoose);
+          }
         }
 
         if (this.mounted) {
@@ -175,6 +187,7 @@ class _GroupPageState extends State<GroupPage> {
         setState(() {
           AppList.listItem.clear();
           AppList.listItem.addAll(dummyListData);
+          _data = true;
         });
       }
       return;
@@ -183,6 +196,7 @@ class _GroupPageState extends State<GroupPage> {
         setState(() {
           AppList.listItem.clear();
           AppList.listItem.addAll(AppList.listItemGroup);
+          _data = true;
         });
       }
     }
@@ -198,10 +212,15 @@ class _GroupPageState extends State<GroupPage> {
   void initState() {
     if (AppBool.groupChange) {
       AppList.listItemGroup.clear();
+      AppList.listItem.clear();
+      AppList.groupNameList.clear();
       AppBool.groupChange = false;
+      log("message");
       _getGroupData();
       //_filterSearchResults(AppString.groupNameChoose);
-    } else {
+    }
+    if (AppString.groupNameChoose != "group") {
+      log(AppString.groupNameChoose);
       _filterSearchResults(AppString.groupNameChoose);
     }
 
@@ -240,110 +259,120 @@ class _GroupPageState extends State<GroupPage> {
         title: Text('แชท'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 20),
-              Container(
-                alignment: Alignment.centerRight,
-                child: PopupMenuButton<String>(
-                  initialValue: AppString.groupNameChoose,
-                  child: Container(
-                    width: 150,
-                    height: 40,
-                    margin: EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppString.groupNameChoose,
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.black,
-                        ),
-                      ],
-                    ),
-                  ),
-                  color: Color(0xffffffff),
-                  onSelected: (value) {
-                    setState(() {
-                      AppString.groupNameChoose = value;
-                      _filterSearchResults(value);
-                    });
-
-                    // _selecteMenu(value, context);
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return AppList.groupNameList.map((String menu) {
-                      return PopupMenuItem<String>(
-                        value: menu,
-                        child: Text(
-                          menu,
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  // physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return InkWell(
-                      onTap: () {
-                        AppString.uidRoomChat =
-                            AppList.listItem[index].group.groupID;
-                        AppModel.group = AppList.listItem[index].group;
-                        AppString.nameGroup =
-                            AppList.listItem[index].group.nameGroup;
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatGroupPage(
-                              groupName:
-                                  AppList.listItem[index].group.nameGroup,
-                              groupID: AppList.listItem[index].group.groupID,
-                              id: AppList.listItem[index].user.uid,
-                              group: AppList.listItem[index].group,
-                            ),
+      body: _data
+          ? SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(height: 20),
+                    Container(
+                      alignment: Alignment.centerRight,
+                      child: PopupMenuButton<String>(
+                        initialValue: AppString.groupNameChoose,
+                        child: Container(
+                          width: 150,
+                          height: 40,
+                          margin: EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
                           ),
-                        );
-                      },
-                      child: ListChatItem(
-                        profileUrl: AppList.listItem[index].user.avatarUrl,
-                        lastText: AppList.listItem[index].lastText,
-                        name: AppList.listItem[index].user.displayName,
-                        time: AppList.listItem[index].lastTime,
-                        unRead: AppList.listItem[index].unRead.toString(),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                AppString.groupNameChoose,
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
+                        color: Color(0xffffffff),
+                        onSelected: (value) {
+                          setState(() {
+                            AppString.groupNameChoose = value;
+                            _filterSearchResults(value);
+                          });
+
+                          // _selecteMenu(value, context);
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return AppList.groupNameList.map((String menu) {
+                            return PopupMenuItem<String>(
+                              value: menu,
+                              child: Text(
+                                menu,
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            );
+                          }).toList();
+                        },
                       ),
-                    );
-                  },
-                  itemCount: AppList.listItem.length,
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          return InkWell(
+                            onTap: () {
+                              AppString.uidRoomChat =
+                                  AppList.listItem[index].group.groupID;
+                              AppModel.group = AppList.listItem[index].group;
+                              AppString.nameGroup =
+                                  AppList.listItem[index].group.nameGroup;
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatGroupPage(
+                                    groupName:
+                                        AppList.listItem[index].group.nameGroup,
+                                    groupID:
+                                        AppList.listItem[index].group.groupID,
+                                    id: AppList.listItem[index].user.uid,
+                                    group: AppList.listItem[index].group,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: ListChatItem(
+                              profileUrl:
+                                  AppList.listItem[index].user.avatarUrl,
+                              lastText: AppList.listItem[index].lastText,
+                              name: AppList.listItem[index].user.displayName,
+                              time: AppList.listItem[index].lastTime,
+                              unRead: AppList.listItem[index].unRead.toString(),
+                            ),
+                          );
+                        },
+                        itemCount: AppList.listItem.length,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
     );
   }
 
   void _selecteMenu(String menu, BuildContext context) {
     if (menu == MenuSettings.createGroup) {
-      Navigator.push(
+      Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => CreateGroup()));
     }
   }

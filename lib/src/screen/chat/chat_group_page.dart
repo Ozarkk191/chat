@@ -48,6 +48,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   Firestore _databaseReference = Firestore.instance;
   List<UserModel> _memberList = List<UserModel>();
   List<String> _tokenList = List<String>();
+  List<String> _imageList = List<String>();
   List<Asset> images = List<Asset>();
   List<File> files = List<File>();
   ChatUser admin;
@@ -220,7 +221,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         .document(message.createdAt.millisecondsSinceEpoch.toString());
 
     Firestore.instance.runTransaction((transaction) async {
-      await transaction.set(
+      transaction.set(
         documentReference,
         message.toJson(),
       );
@@ -313,7 +314,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
             if (AppModel.user.roles == TypeStatus.USER.toString()) {
               AppBool.groupChange = true;
               AppBool.chatChange = true;
-              AppBool.homeUserChange = true;
               AppList.listItemUser.clear();
               Navigator.pushReplacement(
                 context,
@@ -327,7 +327,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
             } else {
               AppBool.groupChange = true;
               AppBool.chatChange = true;
-              AppBool.homeAdminChange = true;
               AppList.boradcastList.clear();
               Navigator.pushReplacement(
                 context,
@@ -367,6 +366,12 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                     items.map((i) => ChatMessage.fromJson(i.data)).toList();
                 _itemList =
                     items.map((i) => ChatMessage.fromJson(i.data)).toList();
+                _imageList.clear();
+                for (var i = 0; i < messages.length; i++) {
+                  if (messages[i].image != null) {
+                    _imageList.add(messages[i].image);
+                  }
+                }
 
                 var length = messages.length;
 
@@ -453,7 +458,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
         context,
         MaterialPageRoute(
           builder: (context) => GalleryPage(
-            message: messages,
+            image: _imageList,
           ),
         ),
       );

@@ -1,9 +1,11 @@
 import 'dart:developer';
 
+import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:chat/app_strings/menu_settings.dart';
 import 'package:chat/app_strings/type_status.dart';
 import 'package:chat/models/group_model.dart';
 import 'package:chat/models/user_model.dart';
+import 'package:chat/services/apple_sign_in.dart';
 import 'package:chat/services/authservice.dart';
 import 'package:chat/src/base_compoments/button/custom_icon_button.dart';
 import 'package:chat/src/screen/chat/chat_group_page.dart';
@@ -13,6 +15,7 @@ import 'package:chat/src/screen/register/data_collect_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -33,6 +36,9 @@ class _LoginPageState extends State<LoginPage> {
   FacebookLogin facebookLogin = FacebookLogin();
   final _databaseReference = Firestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging();
+  bool supportsAppleSignIn = false;
+
+  AppleAuthService appleAuth = AppleAuthService();
 
   bool isLogged = false;
   bool _loadingOverlay = false;
@@ -75,6 +81,39 @@ class _LoginPageState extends State<LoginPage> {
     } catch (error) {
       print(error);
     }
+  }
+
+  // String generateNonce([int length = 32]) {
+  //   final charset =
+  //       '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+  //   final random = Random.secure();
+  //   return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+  //       .join();
+  // }
+
+  // /// Returns the sha256 hash of [input] in hex notation.
+  // String sha256ofString(String input) {
+  //   final bytes = utf8.encode(input);
+  //   final digest = sha256.convert(bytes);
+  //   return digest.toString();
+  // }
+
+  _signInWithApple() async {
+    final AuthorizationResult result = await AppleSignIn.performRequests([
+      AppleIdRequest(requestedScopes: [Scope.email, Scope.fullName])
+    ]);
+
+    log(result.error.toString());
+
+    final AuthCredential credential =
+        OAuthProvider(providerId: 'apple.com').getCredential(
+      accessToken: String.fromCharCodes(result.credential.authorizationCode),
+      idToken: String.fromCharCodes(result.credential.identityToken),
+    );
+    print("222222");
+
+    var user = await FirebaseAuth.instance.signInWithCredential(credential);
+    print("${user.user.displayName}");
   }
 
   _loginWithFacebook() async {
@@ -150,6 +189,18 @@ class _LoginPageState extends State<LoginPage> {
                   path: 'assets/images/ic_email.png',
                   callBack: _signInWithGoogle,
                 ),
+                defaultTargetPlatform == TargetPlatform.iOS
+                    ? SizedBox(width: 20)
+                    : Container(),
+                defaultTargetPlatform == TargetPlatform.iOS
+                    ? CustomIconButton(
+                        path: 'assets/images/ic_apple.png',
+                        callBack: () {
+                          _signInWithApple();
+                          // appleAuth.appleSignIn();
+                        },
+                      )
+                    : Container(),
               ],
             ),
           ],
@@ -178,7 +229,6 @@ class _LoginPageState extends State<LoginPage> {
             });
     var member = _memberList.where((element) => element == user.uid).toList();
     if (member.length != 0) {
-      log("${member[0]}");
       await _databaseReference
           .collection('Users')
           .document(user.uid)
@@ -207,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                 .get()
                 .then((value) {
               AppModel.user = UserModel.fromJson(value.data);
-              log("${AppModel.user.phoneNumber}");
+
               if (AppModel.user.phoneNumber == "null") {
                 _savePhoneNumber(user: user);
               } else {
@@ -241,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
         });
       }).then((value) {
         var id = _groupID.where((element) => element == link).toList();
-        log(id.length.toString());
+
         if (id.length == 0) {
           if (AppModel.user.roles == TypeStatus.USER.toString()) {
             Navigator.pushReplacement(context,

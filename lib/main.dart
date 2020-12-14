@@ -13,7 +13,11 @@ import 'src/screen/settingpage/edit_profire/edit_profile_page.dart';
 import 'src/screen/settingpage/setting_page.dart';
 import 'src/screen/splash/splash_page.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  runApp(
+    MyApp(),
+  );
+}
 
 class MyApp extends StatelessWidget {
   @override

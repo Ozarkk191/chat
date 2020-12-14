@@ -9,12 +9,14 @@ import 'package:chat/src/base_compoments/group_item/add_user_group_button.dart';
 import 'package:chat/src/base_compoments/group_item/column_profile_with_name.dart';
 import 'package:chat/src/base_compoments/textfield/big_round_textfield.dart';
 import 'package:chat/src/screen/invite/invite_page.dart';
+import 'package:chat/src/screen/navigator/text_nav.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:random_string/random_string.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -109,11 +111,6 @@ class _CreateGroupState extends State<CreateGroup> {
 
     adminlist.add(AppModel.user.uid);
 
-    // for (int i = 0; i < AppList.allAdminList.length; i++) {
-    //   uidlist.add(AppList.allAdminList[i].uid);
-    // }
-
-    // uidlist.add(AppString.uid);
     var id = randomBetween(100000, 200000).toString();
     var group = GroupModel(
         nameGroup: _nameGroup.text,
@@ -141,6 +138,7 @@ class _CreateGroupState extends State<CreateGroup> {
 
       ChatMessage message = ChatMessage(
           text: "${_nameGroup.text} ยินดีต้อนรับ", user: user, image: null);
+
       for (var i = 0; i <= uidlist.length; i++) {
         var documentReference = Firestore.instance
             .collection('Rooms')
@@ -155,20 +153,25 @@ class _CreateGroupState extends State<CreateGroup> {
             message.toJson(),
           );
         }).then((_) {
-          // Navigator.pushReplacement(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => ChatGroupPage(
-          //               groupName: _nameGroup.text,
-          //               groupID: now2,
-          //               id: id,
-          //             )));
           AppList.indexList.clear();
+          // AppString.groupNameChoose = _nameGroup.text;
 
           setState(() {
             isLoading = false;
           });
         });
+      }
+      if (!isLoading) {
+        AppBool.groupChange = true;
+        Navigator.pushReplacement(
+          context,
+          PageTransition(
+            type: PageTransitionType.fade,
+            child: TestNav(
+              currentIndex: 1,
+            ),
+          ),
+        );
       }
     });
 
@@ -261,7 +264,18 @@ class _CreateGroupState extends State<CreateGroup> {
           leading: InkWell(
               onTap: () {
                 AppList.indexList.clear();
-                Navigator.pop(context);
+                AppBool.groupChange = true;
+                AppBool.chatChange = true;
+                AppList.boradcastList.clear();
+                Navigator.pushReplacement(
+                  context,
+                  PageTransition(
+                    type: PageTransitionType.fade,
+                    child: TestNav(
+                      currentIndex: 1,
+                    ),
+                  ),
+                );
               },
               child: Icon(Icons.arrow_back_ios)),
           actions: <Widget>[

@@ -69,7 +69,6 @@ class _AddAdminPageState extends State<AddAdminPage> {
       body: SingleChildScrollView(
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
           child: !_loading
               ? Column(
                   children: <Widget>[
@@ -78,33 +77,35 @@ class _AddAdminPageState extends State<AddAdminPage> {
                       margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: TextAndLine(title: "Super Admin"),
                     ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: superAdmin.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditStatusPage(
-                                    user: superAdmin[index],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: ListUserWithStatus(
-                                callback: () {},
-                                profileUrl: superAdmin[index].avatarUrl,
-                                userName: superAdmin[index].displayName,
-                                status: "SUPERADMIN"),
-                          );
-                        },
-                      ),
-                    ),
+                    superAdmin.length != 0
+                        ? Container(
+                            margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: superAdmin.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditStatusPage(
+                                          user: superAdmin[index],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ListUserWithStatus(
+                                      callback: () {},
+                                      profileUrl: superAdmin[index].avatarUrl,
+                                      userName: superAdmin[index].displayName,
+                                      status: "SUPERADMIN"),
+                                );
+                              },
+                            ),
+                          )
+                        : Container(),
                     SizedBox(height: 20),
                     admin.length != 0
                         ? Container(

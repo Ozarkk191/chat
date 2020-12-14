@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:bubbled_navigation_bar/bubbled_navigation_bar.dart';
 import 'package:chat/app_strings/menu_settings.dart';
+import 'package:chat/models/group_model.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bar_item.dart';
 import 'package:chat/src/base_compoments/navigation/navigation_bay_theme.dart';
@@ -61,20 +64,32 @@ class _UserNavBottomState extends State<UserNavBottom>
         onSelectNotification: (payload) {
       setState(() {
         payload = _messages['data']['data'].toString();
+        log(payload.toString());
         var data = payload.split("&&");
-        if (data[2] == "room") {
-        } else if (data[2] == "group") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatGroupPage(
-                groupID: data[1],
-                groupName: data[0],
-                id: data[3],
+        GroupModel group;
+        Firestore.instance
+            .collection("Rooms")
+            .document("chats")
+            .collection("Group")
+            .document(data[1])
+            .get()
+            .then((value) {
+          group = GroupModel.fromJson(value.data);
+        }).then((value) {
+          if (data[2] == "group") {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatGroupPage(
+                  groupID: data[1],
+                  groupName: data[0],
+                  id: data[3],
+                  group: group,
+                ),
               ),
-            ),
-          );
-        }
+            );
+          }
+        });
       });
       return null;
     });
@@ -172,9 +187,9 @@ class _UserNavBottomState extends State<UserNavBottom>
     WidgetsBinding.instance.removeObserver(this);
   }
 
-  void updateIsActive() {
+  void updateIsActive() async {
     Firestore _databaseReference = Firestore.instance;
-    _databaseReference
+    await _databaseReference
         .collection('Users')
         .document(AppModel.user.uid)
         .setData(AppModel.user.toJson());

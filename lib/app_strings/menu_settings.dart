@@ -28,7 +28,7 @@ class AppString {
   static String uidAdmin;
   static String keyChatRooms;
   static String nameGroup;
-  static String groupNameChoose = "group";
+  static String groupNameChoose = "";
 }
 
 class AppBool {

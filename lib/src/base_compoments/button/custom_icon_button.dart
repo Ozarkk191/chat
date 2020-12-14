@@ -21,7 +21,12 @@ class CustomIconButton extends StatelessWidget {
         //   radius: 0.5,
         // ),
       ),
-      child: FlatButton(onPressed: callBack, child: Image.asset('$path')),
+      child: FlatButton(
+          onPressed: callBack,
+          child: Image.asset(
+            '$path',
+            color: Colors.white,
+          )),
     );
   }
 }
